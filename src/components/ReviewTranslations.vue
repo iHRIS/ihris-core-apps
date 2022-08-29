@@ -51,22 +51,113 @@
         </v-card>
       </template>
     </v-dialog>
-    <v-row>
-      <v-col>
-        <v-card>
-          <v-card-title primary-title>
+    <ImportTranslations
+      :importDialog="importDialog"
+      :locale="this.$route.params.locale"
+      :language="language"
+    ></ImportTranslations>
+    <v-card>
+      <v-card-title primary-title>
+        <v-row>
+          <v-col>
             {{language}} Translations
-            <v-spacer></v-spacer>
-            <v-btn
-              color="success"
-              :disabled="translationProgress.showTransProgress"
-              small
-              @click="confirmGTrans = true"
-            >
-              <v-icon left>mdi-google-translate</v-icon>
-              Translate with google
-            </v-btn>
-            <v-spacer></v-spacer>
+            <br>
+            <br>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="indigo"
+                  dark
+                  to="/"
+                  small
+                  class="mx-2"
+                  fab
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-arrow-left-circle</v-icon>
+                </v-btn>
+              </template>
+              <span>Back to Enabled Languages List</span>
+            </v-tooltip>
+          </v-col>
+          <v-col>
+            <v-card width="300">
+              <v-card-title primary-title>
+                Translate with google
+              </v-card-title>
+              <v-card-text>
+                <label v-if="translationProgress.showTransProgress" style="color: green">
+                  Translation on progress
+                </label>
+                <v-row>
+                  <v-col>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="primary"
+                          :disabled="translationProgress.showTransProgress"
+                          small
+                          @click="displayTransConf('full')"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon left>mdi-google-translate</v-icon>
+                          Full
+                        </v-btn>
+                      </template>
+                      <span>Translate all texts</span>
+                    </v-tooltip>
+                  </v-col>
+                  <v-col>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="success"
+                          :disabled="translationProgress.showTransProgress"
+                          small
+                          @click="displayTransConf('partial')"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon left>mdi-google-translate</v-icon>
+                          Partial
+                        </v-btn>
+                      </template>
+                      <span>Only missing translations</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col>
+            <v-card width="300">
+              <v-card-title primary-title>
+                Import/Export
+              </v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col>
+                    <v-btn color="primary" small @click="exportTranslation" v-if="!exporting">
+                      <v-icon left>mdi-export</v-icon>
+                      Export
+                    </v-btn>
+                    <v-progress-linear :indeterminate="true" height="20" v-else>
+                      Preparing Export
+                    </v-progress-linear>
+                  </v-col>
+                  <v-col>
+                    <v-btn color="primary" small @click="importDialog = true">
+                      <v-icon left>mdi-import</v-icon>
+                      Import
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <v-col>
             <v-text-field
               v-model="search"
               label="Search"
@@ -74,11 +165,18 @@
               clearable
               prepend-icon="mdi-magnify"
             ></v-text-field>
-          </v-card-title>
+          </v-col>
+        </v-row>
+      </v-card-title>
+    </v-card>
+    <v-row>
+      <v-col>
+        <v-card>
           <v-card-text>
             <v-progress-linear
               v-model="translationProgress.percent"
               height="25"
+              buffer-value="0"
               stream
               v-if="translationProgress.showTransProgress"
             >
@@ -105,25 +203,55 @@
         </v-card>
       </v-col>
       <v-col v-if="selected.key">
-        WORD: <br><br>
-        <i><b>{{selected.en}}</b></i><br><br>
-        TRANSLATION:
-        <v-textarea
-          clearable
-          clear-icon="mdi-close-circle"
-          v-model="newTranslation"
-          style="background-color: #FFFFC2; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif"
-        ></v-textarea>
-        <v-spacer></v-spacer>
-        <v-btn small rounded color="primary" dark @click="save">
-          <v-icon left>mdi-content-save</v-icon>
-          Save
-        </v-btn>
+        <v-card>
+          <v-toolbar
+            color="secondary"
+            dark
+            height="30"
+          >
+            Edit Translation
+            <v-spacer></v-spacer>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  fab
+                  icon
+                  color="white"
+                  @click="closeEdit"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </template>
+              <span>Close translation dialog</span>
+            </v-tooltip>
+          </v-toolbar>
+          <v-card-text>
+            WORD:
+            <br>
+            <i><b>{{selected.en}}</b></i><br><br>
+            TRANSLATION:
+            <v-textarea
+              clearable
+              clear-icon="mdi-close-circle"
+              v-model="newTranslation"
+              style="background-color: #FFFFC2; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif"
+            ></v-textarea>
+            <v-spacer></v-spacer>
+            <v-btn small rounded color="primary" dark @click="save">
+              <v-icon left>mdi-content-save</v-icon>
+              Save
+            </v-btn>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
 <script>
+import ImportTranslations from './ImportTranslations.vue'
+import { eventBus } from '../main'
 
 export default {
   data () {
@@ -132,11 +260,14 @@ export default {
       snackbarText: '',
       snackbar: false,
       confirmGTrans: false,
+      importDialog: false,
+      exporting: false,
       loading: true,
       search: '',
       selected: {},
       newTranslation: '',
       translations: [],
+      transRunType: '',
       headers: [{
         text: 'SN',
         value: 'sn'
@@ -165,9 +296,20 @@ export default {
     }
   },
   methods: {
+    displayTransConf (type) {
+      this.transRunType = type
+      if (type === 'full') {
+        this.confirmGTrans = true
+      } else {
+        this.googleTranslate()
+      }
+    },
     edit (val) {
       this.selected = val
       this.newTranslation = val.text
+    },
+    closeEdit () {
+      this.selected = {}
     },
     save () {
       fetch('/dictionary/update', {
@@ -209,7 +351,7 @@ export default {
     },
     googleTranslate () {
       this.confirmGTrans = false
-      fetch('/dictionary/translate/en/' + this.$route.params.locale).then((response) => {
+      fetch('/dictionary/translate/en/' + this.$route.params.locale + '/' + this.transRunType).then((response) => {
         if (response.status === 200) {
           this.translationProgress.interval = setInterval(() => {
             this.googleTranslateCount()
@@ -232,6 +374,9 @@ export default {
           if (count.from === count.to || !count.running) {
             clearInterval(this.translationProgress.interval)
             this.translationProgress.showTransProgress = false
+            this.snackbar = true
+            this.snackbarColor = 'green'
+            this.snackbarText = 'Translation completed successfully'
           }
         })
       }).catch(() => {
@@ -239,7 +384,30 @@ export default {
         this.snackbarColor = 'red'
         this.snackbarText = 'Cant get progress'
       })
+    },
+    exportTranslation () {
+      this.exporting = true
+      fetch('/dictionary/export/' + this.$route.params.locale)
+        .then(response => response.blob())
+        .then(blob => {
+          this.exporting = false
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = this.language + '.xlsx'
+          document.body.appendChild(a)
+          a.click()
+          a.remove()
+        }).catch(() => {
+          this.snackbar = true
+          this.snackbarColor = 'red'
+          this.snackbarText = 'Cant download translation'
+          this.exporting = false
+        })
     }
+  },
+  components: {
+    ImportTranslations
   },
   created () {
     this.language = this.$route.params.locale
@@ -257,6 +425,9 @@ export default {
       this.snackbar = true
       this.snackbarColor = 'red'
       this.snackbarText = 'Cant get translation progress'
+    })
+    eventBus.$on('closeImportDialog', () => {
+      this.importDialog = false
     })
   },
   beforeDestroy () {

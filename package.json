@@ -1,5 +1,5 @@
 {
-  "name": "test1",
+  "name": "ihris-dictionary",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,16 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "fetch-defaults": "^1.0.0",
+    "fhirpath": "^2.14.7",
+    "idle-vue": "^2.0.5",
+    "keycloak-js": "^19.0.1",
+    "url": "^0.11.0",
     "vue": "^2.6.14",
+    "vue-cookies": "^1.8.1",
     "vue-router": "^3.5.1",
-    "vuetify": "^2.6.0"
+    "vuetify": "^2.6.0",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -19,6 +26,7 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-standard": "^6.1.0",
     "eslint": "^7.32.0",

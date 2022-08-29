@@ -74,28 +74,54 @@
         >
           <v-icon>mdi-google-translate</v-icon>
           <v-spacer></v-spacer>
-          <v-toolbar-title>Available Translations</v-toolbar-title>
+          <v-toolbar-title>Enabled Languages</v-toolbar-title>
         </v-app-bar>
         <v-card-title primary-title>
-          Select to view
-          <v-spacer></v-spacer>
-          <v-tooltip top>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                class="mx-2"
-                fab
-                dark
-                color="indigo"
-                small
-                @click="getLanguages"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-icon>mdi-plus</v-icon>
-              </v-btn>
-            </template>
-            <span>Add New Language</span>
-          </v-tooltip>
+          <v-row>
+            <v-col cols="7">
+              <div class="text-subtitle-2">
+                Select to view
+              </div>
+            </v-col>
+            <v-col cols="2">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    class="mx-2"
+                    fab
+                    dark
+                    color="indigo"
+                    small
+                    @click="getLanguages"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add New Language</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="2">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    class="mx-2"
+                    fab
+                    dark
+                    color="indigo"
+                    small
+                    @click="populateTexts"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-publish</v-icon>
+                  </v-btn>
+                </template>
+                <span>Populate languages with iHRIS Texts</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
         </v-card-title>
         <v-list shaped>
           <v-list-item-group
@@ -107,14 +133,29 @@
               :key="i"
             >
               <v-list-item-content>
-                <v-list-item-title v-text="lang.language" @click="selected(lang)"></v-list-item-title>
+                <v-row>
+                  <v-col>
+                    <v-list-item-title v-text="lang.language" @click="selected(lang)"></v-list-item-title>
+                  </v-col>
+                  <v-col v-if="textExtractionStatus[lang.locale].active">
+                    <v-progress-linear
+                      color="deep-purple accent-4"
+                      indeterminate
+                      rounded
+                      height="6"
+                      v-if="textExtractionStatus[lang.locale].running"
+                    ></v-progress-linear>
+                    <v-icon
+                      v-if="textExtractionStatus[lang.locale].displayStatus"
+                    >
+                      mdi-check
+                    </v-icon>
+                  </v-col>
+                </v-row>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
         </v-list>
-        <v-card-actions>
-
-        </v-card-actions>
       </v-card>
     </center>
   </div>
@@ -131,7 +172,8 @@ export default {
       translatedLanguages: [],
       selectedLocale: '',
       languages: [],
-      language: ''
+      language: '',
+      textExtractionStatus: {}
     }
   },
   methods: {
@@ -139,6 +181,12 @@ export default {
       fetch('/dictionary/getTranslatedLanguages').then((response) => {
         response.json().then(lang => {
           this.translatedLanguages = lang
+          for (const lang of this.translatedLanguages) {
+            this.$set(this.textExtractionStatus, lang.locale, {})
+            this.$set(this.textExtractionStatus[lang.locale], 'active', false)
+            this.$set(this.textExtractionStatus[lang.locale], 'running', false)
+            this.$set(this.textExtractionStatus[lang.locale], 'displayStatus', false)
+          }
         })
       }).catch(err => {
         console.log(err)
@@ -147,6 +195,42 @@ export default {
     selected (lang) {
       this.$router.push({
         path: '/review/' + lang.locale
+      })
+    },
+    populateTexts () {
+      for (const lang of this.translatedLanguages) {
+        this.textExtractionStatus[lang.locale].active = true
+        // this.textExtractionStatus[lang.locale].running = true
+      }
+      this.textExtractionStatus.en.running = true
+      fetch('/dictionary/extractTexts/en').then((response) => {
+        this.textExtractionStatus.en.running = false
+        this.textExtractionStatus.en.displayStatus = true
+        if (response.status === 200) {
+          for (const lang of this.translatedLanguages) {
+            if (lang.locale === 'en') {
+              continue
+            }
+            this.textExtractionStatus[lang.locale].active = true
+            this.textExtractionStatus[lang.locale].running = true
+            fetch('/dictionary/extractTexts/' + lang.locale).then((response) => {
+              if (response.status === 200) {
+                this.textExtractionStatus[lang.locale].running = false
+                this.textExtractionStatus[lang.locale].displayStatus = true
+              }
+            }).catch(() => {
+              this.textExtractionStatus[lang.locale].running = false
+              this.snackbar = true
+              this.snackbarColor = 'red'
+              this.snackbarText = 'Error Occured for English'
+            })
+          }
+        }
+      }).catch(() => {
+        this.textExtractionStatus.en.running = false
+        this.snackbar = true
+        this.snackbarColor = 'red'
+        this.snackbarText = 'Error Occured for English'
       })
     },
     getLanguages () {

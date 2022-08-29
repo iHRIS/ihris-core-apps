@@ -1,13 +1,25 @@
 <template>
-  <v-app>
-    <br>
-    <center>
-      <v-btn rounded outlined small color="primary" to="/">Translated</v-btn>&nbsp;
-      <v-btn rounded outlined small color="primary" to="/">Reload Texts</v-btn>
-    </center>
-    <br>
+  <v-app id="top">
+    <IhrisHeader app />
     <v-main>
       <router-view/>
     </v-main>
   </v-app>
 </template>
+<script>
+import IhrisHeader from './components/IhrisHeader'
+export default {
+  components: {
+    IhrisHeader
+  },
+  created () {
+    let query = location.search
+    query = query.substring(1)
+    query = query.split('=')
+    const index = query.findIndex((qr) => qr === 'baseURL')
+    if (index !== -1) {
+      this.$store.state.coreURL = query[index + 1]
+    }
+  }
+}
+</script>
