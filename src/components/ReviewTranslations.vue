@@ -81,7 +81,7 @@
               <span>Back to Enabled Languages List</span>
             </v-tooltip>
           </v-col>
-          <v-col>
+          <v-col v-if="$store.state.user.loggedin">
             <v-card width="300">
               <v-card-title primary-title>
                 Translate with google
@@ -113,7 +113,8 @@
                     <v-tooltip bottom>
                       <template v-slot:activator="{ on, attrs }">
                         <v-btn
-                          color="success"
+                          color="blue"
+                          dark
                           :disabled="translationProgress.showTransProgress"
                           small
                           @click="displayTransConf('partial')"
@@ -132,7 +133,7 @@
             </v-card>
           </v-col>
           <v-col>
-            <v-card width="300">
+            <v-card width="300" v-if="$store.state.user.loggedin">
               <v-card-title primary-title>
                 Import/Export
               </v-card-title>
@@ -239,7 +240,7 @@
               style="background-color: #FFFFC2; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif"
             ></v-textarea>
             <v-spacer></v-spacer>
-            <v-btn small rounded color="primary" dark @click="save">
+            <v-btn small rounded color="primary" dark @click="save" v-if="$store.state.user.loggedin">
               <v-icon left>mdi-content-save</v-icon>
               Save
             </v-btn>

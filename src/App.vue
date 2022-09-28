@@ -103,6 +103,9 @@ export default {
     if (index !== -1) {
       this.$store.state.coreURL = query[index + 1]
     }
+    if (!this.$store.state.user.loggedin && this.$store.state.coreURL) {
+      window.location = this.$store.state.coreURL
+    }
   }
 }
 </script>

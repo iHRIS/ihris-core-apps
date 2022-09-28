@@ -14,7 +14,7 @@
       This should only be done during development.
     </div>
     <v-spacer></v-spacer>
-    <div>Welcome <span v-if="$store.state.user.loggedin">, {{ $store.state.user.name }}</span></div>
+    <div>{{ $t(`App.hardcoded-texts.Welcome`) }} <span v-if="$store.state.user.loggedin">, {{ $store.state.user.name }}</span></div>
     <v-spacer></v-spacer>
     <v-progress-circular
       indeterminate
