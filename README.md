@@ -1,5 +1,9 @@
-# test1
+# iHRIS Translator
 
+## Cloning
+```
+git clone --single-branch --branch ihris-translator https://github.com/iHRIS/ihris-core-apps.git ihris-translator
+```
 ## Project setup
 ```
 npm install
