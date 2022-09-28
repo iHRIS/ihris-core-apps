@@ -1,8 +1,8 @@
-# iHRIS Translator
+# iHRIS APPS Startup Template
 
 ## Cloning
 ```
-git clone --single-branch --branch ihris-translator https://github.com/iHRIS/ihris-core-apps.git ihris-translator
+git clone --single-branch --branch startup-template https://github.com/iHRIS/ihris-core-apps.git startup-template
 ```
 ## Project setup
 ```
