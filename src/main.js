@@ -9,6 +9,7 @@ import vuetify from './plugins/vuetify'
 import 'whatwg-fetch'
 import fhirpath from 'fhirpath'
 import fhirutils from './plugins/fhirutils'
+import { i18n } from './i18n'
 const fetchDefaults = require('fetch-defaults')
 
 Vue.config.productionTip = false
@@ -90,6 +91,7 @@ fetch('/config/app').then((response) => {
                 new Vue({
                   router,
                   store,
+                  i18n,
                   vuetify,
                   render: h => h(App)
                 }).$mount('#app')
@@ -110,6 +112,7 @@ fetch('/config/app').then((response) => {
       new Vue({
         router,
         store,
+        i18n,
         vuetify,
         render: h => h(App)
       }).$mount('#app')

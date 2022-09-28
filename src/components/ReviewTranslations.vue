@@ -312,7 +312,7 @@ export default {
       this.selected = {}
     },
     save () {
-      fetch('/dictionary/update', {
+      fetch('/translator/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -339,7 +339,7 @@ export default {
       if (!silent) {
         this.loading = true
       }
-      fetch('/dictionary/getTranslations/' + this.$route.params.locale).then((response) => {
+      fetch('/translator/getTranslations/' + this.$route.params.locale).then((response) => {
         response.json().then(trans => {
           this.loading = false
           this.translations = trans.translations
@@ -351,7 +351,7 @@ export default {
     },
     googleTranslate () {
       this.confirmGTrans = false
-      fetch('/dictionary/translate/en/' + this.$route.params.locale + '/' + this.transRunType).then((response) => {
+      fetch('/translator/translate/en/' + this.$route.params.locale + '/' + this.transRunType).then((response) => {
         if (response.status === 200) {
           this.translationProgress.interval = setInterval(() => {
             this.googleTranslateCount()
@@ -365,7 +365,7 @@ export default {
     },
     googleTranslateCount () {
       this.translationProgress.showTransProgress = true
-      fetch('/dictionary/translationCount/en/' + this.$route.params.locale).then((response) => {
+      fetch('/translator/translationCount/en/' + this.$route.params.locale).then((response) => {
         response.json().then((count) => {
           this.getTranslations(true)
           this.translationProgress.required = count.from
@@ -387,7 +387,7 @@ export default {
     },
     exportTranslation () {
       this.exporting = true
-      fetch('/dictionary/export/' + this.$route.params.locale)
+      fetch('/translator/export/' + this.$route.params.locale)
         .then(response => response.blob())
         .then(blob => {
           this.exporting = false
@@ -412,7 +412,7 @@ export default {
   created () {
     this.language = this.$route.params.locale
     this.getTranslations()
-    fetch('/dictionary/translationCount/en/' + this.$route.params.locale).then((response) => {
+    fetch('/translator/translationCount/en/' + this.$route.params.locale).then((response) => {
       response.json().then((translation) => {
         if (translation.running) {
           this.translationProgress.showTransProgress = true

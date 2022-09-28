@@ -2,7 +2,7 @@
   <div>
   <v-app-bar color="white" app clipped-left clipped-right>
     <a :href="$store.state.coreURL">
-      <v-img :src="'/ihrisapp/dictionary/images/' + header.logo" contain max-height="36" max-width="106" />
+      <v-img :src="'/ihrisapp/translator/images/' + header.logo" contain max-height="36" max-width="106" />
     </a>
     <v-toolbar-title class="headline ml-2" bottom="true">
       <span v-if="header.title" class="primary--text font-weight-bold">{{ header.title }}</span>
@@ -28,7 +28,7 @@
       <v-icon>mdi-help</v-icon>
     </v-btn>
     <div>
-      <!-- <language-switcher /> -->
+      <language-switcher />
     </div>
     <template v-if="$store.state.user.loggedin">
       <v-btn  small fab dark @click="logout" title="Logout" :loading="loading" :disabled="loading">
@@ -47,36 +47,20 @@
 
 <script>
 import VueCookies from 'vue-cookies'
-import vuetify from '../plugins/vuetify'
-import store from '../store'
-import router from '../router'
-// import LanguageSwitcher from "@/components/layout/language-switcher";
+import LanguageSwitcher from '@/components/language-switcher'
 
 export default {
   name: 'IhriHeader',
-  vuetify,
-  store,
-  router,
+  props: ['header'],
   data: function () {
     return {
       loading: false,
       idle_countdown: false,
-      idle_logout: 30,
-      header: {
-        title: false,
-        site: null,
-        logo: 'iHRIS5Logo.png',
-        auths: []
-      },
-      footer: {
-        links: []
-      },
-      nav: {
-        active: null,
-        menu: {},
-        auths: []
-      }
+      idle_logout: 30
     }
+  },
+  components: {
+    LanguageSwitcher
   },
   onIdle () {
     // if (store.state.user.loggedin) this.logout(null, true)
@@ -116,54 +100,7 @@ export default {
           window.location = this.$store.state.coreURL
         })
       }
-    },
-    updateConfig: function () {
-      // make sure we're user has been created in session (logged in or not)
-      fetch('/auth').then(() => {
-        fetch('/config/site').then(response => {
-          response.json().then(data => {
-            if (Object.prototype.hasOwnProperty.call(data, 'security') && Object.prototype.hasOwnProperty.call(data.security, 'disabled')) {
-              this.$store.commit('securityOff', data.security.disabled)
-            }
-            if (Object.prototype.hasOwnProperty.call(data, 'title')) this.header.title = data.title
-            if (Object.prototype.hasOwnProperty.call(data, 'site')) this.header.site = data.site
-            if (Object.prototype.hasOwnProperty.call(data, 'logo')) this.header.logo = data.logo
-            if (Object.prototype.hasOwnProperty.call(data, 'auth')) {
-              this.header.auths = []
-              this.nav.auths = []
-              for (const id of Object.keys(data.auth)) {
-                data.auth[id].id = id
-                this.header.auths.push(data.auth[id])
-                this.nav.auths.push(data.auth[id])
-              }
-            }
-            if (Object.prototype.hasOwnProperty.call(data, 'user')) {
-              if (data.user.loggedin) {
-                const user = {
-                  name: data.user.name,
-                  location: data.user.location,
-                  role: data.user.role,
-                  reference: data.user.reference,
-                  facilityId: data.user.facilityId,
-                  physicalLocation: data.user.physicalLocation
-                }
-                this.$store.commit('login', user)
-              } else {
-                this.$store.commit('logout')
-              }
-            }
-            if (Object.prototype.hasOwnProperty.call(data, 'nav')) {
-              if (Object.prototype.hasOwnProperty.call(data.nav, 'active')) this.nav.active = data.nav.active
-              if (Object.prototype.hasOwnProperty.call(data.nav, 'menu')) this.nav.menu = data.nav.menu
-              if (Object.prototype.hasOwnProperty.call(data.nav, 'home')) this.nav.home = data.nav.home
-            }
-          })
-        })
-      })
     }
-  },
-  created () {
-    this.updateConfig()
   }
 }
 </script>

@@ -3,7 +3,7 @@ module.exports = {
 
   devServer: {
     proxy: {
-      '^/dictionary': {
+      '^/translator': {
         target: 'http://localhost:3000/',
         logLevel: 'debug'
       },
@@ -17,6 +17,6 @@ module.exports = {
       }
     }
   },
-  publicPath: '/ihrisapp/dictionary/',
+  publicPath: '/ihrisapp/translator/',
   transpileDependencies: ['vuetify']
 }

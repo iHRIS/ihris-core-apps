@@ -162,6 +162,7 @@
 </template>
 
 <script>
+import { eventBus } from '../main'
 export default {
   data () {
     return {
@@ -178,7 +179,7 @@ export default {
   },
   methods: {
     getTranslatedLanguages () {
-      fetch('/dictionary/getTranslatedLanguages').then((response) => {
+      fetch('/translator/getTranslatedLanguages').then((response) => {
         response.json().then(lang => {
           this.translatedLanguages = lang
           for (const lang of this.translatedLanguages) {
@@ -203,7 +204,7 @@ export default {
         // this.textExtractionStatus[lang.locale].running = true
       }
       this.textExtractionStatus.en.running = true
-      fetch('/dictionary/extractTexts/en').then((response) => {
+      fetch('/translator/extractTexts/en').then((response) => {
         this.textExtractionStatus.en.running = false
         this.textExtractionStatus.en.displayStatus = true
         if (response.status === 200) {
@@ -213,7 +214,7 @@ export default {
             }
             this.textExtractionStatus[lang.locale].active = true
             this.textExtractionStatus[lang.locale].running = true
-            fetch('/dictionary/extractTexts/' + lang.locale).then((response) => {
+            fetch('/translator/extractTexts/' + lang.locale).then((response) => {
               if (response.status === 200) {
                 this.textExtractionStatus[lang.locale].running = false
                 this.textExtractionStatus[lang.locale].displayStatus = true
@@ -235,20 +236,21 @@ export default {
     },
     getLanguages () {
       this.addDialog = true
-      fetch('/dictionary/languages').then((response) => {
+      fetch('/translator/languages').then((response) => {
         response.json().then((languages) => {
           this.languages = languages
         })
       })
     },
     add () {
-      fetch('/dictionary/addLanguage/' + this.language, { method: 'POST' }).then((response) => {
+      fetch('/translator/addLanguage/' + this.language, { method: 'POST' }).then((response) => {
         if (response.status === 201) {
           this.addDialog = false
           this.getTranslatedLanguages()
           this.snackbar = true
           this.snackbarColor = 'green'
           this.snackbarText = 'Language Added'
+          eventBus.$emit('getLanguageList')
         } else {
           this.snackbar = true
           this.snackbarColor = 'red'

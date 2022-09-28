@@ -100,7 +100,7 @@ export default {
       const data = new FormData()
       data.append('translation', this.importedTranslation)
       this.importStatus.running = true
-      fetch('/dictionary/import/' + this.locale, {
+      fetch('/translator/import/' + this.locale, {
         method: 'POST',
         body: data
       }).then((response) => {
