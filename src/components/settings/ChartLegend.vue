@@ -1,0 +1,83 @@
+<template>
+  <div>
+    <v-row>
+      <v-col cols="12">
+        <v-switch label="Show/Hide" v-model="legend.show" @change="updated"></v-switch>
+        <v-select
+          :items="types"
+          v-model="legend.type"
+          label="Type"
+          @change="updated"
+        ></v-select>
+        <v-select
+          :items="orientation"
+          v-model="legend.orient"
+          label="Orientation"
+          @change="updated"
+        ></v-select>
+        <v-select
+          :items="aligns"
+          v-model="legend.align"
+          label="Align"
+          @change="updated"
+        ></v-select>
+        <v-text-field
+          v-model="legend.itemGap"
+          type="number"
+          label="Items Gap"
+          min="5"
+          max="100"
+          @input="updated"
+        ></v-text-field>
+        <v-select
+          :items="selections"
+          v-model="legend.selectedMode"
+          label="Selection Mode"
+          @change="updated"
+        ></v-select>
+        <v-expansion-panels multiple focusable>
+          <v-expansion-panel>
+            <v-expansion-panel-header>Text Style</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <TextStyle @textStyle='externalSettings' />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+    </v-row>
+  </div>
+</template>
+<script>
+import TextStyle from './TextStyle.vue'
+export default {
+  data () {
+    return {
+      legend: {
+        show: true,
+        type: 'plain',
+        orient: 'vertical',
+        align: 'auto',
+        itemGap: 10,
+        selectedMode: true,
+        textStyle: {}
+      },
+      types: ['plain', 'scroll'],
+      aligns: ['auto', 'left', 'right'],
+      selections: [true, false, 'single', 'multiple'],
+      orientation: ['vertical', 'horizontal']
+    }
+  },
+  methods: {
+    externalSettings (setting) {
+      this.legend[setting.name] = setting.value
+      this.updated()
+    },
+    updated () {
+      this.$emit('chartLegend', { name: 'legend', value: this.legend })
+    }
+  },
+  components: {
+    TextStyle
+  }
+}
+</script>
