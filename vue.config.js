@@ -14,6 +14,10 @@ module.exports = {
       '^/config': {
         target: 'http://localhost:3000/',
         logLevel: 'debug'
+      },
+      '^/es': {
+        target: 'http://localhost:3000/',
+        logLevel: 'debug'
       }
     }
   },
