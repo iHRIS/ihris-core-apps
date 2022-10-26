@@ -24,6 +24,8 @@
                   <ul>
                     <draggable
                       :list="dimensions"
+                      @start="dragStart"
+                      @end="dragEnd"
                       :move="dragging"
                       :group="{ name: 'people', pull: 'clone', put: false }"
                       animation=650
@@ -51,6 +53,8 @@
                   <v-card-text>
                     <draggable
                       :list="filters"
+                      @start="dragStart"
+                      @end="dragEnd"
                       :move="dragging"
                       id="filters"
                       group="people"
@@ -58,7 +62,47 @@
                     >
                       <v-chip v-for="(filter, index) in filters" :key="index" color="black" dark small>
                         {{filter.display}}
+                        <v-menu
+                          offset-y
+                          origin="center center"
+                          transition="scale-transition"
+                          rounded="b-xl"
+                          :close-on-content-click="false"
+                        >
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              icon
+                              small
+                              v-bind="attrs"
+                              v-on="on"
+                              id="seriesActivator"
+                            >
+                              <v-icon color="white">mdi-dots-horizontal</v-icon>
+                            </v-btn>
+                          </template>
+                          <v-list rounded>
+                            <v-list-item link @click="filters.splice(index, 1)">
+                              <v-list-item-icon>
+                                <v-icon>mdi-minus-circle</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-title>Remove</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item link @click="move('filters', 'series', index)" :disabled="series.length > 0">
+                              <v-list-item-icon>
+                                <v-icon>mdi-cursor-move</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-title>Move to series</v-list-item-title>
+                            </v-list-item>
+                            <v-list-item link @click="move('filters', 'categories', index)" :disabled="categories.length > 1">
+                              <v-list-item-icon>
+                                <v-icon>mdi-cursor-move</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-title>Move to categories</v-list-item-title>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
                       </v-chip>
+                      <v-chip v-if="dragArea">Drop Here</v-chip>
                     </draggable>
                   </v-card-text>
                 </v-card>
@@ -114,13 +158,55 @@
                 <draggable
                   id="categories"
                   :list="categories"
+                  @start="dragStart"
+                  @end="dragEnd"
                   :move="dragging"
                   group="people"
                   animation=650
                 >
                   <v-chip v-for="(cat, index) in categories" :key="index" color="green" dark small>
                     {{cat.display}}
+                    <v-menu
+                      offset-y
+                      origin="center center"
+                      transition="scale-transition"
+                      rounded="b-xl"
+                      :close-on-content-click="false"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                          id="seriesActivator"
+                        >
+                          <v-icon color="white">mdi-dots-horizontal</v-icon>
+                        </v-btn>
+                      </template>
+                      <v-list rounded>
+                        <v-list-item link @click="categories.splice(index, 1)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-minus-circle</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Remove</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item link @click="move('categories', 'series', index)" :disabled="series.length > 0">
+                          <v-list-item-icon>
+                            <v-icon>mdi-cursor-move</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Move to series</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item link @click="move('categories', 'filters', index)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-cursor-move</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Move to filters</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
                   </v-chip>
+                  <v-chip v-if="dragArea & categories.length < 2">Drop Here</v-chip>
                 </draggable>
               </v-card-text>
             </v-card>
@@ -134,17 +220,81 @@
               <v-card-text>
                 <draggable
                   :list="series"
+                  @start="dragStart"
+                  @end="dragEnd"
                   :move="dragging"
                   id="series"
                   group="people"
                   animation=650
                 >
-                  <v-chip v-for="(ser, index) in series" :key="index" color="blue" dark small>
+                  <v-chip v-for="(ser, index) in series" :key="index" color="blue" dark small style="cursor: move">
                     {{ser.aggsBy.display}}({{ser.display}})
-                    <v-btn text icon color="primary" small>
-                      <v-icon color="white">mdi-dots-horizontal</v-icon>
-                    </v-btn>
+                    <v-menu
+                      offset-y
+                      origin="center center"
+                      transition="scale-transition"
+                      rounded="b-xl"
+                      :close-on-content-click="false"
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          icon
+                          small
+                          v-bind="attrs"
+                          v-on="on"
+                          id="seriesActivator"
+                        >
+                          <v-icon color="white">mdi-dots-horizontal</v-icon>
+                        </v-btn>
+                      </template>
+                      <v-list rounded>
+                        <v-list-group
+                          prepend-icon="mdi-sigma"
+                          no-action
+                        >
+                          <template v-slot:activator>
+                            <v-list-item-content v-bind="attrs" v-on="on" no-action>
+                              <v-list-item-title no-action>Aggregations</v-list-item-title>
+                            </v-list-item-content>
+                          </template>
+                          <v-list-item link>
+                            <v-list-item-content>
+                              <v-list-item-title @click="changeAgg(index, 'value_count')">Count</v-list-item-title>
+                            </v-list-item-content>
+                          </v-list-item>
+                          <v-list-item link v-if="ser.type === 'long'">
+                            <v-list-item-content>
+                              <v-list-item-title @click="changeAgg(index, 'sum')">Sum</v-list-item-title>
+                            </v-list-item-content>
+                          </v-list-item>
+                          <v-list-item link v-if="ser.type === 'long'">
+                            <v-list-item-content>
+                              <v-list-item-title @click="changeAgg(index, 'avg')">Average</v-list-item-title>
+                            </v-list-item-content>
+                          </v-list-item>
+                        </v-list-group>
+                        <v-list-item link @click="series.splice(index, 1)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-minus-circle</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Remove</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item link @click="move('series', 'categories', index)" :disabled="categories.length > 1">
+                          <v-list-item-icon>
+                            <v-icon>mdi-cursor-move</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Move to categories</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item link @click="move('series', 'filters', index)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-cursor-move</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Move to filters</v-list-item-title>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
                   </v-chip>
+                  <v-chip v-if="dragArea && series.length < 1">Drop Here</v-chip>
                 </draggable>
               </v-card-text>
             </v-card>
@@ -169,23 +319,31 @@
                 <v-spacer></v-spacer> <v-btn color="success" to="viz2" text>Second Design</v-btn>
               </v-card-text>
             </v-card>
+            <v-progress-linear
+              color="red lighten-2"
+              buffer-value="0"
+              stream
+              height="20"
+              v-if="loadingData"
+            >Loading Data</v-progress-linear>
           </v-col>
         </v-row>
       </v-col>
     </v-row>
     {{option}}
-    <ChartsList :activeChart="chart" :showChartsList="showChartsList" @close="hideChartsList" @chartSelected='chartSelected'/>
+    <ChartsList :activeChart="chart" :showChartsList="showChartsList" @close="hideChartsList" @chartSelected='chartSelected' />
   </v-container>
 </template>
 <script>
 import draggable from 'vuedraggable'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart } from 'echarts/charts'
+import { PieChart, BarChart, LineChart, ScatterChart, RadarChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
-  LegendComponent
+  LegendComponent,
+  GridComponent
 } from 'echarts/components'
 import VChart from 'vue-echarts'
 import ChartsList from './ChartsList.vue'
@@ -194,14 +352,20 @@ import ChartSettings from './settings/ChartSettings.vue'
 use([
   CanvasRenderer,
   PieChart,
+  BarChart,
+  LineChart,
+  ScatterChart,
+  RadarChart,
   TitleComponent,
   TooltipComponent,
-  LegendComponent
+  LegendComponent,
+  GridComponent
 ])
 
 export default {
   data () {
     return {
+      loadingData: false,
       displayChart: false,
       datasets: [],
       // dataset: {},
@@ -225,8 +389,7 @@ export default {
       chart: { name: 'bar', icon: 'mdi-chart-bar', title: 'Bar Chart', description: 'Presents data with rectangular bars at heights or lengths proportional to the values they represent' },
       option: {
         tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          trigger: 'item'
         },
         legend: {
           orient: 'vertical',
@@ -239,8 +402,14 @@ export default {
           left: 'center',
           textStyle: {}
         },
-        series: []
-      }
+        series: [],
+        xAxis: [],
+        yAxis: {}
+      },
+      chartOptions: [{
+        type: 'bar'
+      }],
+      dragArea: false
     }
   },
   methods: {
@@ -303,13 +472,14 @@ export default {
           }
         }
       }
-      this.displayChart = true
       query.reportOptions = {
         locationBasedConstraint: true
       }
       this.getData(query)
     },
     getData (query) {
+      this.loadingData = true
+      this.displayChart = false
       const url = `/es/${this.dataset.name}/_search?filter_path=aggregations`
       fetch(url, {
         method: 'POST',
@@ -322,7 +492,6 @@ export default {
           response
             .json()
             .then((data) => {
-              console.info(JSON.stringify(data, 0, 2))
               this.parseResults(data)
             })
             .catch((err) => {
@@ -333,7 +502,7 @@ export default {
           console.log(err)
         })
     },
-    parseResults (results) {
+    async parseResults (results) {
       const level1Cat = []
       let level2Cat = []
       const keys = {}
@@ -378,7 +547,7 @@ export default {
         }
         if (results.aggregations.series.buckets) {
           for (const bucket of results.aggregations.series.buckets) {
-            level1Cat.push(bucket.key)
+            // level1Cat.push(bucket.key)
             series[this.series[0].display].push({
               name: bucket.key,
               value: bucket.doc_count
@@ -391,10 +560,29 @@ export default {
           })
         }
       }
-      console.log(level1Cat)
-      console.log(level2Cat)
-      console.log(series)
+      this.option.xAxis = []
+      this.option.yAxis = {}
       this.option.series = []
+      if (level1Cat && level1Cat.length > 0) {
+        if (level2Cat && level2Cat.length > 0) {
+          this.option.xAxis.push({
+            type: 'category',
+            data: level2Cat
+          })
+        }
+        if (level1Cat && level1Cat.length > 0) {
+          this.option.xAxis.push({
+            type: 'category',
+            data: level1Cat
+          })
+        }
+        this.option.yAxis = {
+          type: 'value'
+        }
+      } else {
+        delete this.option.yAxis
+        delete this.option.xAxis
+      }
       for (const seriesName in series) {
         this.option.series.push({
           name: seriesName,
@@ -402,6 +590,37 @@ export default {
           data: series[seriesName]
         })
       }
+      await this.$nextTick()
+      this.loadingData = false
+      this.displayChart = true
+    },
+    move (from, to, position) {
+      if (to === 'series') {
+        this.setDefaultAgg(this[from][position])
+      }
+      this[to].push(this[from][position])
+      this[from].splice(position, 1)
+    },
+    changeAgg (position, agg) {
+      const aggregation = this.aggregations.find((aggregation) => {
+        return aggregation.name === agg
+      })
+      if (aggregation) {
+        this.series[position].aggsBy = aggregation
+      }
+      document.getElementById('seriesActivator').click()
+    },
+    dragEnd () {
+      this.dragArea = false
+    },
+    dragStart () {
+      this.dragArea = true
+      // {
+      //   'border-style': 'dashed',
+      //   'border-color': 'cadetblue',
+      //   height: '30px',
+      //   width: 'auto'
+      // }
     },
     dragging (evt) {
       if (evt.to.id === 'categories' && this.categories.length > 1) {
@@ -411,21 +630,24 @@ export default {
         if (this.series.length > 0) {
           return false
         }
-        if (!evt.draggedContext.element.aggsBy) {
-          if (evt.draggedContext.element.type === 'long') {
-            const agg = this.aggregations.find((agg) => {
-              return agg.name === 'sum'
-            })
-            if (agg) {
-              evt.draggedContext.element.aggsBy = agg
-            }
-          } else {
-            const agg = this.aggregations.find((agg) => {
-              return agg.name === 'value_count'
-            })
-            if (agg) {
-              evt.draggedContext.element.aggsBy = agg
-            }
+        this.setDefaultAgg(evt.draggedContext.element)
+      }
+    },
+    setDefaultAgg (component) {
+      if (!component.aggsBy) {
+        if (component.type === 'long') {
+          const agg = this.aggregations.find((agg) => {
+            return agg.name === 'sum'
+          })
+          if (agg) {
+            component.aggsBy = agg
+          }
+        } else {
+          const agg = this.aggregations.find((agg) => {
+            return agg.name === 'value_count'
+          })
+          if (agg) {
+            component.aggsBy = agg
           }
         }
       }
@@ -472,6 +694,13 @@ export default {
         return false
       }
       return true
+    }
+  },
+  watch: {
+    showCategory (val) {
+      if (!val) {
+        this.categories = []
+      }
     }
   },
   created () {

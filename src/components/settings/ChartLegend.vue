@@ -21,6 +21,12 @@
           label="Align"
           @change="updated"
         ></v-select>
+        <v-select
+          :items="top"
+          v-model="legend.top"
+          label="Position"
+          @change="updated"
+        ></v-select>
         <v-text-field
           v-model="legend.itemGap"
           type="number"
@@ -57,12 +63,14 @@ export default {
         type: 'plain',
         orient: 'vertical',
         align: 'auto',
+        top: 'top',
         itemGap: 10,
         selectedMode: true,
         textStyle: {}
       },
       types: ['plain', 'scroll'],
       aligns: ['auto', 'left', 'right'],
+      top: ['bottom', 'middle', 'top'],
       selections: [true, false, 'single', 'multiple'],
       orientation: ['vertical', 'horizontal']
     }
