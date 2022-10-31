@@ -1,19 +1,49 @@
 <template>
   <v-container grid-list-xs>
+    <v-row>
+      <v-col cols="6">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-bind="attrs"
+              v-on="on"
+              type="number"
+              min="0"
+              max="100"
+              v-model="innerRadius"
+              label="Inner Radius"
+              @input="radius('inner')"
+              append-icon="mdi-percent"
+            ></v-text-field>
+          </template>
+          <span>Inner Radius of Pie chart</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="6">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-bind="attrs"
+              v-on="on"
+              type="number"
+              min="0"
+              max="100"
+              v-model="outerRadius"
+              label="Outer Radius"
+              @input="radius('outer')"
+              append-icon="mdi-percent"
+            ></v-text-field>
+          </template>
+          <span>Outer Radius of Pie chart</span>
+        </v-tooltip>
+      </v-col>
+    </v-row>
     <v-select
       :items="colorBy"
       v-model="settings.colorBy"
       label="Color By"
       @change="updated"
     ></v-select>
-    <v-text-field
-      v-model="settings.colorBy"
-      type="number"
-      label="Items Gap"
-      min="5"
-      max="100"
-      @input="updated"
-    ></v-text-field>
     <v-select
       :items="selectedMode"
       v-model="settings.selectedMode"
@@ -82,6 +112,7 @@
           v-model="settings.roseType"
           label="Rose Type"
           @change="updated"
+          clearable
         ></v-select>
       </template>
       <span>Whether to show as Nightingale chart, which distinguishes data through radius</span>
@@ -321,9 +352,10 @@
   </v-container>
 </template>
 <script>
+import TextStyle from '../TextStyle.vue'
 export default {
-  props: { externalSettings: Object, type: String},
-  data() {
+  props: { externalSettings: Object, type: String },
+  data () {
     return {
       settings: {
         type: 'pie',
@@ -343,27 +375,33 @@ export default {
         width: '',
         height: '',
         label: {
-          show: false,
+          show: true,
           position: 'outside',
           distanceToLabelLine: 5
         },
         labelLine: {
-          show: false,
+          show: true,
           length: 15,
           length2: 15
         },
         labelLayout: {
           draggable: true
+        },
+        radius: ['0%', '75%'],
+        tooltip: {
+          trigger: 'item'
         }
       },
       colorBy: ['data', 'series'],
       selectedMode: [false, 'single', 'multiple', 'series'],
       roseTypes: ['radius', 'area'],
-      labelPosition: ['outside', 'inside', 'inner', 'center']
+      labelPosition: ['outside', 'inside', 'inner', 'center'],
+      innerRadius: 0,
+      outerRadius: 75
     }
   },
   created () {
-    if(type === 'donut') {
+    if (this.type === 'donut') {
       this.settings.radius = ['40%', '70%']
       this.settings.avoidLabelOverlap = false
       this.settings.label = {
@@ -381,6 +419,9 @@ export default {
         show: false
       }
     }
+    this.innerRadius = this.settings.radius[0].replace('%', '')
+    this.outerRadius = this.settings.radius[1].replace('%', '')
+    this.updated()
   },
   methods: {
     LabelTextStyle (setting) {
@@ -388,7 +429,34 @@ export default {
         this.settings.label[style] = setting.value[style]
       }
       this.updated()
+    },
+    updated () {
+      this.$emit('chartSettings', this.settings)
+    },
+    radius (type) {
+      if (type === 'inner') {
+        if (this.innerRadius > 100) {
+          this.innerRadius = 100
+        }
+        if (this.innerRadius < 0) {
+          this.innerRadius = 0
+        }
+        this.settings.radius = [this.innerRadius + '%', this.outerRadius + '%']
+      }
+      if (type === 'outer') {
+        if (this.outerRadius > 100) {
+          this.outerRadius = 100
+        }
+        if (this.outerRadius < 0) {
+          this.outerRadius = 0
+        }
+        this.settings.radius = [this.innerRadius + '%', this.outerRadius + '%']
+      }
+      this.updated()
     }
   },
+  components: {
+    TextStyle
+  }
 }
 </script>

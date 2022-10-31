@@ -2,6 +2,12 @@
   <div>
     <v-expansion-panels multiple focusable>
       <v-expansion-panel>
+        <v-expansion-panel-header>Line Chart</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <LineChart @chartSettings="chartSettings" />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
         <v-expansion-panel-header>Chart Title</v-expansion-panel-header>
         <v-expansion-panel-content>
           <ChartTitle @chartTitle='externalSettings' />
@@ -47,13 +53,13 @@ import ChartToolTip from './ChartToolTip.vue'
 import ChartAxisPointer from './ChartAxisPointer.vue'
 import ChartXaxis from './ChartXaxis.vue'
 import ChartYaxis from './ChartYaxis.vue'
+import LineChart from './Charts/LineChart.vue'
 export default {
   data () {
     return {
       options: {
         tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
+          trigger: 'item'
         },
         legend: {
           orient: 'vertical',
@@ -71,13 +77,16 @@ export default {
     ChartToolTip,
     ChartAxisPointer,
     ChartXaxis,
-    ChartYaxis
+    ChartYaxis,
+    LineChart
   },
   methods: {
     externalSettings (setting) {
       this.options[setting.name] = setting.value
-      this.$emit('chartSettings', this.options)
-      console.error(JSON.stringify(this.options, 0, 2))
+      this.$emit('generalSettings', this.options)
+    },
+    chartSettings (setting) {
+      this.$emit('chartSettings', setting)
     }
   }
 }

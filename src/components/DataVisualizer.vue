@@ -144,7 +144,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <ChartSettings @chartSettings='settingsUpdated' />
+            <ChartSettings @chartSettings="chartSettings" @generalSettings="generalSettings" />
           </v-col>
         </v-row>
       </v-col>
@@ -330,7 +330,6 @@
         </v-row>
       </v-col>
     </v-row>
-    {{option}}
     <ChartsList :activeChart="chart" :showChartsList="showChartsList" @close="hideChartsList" @chartSelected='chartSelected' />
   </v-container>
 </template>
@@ -372,6 +371,7 @@ export default {
       dataset: { name: 'allpractitioners', display: 'Practitioners List (All practitioners)', id: 'ihris-es-report-all-practitioners' },
       dimensions: [],
       // categories: [],
+      // series: [],
       categories: [{ name: 'cadre', display: 'Cadre', type: 'text' }, { name: 'gender', display: 'Gender', type: 'text' }],
       series: [{ name: 'job', display: 'Job Title', type: 'text', aggsBy: { name: 'value_count', display: 'CNT' } }],
       filters: [],
@@ -406,9 +406,7 @@ export default {
         xAxis: [],
         yAxis: {}
       },
-      chartOptions: [{
-        type: 'bar'
-      }],
+      chartOptions: [],
       dragArea: false
     }
   },
@@ -583,10 +581,14 @@ export default {
         delete this.option.yAxis
         delete this.option.xAxis
       }
+      const chartOpt = this.chartOptions.find((opt) => {
+        return opt.type === this.chart.name
+      })
       for (const seriesName in series) {
         this.option.series.push({
           name: seriesName,
           type: this.chart.name,
+          ...chartOpt,
           data: series[seriesName]
         })
       }
@@ -670,9 +672,26 @@ export default {
     chartSelected (chart) {
       this.chart = chart
     },
-    settingsUpdated (setting) {
+    generalSettings (setting) {
       for (const set in setting) {
         this.option[set] = setting[set]
+      }
+    },
+    chartSettings (setting) {
+      let updated = false
+      for (const index in this.chartOptions) {
+        if (this.chartOptions[index].type === setting.type) {
+          for (const stng in setting) {
+            this.chartOptions[index][stng] = setting[stng]
+            this.option.series[0][stng] = setting[stng]
+          }
+          // this.chartOptions[index] = setting
+          updated = true
+        }
+      }
+      console.error(JSON.stringify(this.option, 0, 2))
+      if (!updated) {
+        this.chartOptions.push(setting)
       }
     }
   },
