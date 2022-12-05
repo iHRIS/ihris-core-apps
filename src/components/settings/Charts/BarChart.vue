@@ -11,26 +11,6 @@
       ></v-color-picker>
     </v-dialog>
     <v-dialog
-      v-model="displayISBorderColor"
-      width="313px"
-    >
-      <v-color-picker
-        class="ma-2"
-        canvas-height="300"
-        v-model="settings.itemStyle.borderColor"
-      ></v-color-picker>
-    </v-dialog>
-    <v-dialog
-      v-model="displayISShadowColor"
-      width="313px"
-    >
-      <v-color-picker
-        class="ma-2"
-        canvas-height="300"
-        v-model="settings.itemStyle.shadowColor"
-      ></v-color-picker>
-    </v-dialog>
-    <v-dialog
       v-model="displayBBorderColor"
       width="313px"
     >
@@ -174,106 +154,7 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Bars Settings</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <v-row>
-                <v-col cols="6">
-                  Border Color:
-                </v-col>
-                <v-col cols="6">
-                  <v-card :color="settings.itemStyle.borderColor" width="30px" height="20" @click="displayISBorderColor = true">
-                    <v-card-text @click="displayISBorderColor = true">
-
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-                <v-col cols="12">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-bind="attrs"
-                        v-on="on"
-                        v-model="settings.itemStyle.borderWidth"
-                        type="number"
-                        label="Border Width"
-                        min="0"
-                        max="40"
-                        @input="updated"
-                      ></v-text-field>
-                    </template>
-                    <span>The border width of bar. defaults to have no border</span>
-                  </v-tooltip>
-                </v-col>
-                <v-col cols="12">
-                  <v-select
-                    :items="borderTypes"
-                    v-model="settings.itemStyle.borderType"
-                    label="Border type"
-                    @input="updated"
-                  ></v-select>
-                </v-col>
-                <v-col cols="12">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-select
-                        v-bind="attrs"
-                        v-on="on"
-                        :items="borderTypes"
-                        v-model="settings.itemStyle.shadowBlur"
-                        type="number"
-                        label="Size of shadow blur"
-                        min="0"
-                        max="40"
-                        interval="0.5"
-                        @input="updated"
-                      ></v-select>
-                    </template>
-                    <span>This attribute should be used along with shadowColor,shadowOffsetX, shadowOffsetY to set shadow to component</span>
-                  </v-tooltip>
-                </v-col>
-                <v-col cols="6">
-                  Shadow Color:
-                </v-col>
-                <v-col cols="6">
-                  <v-card :color="settings.itemStyle.shadowColor" width="30px" height="20" @click="displayISShadowColor = true">
-                    <v-card-text @click="displayISShadowColor = true">
-
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-                <v-col cols="6">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-bind="attrs"
-                        v-on="on"
-                        v-model="settings.itemStyle.shadowOffsetX"
-                        type="number"
-                        label="Horizontal Offset"
-                        min="-90"
-                        max="90"
-                        @input="labelOffset"
-                      ></v-text-field>
-                    </template>
-                    <span>Offset distance on the horizontal direction of shadow</span>
-                  </v-tooltip>
-                </v-col>
-                <v-col cols="6">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-bind="attrs"
-                        v-on="on"
-                        v-model="settings.itemStyle.shadowOffsetY"
-                        type="number"
-                        label="Vertical Offset"
-                        min="-90"
-                        max="90"
-                        @input="labelOffset"
-                      ></v-text-field>
-                    </template>
-                    <span>Offset distance on the vertical direction of shadow</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
+              <ItemStyle subscriber="barStyle" @barStyle="barStyle" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -339,6 +220,7 @@
 <script>
 import LineStyle from '../LineStyle.vue'
 import ChartLabel from '../ChartLabel.vue'
+import ItemStyle from '../ItemStyle.vue'
 export default {
   props: { externalSettings: Object, type: String },
   data () {
@@ -429,13 +311,20 @@ export default {
       }
       this.updated()
     },
+    barStyle (setting) {
+      for (const style in setting.value) {
+        this.settings.itemStyle[style] = setting.value[style]
+      }
+      this.updated()
+    },
     updated () {
       this.$emit('chartSettings', this.settings)
     }
   },
   components: {
     LineStyle,
-    ChartLabel
+    ChartLabel,
+    ItemStyle
   }
 }
 </script>

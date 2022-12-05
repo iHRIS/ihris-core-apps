@@ -6,24 +6,18 @@
     width="800px"
   >
     <v-card>
-      <v-toolbar
-        color="primary"
-        dark
-        height="20"
-      >
-        <v-toolbar-title style="font-size: 14px">
-          Select Chart
-        </v-toolbar-title>
+      <v-system-bar window color="primary" dark>
+        Select Chart Type
         <v-spacer></v-spacer>
         <v-icon @click.native="close" style="cursor: pointer">mdi-close</v-icon>
-      </v-toolbar>
+      </v-system-bar>
       <v-card-text>
         <v-row>
           <v-col cols="4" v-for="(chart, index) in charts" :key="index">
             <v-list class="chart">
                 <v-list-item>
                   <v-list-item-content>
-                    <v-row @click="selected(index)" :class="{activeChart: chart.name === activeChart.name}">
+                    <v-row @click="selected(index)" :class="{activeChart: chart.type === activeChart.type && chart.subType === activeChart.subType}">
                       <v-col cols="2">
                         <v-icon x-large color="purple">
                           {{chart.icon}}
@@ -62,52 +56,56 @@ export default {
   data () {
     return {
       charts: [{
-        name: 'bar',
+        type: 'bar',
+        subType: '',
         icon: 'mdi-chart-bar',
         title: 'Bar Chart',
         description: 'Presents data with rectangular bars at heights or lengths proportional to the values they represent'
       }, {
-        name: 'pie',
+        type: 'pie',
+        subType: '',
         icon: 'mdi-chart-pie',
         title: 'Pie Chart',
-        description: 'Show how a total amount is divided between levels of a categorical variable as a circle divided into radial slices'
+        description: 'Compare data in propotion to a whole'
       }, {
-        name: 'donut',
+        type: 'pie',
+        subType: 'donut',
         icon: 'mdi-chart-donut',
         title: 'Donut',
-        description: 'Show information that changes over time'
+        description: 'Compare data in propotion to a whole'
       }, {
-        name: 'line',
+        type: 'line',
+        subType: '',
         icon: 'mdi-chart-line',
         title: 'Line Chart',
-        description: 'Show information that changes over time'
+        description: 'Display data as a series of points'
       }, {
-        name: 'area',
+        type: 'line',
+        subType: 'area',
         icon: 'mdi-chart-areaspline',
         title: 'Area',
-        description: 'Show information that changes over time'
+        description: 'Emphasize the data between an axis and a line'
       }, {
-        name: 'stacked-area',
-        icon: 'mdi-chart-line-stacked',
-        title: 'Stacked Area',
-        description: 'Show information that changes over time'
-      }, {
-        name: 'radar',
-        icon: 'mdi-radar',
-        title: 'Radar',
-        description: 'Show information that changes over time'
-      }, {
-        name: 'gauge',
+        type: 'gauge',
+        subType: '',
         icon: 'mdi-gauge',
         title: 'Gauge',
-        description: 'Show information that changes over time'
+        description: 'Show the status of a metric'
       }, {
-        name: 'scatter',
+        type: 'metric',
+        subType: '',
+        icon: 'mdi-gauge',
+        title: 'Metric',
+        description: 'Show a calculation as a single number'
+      }, {
+        type: 'scatter',
+        subType: '',
         icon: 'mdi-chart-scatter-plot',
         title: 'Scatter',
         description: 'Show information that changes over time'
       }, {
-        name: 'map',
+        type: 'map',
+        subType: '',
         icon: 'mdi-google-maps',
         title: 'Open as Map',
         description: 'Show information that changes over time'

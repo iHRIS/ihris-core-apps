@@ -26,7 +26,7 @@
           type="number"
           @input="updated"
         ></v-text-field>
-        <v-expansion-panels multiple focusable>
+        <v-expansion-panels multiple focusable v-model="expandSettings">
           <v-expansion-panel>
             <v-expansion-panel-header>Label of axis pointer</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -48,8 +48,6 @@
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
-        </v-expansion-panels>
-        <v-expansion-panels multiple focusable>
           <v-expansion-panel>
             <v-expansion-panel-header>Handle (Button to drag axisPointer)</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -113,7 +111,8 @@ export default {
           color: '#333'
         }
       },
-      types: ['line', 'shadow', 'none']
+      types: ['line', 'shadow', 'none'],
+      expandSettings: []
     }
   },
   watch: {
@@ -137,6 +136,12 @@ export default {
     updated () {
       this.$emit('chartAxisPointer', { name: 'axisPointer', value: this.axisPointer })
     }
+  },
+  created () {
+    this.expandSettings = [0, 1]
+    setTimeout(() => {
+      this.expandSettings = []
+    }, 500)
   },
   components: {
     TextStyle

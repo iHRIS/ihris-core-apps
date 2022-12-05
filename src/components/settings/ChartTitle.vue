@@ -14,7 +14,7 @@
           label="Text Alignment"
           @change="updated"
         ></v-select>
-        <v-expansion-panels multiple focusable>
+        <v-expansion-panels multiple focusable v-model="expandTextStyle">
           <v-expansion-panel>
             <v-expansion-panel-header>Text Style</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -38,7 +38,8 @@ export default {
         left: 'center',
         textStyle: {}
       },
-      textAligns: ['auto', 'left', 'right', 'center']
+      textAligns: ['auto', 'left', 'right', 'center'],
+      expandTextStyle: []
     }
   },
   methods: {
@@ -52,6 +53,12 @@ export default {
   },
   components: {
     TextStyle
+  },
+  created () {
+    this.expandTextStyle = [0]
+    setTimeout(() => {
+      this.expandTextStyle = []
+    }, 500)
   }
 }
 </script>

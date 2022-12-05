@@ -1,62 +1,39 @@
 <template>
   <div>
-    <v-expansion-panels multiple focusable>
-      <v-expansion-panel>
+    <v-expansion-panels multiple focusable v-model="expandSettings">
+      <v-expansion-panel v-if="chartType === 'bar'">
+        <v-expansion-panel-header>Bar Chart</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <BarChart @chartSettings="chartSettings" />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel v-else-if="chartType === 'pie'">
+        <v-expansion-panel-header>Pie Chart</v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <PieChart @chartSettings="chartSettings" :chartSubType='chartSubType' />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel v-else-if="chartType === 'line'">
         <v-expansion-panel-header>Line Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <LineChart @chartSettings="chartSettings" />
+          <LineChart @chartSettings="chartSettings" :chartSubType='chartSubType' />
         </v-expansion-panel-content>
       </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart Title</v-expansion-panel-header>
+      <v-expansion-panel v-else-if="chartType === 'gauge'">
+        <v-expansion-panel-header>Gauge Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <ChartTitle @chartTitle='externalSettings' />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart Legend</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <ChartLegend @chartLegend='externalSettings' />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart Tooltip</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <ChartToolTip @chartTooltip='externalSettings' />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart Axis Pointer</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <ChartAxisPointer @chartAxisPointer='externalSettings' />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart X Axis</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <ChartXaxis @chartXaxis='externalSettings' />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>Chart Y Axis</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <ChartYaxis @chartYaxis='externalSettings' />
+          <GaugeChart @chartSettings="chartSettings" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
   </div>
 </template>
 <script>
-import ChartTitle from './ChartTitle.vue'
-import ChartLegend from './ChartLegend.vue'
-import ChartToolTip from './ChartToolTip.vue'
-import ChartAxisPointer from './ChartAxisPointer.vue'
-import ChartXaxis from './ChartXaxis.vue'
-import ChartYaxis from './ChartYaxis.vue'
-import LineChart from './Charts/LineChart.vue'
 export default {
+  props: ['chartType', 'chartSubType'],
   data () {
     return {
+      expandSettings: [],
       options: {
         tooltip: {
           trigger: 'item'
@@ -72,22 +49,21 @@ export default {
     }
   },
   components: {
-    ChartTitle,
-    ChartLegend,
-    ChartToolTip,
-    ChartAxisPointer,
-    ChartXaxis,
-    ChartYaxis,
-    LineChart
+    BarChart: () => import(/* webpackChunkName: "bar-chart" */ './Charts/BarChart'),
+    PieChart: () => import(/* webpackChunkName: "pie-chart" */ './Charts/PieChart'),
+    LineChart: () => import(/* webpackChunkName: "line-chart" */ './Charts/LineChart'),
+    GaugeChart: () => import(/* webpackChunkName: "gauge-chart" */ './Charts/GaugeChart')
   },
   methods: {
-    externalSettings (setting) {
-      this.options[setting.name] = setting.value
-      this.$emit('generalSettings', this.options)
-    },
     chartSettings (setting) {
       this.$emit('chartSettings', setting)
     }
+  },
+  created () {
+    this.expandSettings = [0]
+    setTimeout(() => {
+      this.expandSettings = []
+    }, 500)
   }
 }
 </script>

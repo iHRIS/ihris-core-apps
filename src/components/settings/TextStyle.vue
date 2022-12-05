@@ -105,7 +105,7 @@ export default {
     }
   },
   created () {
-    this.$emit('textStyle', { name: 'textStyle', value: this.style })
+    this.updated()
   }
 }
 </script>

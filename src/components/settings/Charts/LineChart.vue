@@ -161,7 +161,7 @@
 import LineStyle from '../LineStyle.vue'
 import ChartLabel from '../ChartLabel.vue'
 export default {
-  props: { externalSettings: Object, type: String },
+  props: { externalSettings: Object, chartSubType: String },
   data () {
     return {
       settings: {
@@ -219,16 +219,27 @@ export default {
       }]
     }
   },
+  watch: {
+    chartSubType () {
+      if (this.chartSubType === 'area') {
+        this.settings.areaStyle = {}
+      } else {
+        delete this.settings.areaStyle
+      }
+    }
+  },
   created () {
     if (this.settings.markPoint && this.settings.markPoint.data) {
       this.markPoint = true
+    }
+    if (this.chartSubType === 'area') {
+      this.settings.areaStyle = {}
     }
     this.updated()
   },
   methods: {
     markPointSwitch () {
       if (this.markPoint) {
-        console.log('here')
         this.settings.markPoint = {
           data: [{
             type: 'max'

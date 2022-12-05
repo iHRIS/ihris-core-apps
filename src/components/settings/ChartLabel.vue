@@ -73,7 +73,7 @@
 <script>
 import TextStyle from './TextStyle.vue'
 export default {
-  props: ['subscriber'],
+  props: ['subscriber', 'default'],
   data () {
     return {
       label: {
@@ -86,6 +86,14 @@ export default {
   created () {
     this.labelXOffset = this.label.offset[0]
     this.labelYOffset = this.label.offset[1]
+    if (this.default) {
+      const labelSetProp = Object.keys(this.label)
+      for (const def in this.default) {
+        if (labelSetProp.includes(def)) {
+          this.label[def] = this.default[def]
+        }
+      }
+    }
     this.updated()
   },
   methods: {

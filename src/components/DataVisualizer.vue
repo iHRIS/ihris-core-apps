@@ -1,10 +1,113 @@
 <template>
   <v-container fluid>
     <h2><center>Data Vizualizer</center></h2>
+    <v-dialog
+      persistent
+      transition="dialog-top-transition"
+      v-model="showValuesSelector"
+      width="900px"
+    >
+      <v-system-bar
+        window
+        color="primary"
+        dark
+        height="60px"
+      >
+        Select values
+        <v-spacer></v-spacer>
+        <v-icon @click.native="showValuesSelector = false" style="cursor: pointer">mdi-close</v-icon>
+      </v-system-bar>
+      <v-card>
+        <v-card-text v-if="activeDimension.index > -1">
+          <v-row>
+            <v-col cols="6">
+              <v-card height="700" class="overflow-auto">
+                <v-card-text>
+                  <v-list
+                    shaped
+                    dense
+                  >
+                    <v-list-item-group
+                      color="primary"
+                      v-model="me[activeDimension.location][activeDimension.index].highlightedValue"
+                    >
+                    <v-list-item
+                      v-for="(value, i) in this[activeDimension.location][activeDimension.index].allValues"
+                      :key="i"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          <v-icon>mdi-menu-right</v-icon>
+                          <label style="font-size: 13px">
+                            {{value}}
+                          </label>
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                    </v-list-item-group>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="1" class="fill-height">
+              <v-btn icon color="primary">
+                <v-icon>mdi-chevron-double-right</v-icon>
+              </v-btn>
+              <v-btn text icon color="primary" @click="moveDimensionValue('allValues', 'selectedValues')">
+                <v-icon>mdi-chevron-right</v-icon>
+              </v-btn>
+              <v-divider></v-divider>
+              <v-btn icon color="primary">
+                <v-icon>mdi-chevron-double-left</v-icon>
+              </v-btn>
+              <v-btn text icon color="primary" @click="moveDimensionValue('selectedValues', 'allValues')">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="5">
+              <v-card height="700" class="overflow-auto">
+                <v-card-text>
+                  <v-list
+                    shaped
+                    dense
+                  >
+                    <v-list-item-group
+                      color="primary"
+                      v-model="me[activeDimension.location][activeDimension.index].highlightedValue"
+                    >
+                    <v-list-item
+                      v-for="(value, i) in this[activeDimension.location][activeDimension.index].selectedValues"
+                      :key="i"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          <v-icon>mdi-menu-right</v-icon>
+                          <label style="font-size: 13px">
+                            {{value}}
+                          </label>
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                    </v-list-item-group>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
+      <v-spacer></v-spacer>
+      <v-btn
+        color="success"
+        @click='showValuesSelector = false'
+        small
+      >Close</v-btn>
+    </v-dialog>
     <v-row>
       <v-col cols="4">
         <v-row>
           <v-col cols="6">
+            <input type="button" id="hiddenActivator">
             <v-card>
               <v-card-text>
                 <v-row>
@@ -75,13 +178,13 @@
                               small
                               v-bind="attrs"
                               v-on="on"
-                              id="seriesActivator"
+                              id="filtersActivator"
                             >
                               <v-icon color="white">mdi-dots-horizontal</v-icon>
                             </v-btn>
                           </template>
                           <v-list rounded>
-                            <v-list-item link @click="filters.splice(index, 1)">
+                            <v-list-item link @click="removeDimension('filters', index)">
                               <v-list-item-icon>
                                 <v-icon>mdi-minus-circle</v-icon>
                               </v-list-item-icon>
@@ -93,7 +196,7 @@
                               </v-list-item-icon>
                               <v-list-item-title>Move to series</v-list-item-title>
                             </v-list-item>
-                            <v-list-item link @click="move('filters', 'categories', index)" :disabled="categories.length > 1">
+                            <v-list-item link @click="move('filters', 'categories', index)" :disabled="categories.length >= maxCategories">
                               <v-list-item-icon>
                                 <v-icon>mdi-cursor-move</v-icon>
                               </v-list-item-icon>
@@ -144,12 +247,13 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <ChartSettings @chartSettings="chartSettings" @generalSettings="generalSettings" />
+            <ChartSettings v-if="chart.type" :chartType="chart.type" :chartSubType="chart.subType" @chartSettings="chartSettings" />
+            <GeneralSettings @generalSettings="generalSettings" />
           </v-col>
         </v-row>
       </v-col>
       <v-col cols="8">
-        <v-row v-if="showCategory">
+        <v-row v-if="maxCategories > 0">
           <v-col cols="1">Category</v-col>
             &nbsp;
             <v-col cols="10">
@@ -179,13 +283,13 @@
                           small
                           v-bind="attrs"
                           v-on="on"
-                          id="seriesActivator"
+                          id="categoriesActivator"
                         >
                           <v-icon color="white">mdi-dots-horizontal</v-icon>
                         </v-btn>
                       </template>
                       <v-list rounded>
-                        <v-list-item link @click="categories.splice(index, 1)">
+                        <v-list-item link @click="removeDimension('categories', index)">
                           <v-list-item-icon>
                             <v-icon>mdi-minus-circle</v-icon>
                           </v-list-item-icon>
@@ -206,7 +310,7 @@
                       </v-list>
                     </v-menu>
                   </v-chip>
-                  <v-chip v-if="dragArea & categories.length < 2">Drop Here</v-chip>
+                  <v-chip v-if="dragArea & categories.length < maxCategories">Drop Here</v-chip>
                 </draggable>
               </v-card-text>
             </v-card>
@@ -253,7 +357,7 @@
                           no-action
                         >
                           <template v-slot:activator>
-                            <v-list-item-content v-bind="attrs" v-on="on" no-action>
+                            <v-list-item-content no-action>
                               <v-list-item-title no-action>Aggregations</v-list-item-title>
                             </v-list-item-content>
                           </template>
@@ -279,7 +383,7 @@
                           </v-list-item-icon>
                           <v-list-item-title>Remove</v-list-item-title>
                         </v-list-item>
-                        <v-list-item link @click="move('series', 'categories', index)" :disabled="categories.length > 1">
+                        <v-list-item link @click="move('series', 'categories', index)" :disabled="categories.length >= maxCategories">
                           <v-list-item-icon>
                             <v-icon>mdi-cursor-move</v-icon>
                           </v-list-item-icon>
@@ -304,7 +408,7 @@
               color="success"
               @click="buildQuery"
               small
-              :disabled="canDisplayChart"
+              :disabled="!canDisplayChart"
             >
               <v-icon left>mdi-sitemap</v-icon>
               Visualize
@@ -337,7 +441,7 @@
 import draggable from 'vuedraggable'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, BarChart, LineChart, ScatterChart, RadarChart } from 'echarts/charts'
+import { PieChart, BarChart, LineChart, ScatterChart, RadarChart, GaugeChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
@@ -347,6 +451,7 @@ import {
 import VChart from 'vue-echarts'
 import ChartsList from './ChartsList.vue'
 import ChartSettings from './settings/ChartSettings.vue'
+import GeneralSettings from './settings/GeneralSettings.vue'
 
 use([
   CanvasRenderer,
@@ -355,6 +460,7 @@ use([
   LineChart,
   ScatterChart,
   RadarChart,
+  GaugeChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
@@ -364,6 +470,8 @@ use([
 export default {
   data () {
     return {
+      me: this,
+      data: '',
       loadingData: false,
       displayChart: false,
       datasets: [],
@@ -385,8 +493,13 @@ export default {
         name: 'avg',
         display: 'AVG'
       }],
+      activeDimension: {
+        location: '',
+        index: -1
+      },
       showChartsList: false,
-      chart: { name: 'bar', icon: 'mdi-chart-bar', title: 'Bar Chart', description: 'Presents data with rectangular bars at heights or lengths proportional to the values they represent' },
+      showValuesSelector: false,
+      chart: { type: 'bar', subType: '', icon: 'mdi-chart-bar', title: 'Bar Chart', description: 'Presents data with rectangular bars at heights or lengths proportional to the values they represent' },
       option: {
         tooltip: {
           trigger: 'item'
@@ -412,6 +525,7 @@ export default {
   },
   methods: {
     buildQuery () {
+      this.data = ''
       const query = {
         size: 0
       }
@@ -429,43 +543,62 @@ export default {
           if (category.type === 'text') {
             field += '.keyword'
           }
-          query.aggs.categories.terms = {
-            field
+          const term = {}
+          term[category.name] = {
+            terms: {
+              field
+            }
+          }
+          query.aggs.categories.composite = {
+            sources: [term]
           }
         } else {
-          query.aggs.categories.multi_terms = {
-            terms: []
-          }
+          const terms = []
           for (const category of this.categories) {
             let field = category.name
             if (category.type === 'text') {
               field += '.keyword'
             }
-            query.aggs.categories.multi_terms.terms.push({
-              field
-            })
+            const term = {}
+            term[category.name] = {
+              terms: {
+                field,
+                missing_bucket: true
+              }
+            }
+            terms.push(term)
+          }
+          query.aggs.categories.composite = {
+            size: 1000,
+            sources: terms
           }
         }
         query.aggs.categories.aggs = {
           series: {}
         }
-        if (this.series[0].aggsBy.name === 'value_count') {
+        if (this.series[0].aggsBy.name === 'value_count' && this.chart.type !== 'pie') {
           query.aggs.categories.aggs.series.terms = {
             field: seriesField,
             order: { _key: 'asc' },
-            min_doc_count: 0
+            min_doc_count: 0,
+            size: 2000000
           }
         } else {
           const aggBy = this.series[0].aggsBy.name
           query.aggs.categories.aggs.series[aggBy] = { field: seriesField }
         }
       } else {
+        const terms = {}
+        terms[this.series[0].name] = {
+          terms: {
+            field: seriesField
+          }
+        }
         query.aggs = {
           series: {
-            terms: {
-              field: seriesField,
-              order: { _key: 'asc' },
-              min_doc_count: 0
+            composite: {
+              size: 1000,
+              sources: [terms]
             }
           }
         }
@@ -473,47 +606,76 @@ export default {
       query.reportOptions = {
         locationBasedConstraint: true
       }
-      this.getData(query)
+      this.getData(query).then(() => {
+        this.parseResults()
+      })
     },
     getData (query) {
-      this.loadingData = true
-      this.displayChart = false
-      const url = `/es/${this.dataset.name}/_search?filter_path=aggregations`
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(query)
+      return new Promise((resolve, reject) => {
+        let category = 'categories'
+        if (this.maxCategories === 0) {
+          category = 'series'
+        }
+        this.loadingData = true
+        this.displayChart = false
+        const url = `/es/${this.dataset.name}/_search?filter_path=aggregations`
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(query)
+        })
+          .then((response) => {
+            response
+              .json()
+              .then((data) => {
+                if (!this.data) {
+                  this.data = data
+                } else if (data.aggregations[category].buckets && data.aggregations[category].buckets.length > 0) {
+                  this.data.aggregations[category].buckets = this.data.aggregations[category].buckets.concat(data.aggregations[category].buckets)
+                }
+                if (data.aggregations && data.aggregations[category].after_key) {
+                  query.aggs[category].composite.after = data.aggregations[category].after_key
+                  this.getData(query).then(() => {
+                    return resolve()
+                  })
+                } else {
+                  return resolve()
+                }
+              })
+              .catch((err) => {
+                console.log(err)
+                return reject(err)
+              })
+          })
+          .catch((err) => {
+            console.log(err)
+          })
       })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              this.parseResults(data)
-            })
-            .catch((err) => {
-              console.log(err)
-            })
-        })
-        .catch((err) => {
-          console.log(err)
-        })
     },
-    async parseResults (results) {
+    async parseResults () {
       const level1Cat = []
       let level2Cat = []
       const keys = {}
       const series = {}
-      if (results.aggregations.categories) {
-        for (const bucket of results.aggregations.categories.buckets) {
-          if (Array.isArray(bucket.key)) {
-            if (!keys[bucket.key[0]]) {
-              keys[bucket.key[0]] = []
+      if (this.data.aggregations.categories) {
+        for (const bucket of this.data.aggregations.categories.buckets) {
+          if (Object.keys(bucket.key).length > 1) {
+            const catKeys = Object.keys(bucket.key)
+            if (!keys[bucket.key[catKeys[0]]]) {
+              keys[bucket.key[catKeys[0]]] = []
             }
-            keys[bucket.key[0]].push(bucket.key[1])
+            keys[bucket.key[catKeys[0]]].push(bucket.key[catKeys[1]])
           } else {
-            level1Cat.push(bucket.key)
+            if (typeof bucket.key === 'object') {
+              const keys = Object.keys(bucket.key)
+              for (const key of keys) {
+                level1Cat.push(bucket.key[key])
+              }
+            } else {
+              level1Cat.push(bucket.key)
+            }
           }
           if (bucket.series.buckets) {
             for (const value of bucket.series.buckets) {
@@ -530,7 +692,14 @@ export default {
             if (!series[this.series[0].display]) {
               series[this.series[0].display] = []
             }
-            series[this.series[0].display].push(bucket.series.value)
+            if (this.hasAxis) {
+              series[this.series[0].display].push(bucket.series.value)
+            } else {
+              series[this.series[0].display].push({
+                name: bucket.key[Object.keys(bucket.key)[0]],
+                value: bucket.series.value
+              })
+            }
           }
         }
         if (Object.keys(keys).length > 0) {
@@ -539,29 +708,29 @@ export default {
             level1Cat.push(key)
           }
         }
-      } else if (results.aggregations.series) {
+      } else if (this.data.aggregations.series) {
         if (!series[this.series[0].display]) {
           series[this.series[0].display] = []
         }
-        if (results.aggregations.series.buckets) {
-          for (const bucket of results.aggregations.series.buckets) {
+        if (this.data.aggregations.series.buckets) {
+          for (const bucket of this.data.aggregations.series.buckets) {
             // level1Cat.push(bucket.key)
             series[this.series[0].display].push({
               name: bucket.key,
               value: bucket.doc_count
             })
           }
-        } else if (results.aggregations.series.value) {
+        } else if (this.data.aggregations.series.value) {
           series[this.series[0].display].push({
             name: this.series[0].display,
-            value: results.aggregations.series.value
+            value: this.data.aggregations.series.value
           })
         }
       }
       this.option.xAxis = []
       this.option.yAxis = {}
       this.option.series = []
-      if (level1Cat && level1Cat.length > 0) {
+      if (level1Cat && level1Cat.length > 0 && this.hasAxis) {
         if (level2Cat && level2Cat.length > 0) {
           this.option.xAxis.push({
             type: 'category',
@@ -582,12 +751,12 @@ export default {
         delete this.option.xAxis
       }
       const chartOpt = this.chartOptions.find((opt) => {
-        return opt.type === this.chart.name
+        return opt.type === this.chart.type
       })
       for (const seriesName in series) {
         this.option.series.push({
           name: seriesName,
-          type: this.chart.name,
+          type: this.chart.type,
           ...chartOpt,
           data: series[seriesName]
         })
@@ -595,6 +764,49 @@ export default {
       await this.$nextTick()
       this.loadingData = false
       this.displayChart = true
+    },
+    getDimensionValues (evt) {
+      if (evt.to.id !== 'categories' && evt.to.id !== 'series') {
+        return false
+      }
+      const dimension = this[evt.to.id][evt.newIndex].name
+      const type = this[evt.to.id][evt.newIndex].type
+      const url = `/es/populateFilter/${this.dataset.name}/${dimension}?dataType=${type}`
+      this.$set(this[evt.to.id][evt.newIndex], 'allValues', [])
+      if (!this[evt.to.id][evt.newIndex].selectedValues) {
+        this.$set(this[evt.to.id][evt.newIndex], 'selectedValues', [])
+        this.$set(this[evt.to.id][evt.newIndex], 'highlightedValue', -1)
+      }
+      fetch(url, {
+        method: 'GET'
+      }).then((response) => {
+        response
+          .json()
+          .then((data) => {
+            for (const bucket of data) {
+              if (this[evt.to.id][evt.newIndex].selectedValues.indexOf(bucket.key.value) === -1) {
+                this[evt.to.id][evt.newIndex].allValues.push(
+                  bucket.key.value
+                )
+              }
+            }
+            this.activeDimension.location = evt.to.id
+            this.activeDimension.index = evt.newIndex
+            this.showValuesSelector = true
+          })
+      })
+    },
+    moveDimensionValue (from, to) {
+      const position = this[this.activeDimension.location][this.activeDimension.index].highlightedValue
+      this[this.activeDimension.location][this.activeDimension.index][to].push(
+        this[this.activeDimension.location][this.activeDimension.index][from][position]
+      )
+      this[this.activeDimension.location][this.activeDimension.index][to].sort()
+      this[this.activeDimension.location][this.activeDimension.index][from].splice(position, 1)
+    },
+    removeDimension (from, position) {
+      this[from].splice(position, 1)
+      document.getElementById('hiddenActivator').click()
     },
     move (from, to, position) {
       if (to === 'series') {
@@ -612,20 +824,15 @@ export default {
       }
       document.getElementById('seriesActivator').click()
     },
-    dragEnd () {
+    dragEnd (evt) {
+      this.getDimensionValues(evt)
       this.dragArea = false
     },
     dragStart () {
       this.dragArea = true
-      // {
-      //   'border-style': 'dashed',
-      //   'border-color': 'cadetblue',
-      //   height: '30px',
-      //   width: 'auto'
-      // }
     },
     dragging (evt) {
-      if (evt.to.id === 'categories' && this.categories.length > 1) {
+      if (evt.to.id === 'categories' && this.categories.length >= this.maxCategories) {
         return false
       }
       if (evt.to.id === 'series') {
@@ -642,14 +849,14 @@ export default {
             return agg.name === 'sum'
           })
           if (agg) {
-            component.aggsBy = agg
+            this.$set(component, 'aggsBy', agg)
           }
         } else {
           const agg = this.aggregations.find((agg) => {
             return agg.name === 'value_count'
           })
           if (agg) {
-            component.aggsBy = agg
+            this.$set(component, 'aggsBy', agg)
           }
         }
       }
@@ -681,17 +888,23 @@ export default {
       let updated = false
       for (const index in this.chartOptions) {
         if (this.chartOptions[index].type === setting.type) {
-          for (const stng in setting) {
-            this.chartOptions[index][stng] = setting[stng]
-            this.option.series[0][stng] = setting[stng]
-          }
-          // this.chartOptions[index] = setting
+          this.chartOptions[index] = setting
           updated = true
         }
       }
-      console.error(JSON.stringify(this.option, 0, 2))
       if (!updated) {
         this.chartOptions.push(setting)
+      }
+
+      // update series
+      if (this.option.series && this.option.series.length > 0) {
+        for (const series of this.option.series) {
+          if (series.type === setting.type) {
+            for (const stng in setting) {
+              series[stng] = setting[stng]
+            }
+          }
+        }
       }
     }
   },
@@ -699,25 +912,35 @@ export default {
     draggable,
     ChartsList,
     VChart,
+    GeneralSettings,
     ChartSettings
   },
   computed: {
-    showCategory () {
-      if (this.chart.name === 'pie') {
+    canDisplayChart () {
+      if (this.chart.type && this.series.length > 0 && ((this.maxCategories > 0 && this.categories.length > 0) || this.maxCategories === 0)) {
+        return true
+      }
+      return false
+    },
+    hasAxis () {
+      if (this.chart.type === 'pie' || this.chart.type === 'gauge') {
         return false
       }
       return true
     },
-    canDisplayChart () {
-      if (this.chart.name && (this.series.length > 0 || this.categories.length > 0)) {
-        return false
+    maxCategories () {
+      if (this.chart.type === 'pie') {
+        return 1
       }
-      return true
+      if (this.chart.type === 'gauge') {
+        return 0
+      }
+      return 2
     }
   },
   watch: {
-    showCategory (val) {
-      if (!val) {
+    maxCategories (val) {
+      if (val === 0) {
         this.categories = []
       }
     }

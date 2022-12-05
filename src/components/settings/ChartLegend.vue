@@ -41,7 +41,7 @@
           label="Selection Mode"
           @change="updated"
         ></v-select>
-        <v-expansion-panels multiple focusable>
+        <v-expansion-panels multiple focusable v-model="expandTextStyle">
           <v-expansion-panel>
             <v-expansion-panel-header>Text Style</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -60,10 +60,10 @@ export default {
     return {
       legend: {
         show: true,
-        type: 'plain',
-        orient: 'vertical',
+        type: 'scroll',
+        orient: 'horizontal',
         align: 'auto',
-        top: 'top',
+        top: 'bottom',
         itemGap: 10,
         selectedMode: true,
         textStyle: {}
@@ -72,7 +72,8 @@ export default {
       aligns: ['auto', 'left', 'right'],
       top: ['bottom', 'middle', 'top'],
       selections: [true, false, 'single', 'multiple'],
-      orientation: ['vertical', 'horizontal']
+      orientation: ['vertical', 'horizontal'],
+      expandTextStyle: []
     }
   },
   methods: {
@@ -83,6 +84,12 @@ export default {
     updated () {
       this.$emit('chartLegend', { name: 'legend', value: this.legend })
     }
+  },
+  created () {
+    this.expandTextStyle = [0]
+    setTimeout(() => {
+      this.expandTextStyle = []
+    }, 500)
   },
   components: {
     TextStyle

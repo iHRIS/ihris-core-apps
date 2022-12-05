@@ -95,6 +95,7 @@ export default {
     }
   },
   created () {
+    document.title = 'Data Visualizer'
     this.$router.push({ name: 'viz1' })
     this.updateConfig()
     let query = location.search

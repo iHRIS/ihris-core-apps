@@ -274,7 +274,7 @@ export default {
         nameRotate: 0,
         nameTextStyle: {},
         inverse: false,
-        min: '',
+        min: 'dataMin',
         max: '',
         axisLine: {
           show: true,

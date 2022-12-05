@@ -354,7 +354,7 @@
 <script>
 import TextStyle from '../TextStyle.vue'
 export default {
-  props: { externalSettings: Object, type: String },
+  props: { externalSettings: Object, chartSubType: String },
   data () {
     return {
       settings: {
@@ -387,6 +387,7 @@ export default {
         labelLayout: {
           draggable: true
         },
+        itemStyle: {},
         radius: ['0%', '75%'],
         tooltip: {
           trigger: 'item'
@@ -400,8 +401,44 @@ export default {
       outerRadius: 75
     }
   },
+  watch: {
+    chartSubType () {
+      if (this.chartSubType === 'donut') {
+        this.settings.radius = ['40%', '70%']
+        this.settings.avoidLabelOverlap = false
+        this.settings.label = {
+          show: false,
+          position: 'center'
+        }
+        this.settings.emphasis = {
+          label: {
+            show: true,
+            fontSize: '12',
+            fontWeight: 'bold'
+          }
+        }
+        this.settings.labelLine.show = false
+        this.settings.itemStyle = {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        }
+      } else {
+        this.settings.radius = ['0%', '70%']
+        this.settings.avoidLabelOverlap = true
+        this.settings.label = {
+          show: true,
+          position: 'outside',
+          distanceToLabelLine: 5
+        }
+        delete this.settings.emphasis
+        this.settings.labelLine.show = true
+        this.settings.itemStyle = {}
+      }
+    }
+  },
   created () {
-    if (this.type === 'donut') {
+    if (this.chartSubType === 'donut') {
       this.settings.radius = ['40%', '70%']
       this.settings.avoidLabelOverlap = false
       this.settings.label = {
@@ -411,12 +448,17 @@ export default {
       this.settings.emphasis = {
         label: {
           show: true,
-          fontSize: '40',
+          fontSize: '12',
           fontWeight: 'bold'
         }
       }
       this.settings.labelLine = {
         show: false
+      }
+      this.settings.itemStyle = {
+        borderRadius: 10,
+        borderColor: '#fff',
+        borderWidth: 2
       }
     }
     this.innerRadius = this.settings.radius[0].replace('%', '')

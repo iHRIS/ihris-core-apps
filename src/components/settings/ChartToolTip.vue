@@ -25,7 +25,7 @@
         ></v-select>
         <v-switch label="Show Floating Layer" v-model="tooltip.showContent" @change="updated"></v-switch>
         <v-switch label="Always Show Content" v-model="tooltip.alwaysShowContent" @change="updated"></v-switch>
-        <v-expansion-panels multiple focusable>
+        <v-expansion-panels multiple focusable v-model="expandSettings">
           <v-expansion-panel>
             <v-expansion-panel-header>Chart Axis Pointer</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -87,7 +87,8 @@ export default {
         { name: 'Ascending Order, based on series', value: 'seriesAsc' },
         { name: 'Descending Order, based on series', value: 'seriesDesc' },
         { name: 'Ascending Order, based on values', value: 'valueAsc' },
-        { name: 'Ascending Order, based on values', value: 'valueDesc' }]
+        { name: 'Ascending Order, based on values', value: 'valueDesc' }],
+      expandSettings: []
     }
   },
   methods: {
@@ -106,6 +107,12 @@ export default {
   components: {
     ChartAxisPointer,
     TextStyle
+  },
+  created () {
+    this.expandSettings = [0, 1]
+    setTimeout(() => {
+      this.expandSettings = []
+    }, 500)
   }
 }
 </script>
