@@ -1,38 +1,75 @@
 <template>
   <v-container fluid>
-    <h2><center>Data Vizualizer</center></h2>
+    <v-row>
+      <v-col cols="3">
+        <v-row>
+          <v-col>
+            <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
+              <v-icon left color="primary">mdi-home</v-icon> Home
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn color="tertiary" small @click="save">
+              <v-icon left color="primary">mdi-content-save-check</v-icon> Save
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-col>
+      <v-col cols="9">
+        <h2><center>Data Vizualizer</center></h2>
+      </v-col>
+    </v-row>
     <v-dialog
       persistent
       transition="dialog-top-transition"
       v-model="showValuesSelector"
-      width="900px"
+      width="960px"
     >
       <v-system-bar
         window
         color="primary"
         dark
-        height="60px"
+        height="40px"
       >
-        Select values
+        <b>Values For {{activeDimension.name}}</b>
         <v-spacer></v-spacer>
         <v-icon @click.native="showValuesSelector = false" style="cursor: pointer">mdi-close</v-icon>
       </v-system-bar>
       <v-card>
-        <v-card-text v-if="activeDimension.index > -1">
+        <v-card-actions v-if="activeDimension.index > -1">
+          <v-radio-group
+            row
+            v-model="me[activeDimension.location][activeDimension.index].defaultFilter"
+          >
+            <v-radio
+              label="Use All"
+              value="all"
+            ></v-radio>
+            <v-radio
+              label="Use Selected Below"
+              value="selected"
+            ></v-radio>
+          </v-radio-group>
+          <v-spacer></v-spacer>
+          <v-btn color="success" @click="showValuesSelector = false" small>Save</v-btn>
+        </v-card-actions>
+        <v-card-text v-if="activeDimension.index > -1 && me[activeDimension.location][activeDimension.index].defaultFilter !== 'all'">
           <v-row>
             <v-col cols="6">
-              <v-card height="700" class="overflow-auto">
+              All Values
+              <v-card height="638" class="overflow-auto">
                 <v-card-text>
                   <v-list
                     shaped
                     dense
+                    v-if="me[activeDimension.location][activeDimension.index].defaultFilter !== 'all'"
                   >
                     <v-list-item-group
                       color="primary"
-                      v-model="me[activeDimension.location][activeDimension.index].highlightedValue"
+                      v-model="me[activeDimension.location][activeDimension.index].highlightedAllValues"
                     >
                     <v-list-item
-                      v-for="(value, i) in this[activeDimension.location][activeDimension.index].allValues"
+                      v-for="(value, i) in me[activeDimension.location][activeDimension.index].allValues"
                       :key="i"
                     >
                       <v-list-item-content>
@@ -50,30 +87,84 @@
               </v-card>
             </v-col>
             <v-col cols="1" class="fill-height">
-              <v-btn icon color="primary">
+              <br>
+              <br>
+              <br>
+              <v-btn
+                :disabled="this[activeDimension.location][activeDimension.index].allValues.length === 0"
+                text
+                icon
+                color="primary"
+                @click="moveDimensionValue('allValues', 'selectedValues', true)"
+              >
                 <v-icon>mdi-chevron-double-right</v-icon>
               </v-btn>
-              <v-btn text icon color="primary" @click="moveDimensionValue('allValues', 'selectedValues')">
+              <v-btn
+                :disabled="this[activeDimension.location][activeDimension.index].highlightedAllValues < 0"
+                text
+                icon
+                color="primary"
+                @click="moveDimensionValue('allValues', 'selectedValues', false)"
+              >
                 <v-icon>mdi-chevron-right</v-icon>
               </v-btn>
-              <v-divider></v-divider>
-              <v-btn icon color="primary">
+              <br>
+              <br>
+              <br>
+              <v-divider height="5"></v-divider>
+              <br>
+              <br>
+              <br>
+              <v-btn
+                :disabled="this[activeDimension.location][activeDimension.index].selectedValues.length === 0"
+                text
+                icon
+                color="primary"
+                @click="moveDimensionValue('selectedValues', 'allValues', true)"
+              >
                 <v-icon>mdi-chevron-double-left</v-icon>
               </v-btn>
-              <v-btn text icon color="primary" @click="moveDimensionValue('selectedValues', 'allValues')">
+              <v-btn
+                :disabled="this[activeDimension.location][activeDimension.index].highlightedSelectedValues < 0"
+                text
+                icon
+                color="primary"
+                @click="moveDimensionValue('selectedValues', 'allValues', false)"
+              >
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
             </v-col>
             <v-col cols="5">
-              <v-card height="700" class="overflow-auto">
+              <v-row>
+                <v-col cols="5">
+                  Selected Values -
+                </v-col>
+                <v-col cols="7">
+                  <v-radio-group
+                    row
+                    v-model="me[activeDimension.location][activeDimension.index].filterCondition"
+                  >
+                    <v-radio
+                      label="Include"
+                      value="include"
+                    ></v-radio>
+                    <v-radio
+                      label="Exclude"
+                      value="exclude"
+                    ></v-radio>
+                  </v-radio-group>
+                </v-col>
+              </v-row>
+              <v-card height="638" class="overflow-auto">
                 <v-card-text>
                   <v-list
                     shaped
                     dense
+                    v-if="me[activeDimension.location][activeDimension.index].defaultFilter !== 'all'"
                   >
                     <v-list-item-group
                       color="primary"
-                      v-model="me[activeDimension.location][activeDimension.index].highlightedValue"
+                      v-model="me[activeDimension.location][activeDimension.index].highlightedSelectedValues"
                     >
                     <v-list-item
                       v-for="(value, i) in this[activeDimension.location][activeDimension.index].selectedValues"
@@ -96,12 +187,6 @@
           </v-row>
         </v-card-text>
       </v-card>
-      <v-spacer></v-spacer>
-      <v-btn
-        color="success"
-        @click='showValuesSelector = false'
-        small
-      >Close</v-btn>
     </v-dialog>
     <v-row>
       <v-col cols="4">
@@ -289,6 +374,12 @@
                         </v-btn>
                       </template>
                       <v-list rounded>
+                        <v-list-item link @click="getDimensionValues('categories', index)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-filter-minus</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Filter Values</v-list-item-title>
+                        </v-list-item>
                         <v-list-item link @click="removeDimension('categories', index)">
                           <v-list-item-icon>
                             <v-icon>mdi-minus-circle</v-icon>
@@ -377,6 +468,12 @@
                             </v-list-item-content>
                           </v-list-item>
                         </v-list-group>
+                        <v-list-item link @click="getDimensionValues('series', index)">
+                          <v-list-item-icon>
+                            <v-icon>mdi-filter-minus</v-icon>
+                          </v-list-item-icon>
+                          <v-list-item-title>Filter Values</v-list-item-title>
+                        </v-list-item>
                         <v-list-item link @click="series.splice(index, 1)">
                           <v-list-item-icon>
                             <v-icon>mdi-minus-circle</v-icon>
@@ -471,17 +568,18 @@ export default {
   data () {
     return {
       me: this,
+      vizId: '',
       data: '',
       loadingData: false,
       displayChart: false,
       datasets: [],
-      // dataset: {},
-      dataset: { name: 'allpractitioners', display: 'Practitioners List (All practitioners)', id: 'ihris-es-report-all-practitioners' },
+      dataset: {},
+      // dataset: { name: 'allpractitioners', display: 'Practitioners List (All practitioners)', id: 'ihris-es-report-all-practitioners' },
       dimensions: [],
-      // categories: [],
-      // series: [],
-      categories: [{ name: 'cadre', display: 'Cadre', type: 'text' }, { name: 'gender', display: 'Gender', type: 'text' }],
-      series: [{ name: 'job', display: 'Job Title', type: 'text', aggsBy: { name: 'value_count', display: 'CNT' } }],
+      categories: [],
+      series: [],
+      // categories: [{ name: 'cadre', display: 'Cadre', type: 'text' }, { name: 'gender', display: 'Gender', type: 'text' }],
+      // series: [{ name: 'job', display: 'Job Title', type: 'text', aggsBy: { name: 'value_count', display: 'CNT' } }],
       filters: [],
       aggregations: [{
         name: 'value_count',
@@ -495,7 +593,8 @@ export default {
       }],
       activeDimension: {
         location: '',
-        index: -1
+        index: -1,
+        name: ''
       },
       showChartsList: false,
       showValuesSelector: false,
@@ -524,6 +623,61 @@ export default {
     }
   },
   methods: {
+    buildFilters () {
+      const filter = {
+        bool: {
+          must: [],
+          must_not: []
+        }
+      }
+      for (const category of this.categories) {
+        let field = category.name
+        if (category.type === 'text') {
+          field += '.keyword'
+        }
+        if (category.defaultFilter !== 'selected') {
+          continue
+        }
+        if (Array.isArray(category.selectedValues)) {
+          const terms = {
+            terms: {}
+          }
+          terms.terms[field] = []
+          for (const value of category.selectedValues) {
+            terms.terms[field].push(value)
+          }
+          if (category.filterCondition === 'exclude') {
+            filter.bool.must_not.push(terms)
+          } else {
+            filter.bool.must.push(terms)
+          }
+        }
+      }
+      for (const series of this.series) {
+        let field = series.name
+        if (series.type === 'text') {
+          field += '.keyword'
+        }
+        if (series.defaultFilter !== 'selected') {
+          continue
+        }
+        if (Array.isArray(series.selectedValues)) {
+          const terms = {
+            terms: {}
+          }
+          terms.terms[field] = []
+          for (const value of series.selectedValues) {
+            terms.terms[field].push(value)
+          }
+          if (series.filterCondition === 'exclude') {
+            filter.bool.must_not.push(terms)
+          } else {
+            filter.bool.must.push(terms)
+          }
+        }
+      }
+      return filter
+    },
     buildQuery () {
       this.data = ''
       const query = {
@@ -580,7 +734,7 @@ export default {
           query.aggs.categories.aggs.series.terms = {
             field: seriesField,
             order: { _key: 'asc' },
-            min_doc_count: 0,
+            // min_doc_count: 0,
             size: 2000000
           }
         } else {
@@ -602,6 +756,10 @@ export default {
             }
           }
         }
+      }
+      const filter = this.buildFilters()
+      query.query = {
+        bool: filter.bool
       }
       query.reportOptions = {
         locationBasedConstraint: true
@@ -765,17 +923,19 @@ export default {
       this.loadingData = false
       this.displayChart = true
     },
-    getDimensionValues (evt) {
-      if (evt.to.id !== 'categories' && evt.to.id !== 'series') {
+    getDimensionValues (type, indexInType) {
+      if (type !== 'categories' && type !== 'series') {
         return false
       }
-      const dimension = this[evt.to.id][evt.newIndex].name
-      const type = this[evt.to.id][evt.newIndex].type
-      const url = `/es/populateFilter/${this.dataset.name}/${dimension}?dataType=${type}`
-      this.$set(this[evt.to.id][evt.newIndex], 'allValues', [])
-      if (!this[evt.to.id][evt.newIndex].selectedValues) {
-        this.$set(this[evt.to.id][evt.newIndex], 'selectedValues', [])
-        this.$set(this[evt.to.id][evt.newIndex], 'highlightedValue', -1)
+      const dimension = this[type][indexInType].name
+      const url = `/es/populateFilter/${this.dataset.name}/${dimension}?dataType=${this[type][indexInType].type}`
+      this.$set(this[type][indexInType], 'allValues', [])
+      if (!this[type][indexInType].selectedValues) {
+        this.$set(this[type][indexInType], 'selectedValues', [])
+        this.$set(this[type][indexInType], 'highlightedAllValues', -1)
+        this.$set(this[type][indexInType], 'defaultFilter', -1)
+        this.$set(this[type][indexInType], 'filterCondition', -1)
+        this.$set(this[type][indexInType], 'highlightedSelectedValues', -1)
       }
       fetch(url, {
         method: 'GET'
@@ -784,25 +944,47 @@ export default {
           .json()
           .then((data) => {
             for (const bucket of data) {
-              if (this[evt.to.id][evt.newIndex].selectedValues.indexOf(bucket.key.value) === -1) {
-                this[evt.to.id][evt.newIndex].allValues.push(
+              if (this[type][indexInType].selectedValues.indexOf(bucket.key.value) === -1) {
+                this[type][indexInType].allValues.push(
                   bucket.key.value
                 )
               }
             }
-            this.activeDimension.location = evt.to.id
-            this.activeDimension.index = evt.newIndex
+            this.activeDimension.location = type
+            this.activeDimension.name = this[type][indexInType].display
+            this.activeDimension.index = indexInType
             this.showValuesSelector = true
           })
       })
     },
-    moveDimensionValue (from, to) {
-      const position = this[this.activeDimension.location][this.activeDimension.index].highlightedValue
-      this[this.activeDimension.location][this.activeDimension.index][to].push(
-        this[this.activeDimension.location][this.activeDimension.index][from][position]
-      )
-      this[this.activeDimension.location][this.activeDimension.index][to].sort()
-      this[this.activeDimension.location][this.activeDimension.index][from].splice(position, 1)
+    moveDimensionValue (from, to, moveAll) {
+      if (moveAll) {
+        this[this.activeDimension.location][this.activeDimension.index][to] = [
+          ...this[this.activeDimension.location][this.activeDimension.index][to],
+          ...this[this.activeDimension.location][this.activeDimension.index][from]
+        ]
+        this[this.activeDimension.location][this.activeDimension.index][to].sort()
+        this[this.activeDimension.location][this.activeDimension.index][from] = []
+      } else {
+        let position = -1
+        if (from === 'allValues') {
+          position = this[this.activeDimension.location][this.activeDimension.index].highlightedAllValues
+        } else if (from === 'selectedValues') {
+          position = this[this.activeDimension.location][this.activeDimension.index].highlightedSelectedValues
+        }
+        this[this.activeDimension.location][this.activeDimension.index][to].push(
+          this[this.activeDimension.location][this.activeDimension.index][from][position]
+        )
+        this[this.activeDimension.location][this.activeDimension.index][to].sort()
+        this[this.activeDimension.location][this.activeDimension.index][from].splice(position, 1)
+      }
+      this.$set(this[this.activeDimension.location][this.activeDimension.index], 'highlightedAllValues', -1)
+      this.$set(this[this.activeDimension.location][this.activeDimension.index], 'highlightedSelectedValues', -1)
+    },
+    closeDimValuesSelector () {
+      this.showValuesSelector = false
+      this.$set(this[this.activeDimension.location][this.activeDimension.index], 'highlightedAllValues', -1)
+      this.$set(this[this.activeDimension.location][this.activeDimension.index], 'highlightedSelectedValues', -1)
     },
     removeDimension (from, position) {
       this[from].splice(position, 1)
@@ -825,8 +1007,15 @@ export default {
       document.getElementById('seriesActivator').click()
     },
     dragEnd (evt) {
-      this.getDimensionValues(evt)
       this.dragArea = false
+      if (evt.to.id !== evt.from.id) {
+        let position = evt.newIndex
+        // if a dimension is dragged at the end of the dragArea chip, then the newIndex will be higher by 1 as the dragArea chip is not pushed into series or categories array
+        if (this[evt.to.id].length === position) {
+          position -= 1
+        }
+        this.getDimensionValues(evt.to.id, position)
+      }
     },
     dragStart () {
       this.dragArea = true
@@ -862,16 +1051,25 @@ export default {
       }
     },
     datasetSelected () {
-      fetch('/es/listFields/' + this.dataset.name + '?id=' + this.dataset.id).then((response) => {
-        response.json().then((fields) => {
-          this.dimensions = fields
+      return new Promise((resolve, reject) => {
+        this.activeDimension = {
+          location: '',
+          index: -1,
+          name: ''
+        }
+        this.categories = []
+        this.series = []
+        this.filters = []
+        fetch('/es/listFields/' + this.dataset.name + '?id=' + this.dataset.id).then((response) => {
+          response.json().then((fields) => {
+            this.dimensions = fields
+            return resolve()
+          })
+        }).catch((err) => {
+          console.log(err)
+          return reject(err)
         })
-      }).catch((err) => {
-        console.log(err)
       })
-      this.categories = []
-      this.series = []
-      this.filters = []
     },
     hideChartsList () {
       this.showChartsList = false
@@ -906,6 +1104,230 @@ export default {
           }
         }
       }
+    },
+    save () {
+      const visualization = {
+        resourceType: 'Basic',
+        meta: {
+          profile: ['http://ihris.org/fhir/StructureDefinition/ihris-data-visualizer']
+        },
+        code: {
+          coding: [
+            {
+              code: 'visualizer',
+              system: 'http://ihris.org/fhir/CodeSystem/ihris-resource-codesystem'
+            }
+          ]
+        },
+        extension: [{
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-basic-name',
+          valueString: this.option.title.text
+        }, {
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-dataset',
+          valueString: this.dataset.id
+        }, {
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings',
+          valueBase64Binary: window.btoa(JSON.stringify(this.option))
+        }, {
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-permissions',
+          extension: [{
+            url: 'shared',
+            valueBoolean: true
+          }]
+        }]
+      }
+      for (const cat of this.categories) {
+        const cats = [{
+          url: 'name',
+          valueString: cat.name
+        }]
+        if (cat.defaultFilter) {
+          cats.push({
+            url: 'defaultFilter',
+            valueString: cat.defaultFilter
+          })
+        }
+        if (cat.filterCondition) {
+          cats.push({
+            url: 'filterCondition',
+            valueString: cat.filterCondition
+          })
+        }
+        if (cat.selectedValues) {
+          cats.push({
+            url: 'selectedValues',
+            valueString: window.btoa(JSON.stringify(cat.selectedValues))
+          })
+        }
+        visualization.extension.push({
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-categories',
+          extension: cats
+        })
+      }
+      for (const ser of this.series) {
+        const sers = [{
+          url: 'name',
+          valueString: ser.name
+        }, {
+          url: 'aggsBy',
+          valueString: ser.aggsBy.name
+        }]
+        if (ser.defaultFilter) {
+          sers.push({
+            url: 'defaultFilter',
+            valueString: ser.defaultFilter
+          })
+        }
+        if (ser.filterCondition) {
+          sers.push({
+            url: 'filterCondition',
+            valueString: ser.filterCondition
+          })
+        }
+        if (ser.selectedValues) {
+          sers.push({
+            url: 'selectedValues',
+            valueString: window.btoa(JSON.stringify(ser.selectedValues))
+          })
+        }
+        visualization.extension.push({
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-series',
+          extension: sers
+        })
+      }
+      for (const fil of this.filters) {
+        visualization.extension.push({
+          url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-filters',
+          valueString: fil.name
+        })
+      }
+      let method = 'POST'
+      if (this.vizId) {
+        method = 'PUT'
+        visualization.id = this.vizId
+      }
+      fetch('/fhir/Basic/' + this.vizId, {
+        method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(visualization)
+      })
+        .then((response) => {
+          if (response.status !== 200 && response.status !== 201) {
+            return
+          }
+          response.json().then((data) => {
+            this.vizId = data.id
+            console.log('ID:', data.id)
+          })
+        })
+        .catch((error) => {
+          console.error('Error:', error)
+        })
+    },
+    getViz () {
+      fetch('/fhir/Basic/' + this.vizId).then((response) => {
+        response.json()
+          .then(async (data) => {
+            const dataset = data.extension.find((ext) => {
+              return ext.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-dataset'
+            }).valueString
+            this.dataset = this.datasets.find((set) => {
+              return set.id === dataset
+            })
+            await this.datasetSelected()
+            for (const vizData of data.extension) {
+              if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-categories') {
+                const name = vizData.extension.find((ext) => {
+                  return ext.url === 'name'
+                })
+                const catDim = this.dimensions.find((dim) => {
+                  return dim.name === name.valueString
+                })
+                if (catDim) {
+                  let selectedValues = vizData.extension.find((ext) => {
+                    return ext.url === 'selectedValues'
+                  })
+                  if (selectedValues) {
+                    try {
+                      selectedValues = JSON.parse(window.atob(selectedValues.valueString))
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    catDim.selectedValues = selectedValues
+                  }
+                  const defaultFilter = vizData.extension.find((ext) => {
+                    return ext.url === 'defaultFilter'
+                  })
+                  if (defaultFilter) {
+                    catDim.defaultFilter = defaultFilter.valueString
+                  }
+                  const filterCondition = vizData.extension.find((ext) => {
+                    return ext.url === 'filterCondition'
+                  })
+                  if (filterCondition) {
+                    catDim.filterCondition = filterCondition.valueString
+                  }
+                  this.categories.push(catDim)
+                }
+              }
+              if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-series') {
+                const name = vizData.extension.find((ext) => {
+                  return ext.url === 'name'
+                })
+                const serDim = this.dimensions.find((dim) => {
+                  return dim.name === name.valueString
+                })
+                const aggsBy = vizData.extension.find((ext) => {
+                  return ext.url === 'aggsBy'
+                })
+                if (aggsBy) {
+                  const agg = this.aggregations.find((agg) => {
+                    return agg.name === aggsBy.valueString
+                  })
+                  if (agg) {
+                    serDim.aggsBy = agg
+                  }
+                }
+                if (serDim) {
+                  let selectedValues = vizData.extension.find((ext) => {
+                    return ext.url === 'selectedValues'
+                  })
+                  if (selectedValues) {
+                    try {
+                      selectedValues = JSON.parse(window.atob(selectedValues.valueString))
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    serDim.selectedValues = selectedValues
+                  }
+                  const defaultFilter = vizData.extension.find((ext) => {
+                    return ext.url === 'defaultFilter'
+                  })
+                  if (defaultFilter) {
+                    serDim.defaultFilter = defaultFilter.valueString
+                  }
+                  const filterCondition = vizData.extension.find((ext) => {
+                    return ext.url === 'filterCondition'
+                  })
+                  if (filterCondition) {
+                    serDim.filterCondition = filterCondition.valueString
+                  }
+                  this.series.push(serDim)
+                }
+              }
+              if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-filters') {
+                const fil = this.dimensions.find((dim) => {
+                  return dim.name === vizData.valueString
+                })
+                if (fil) {
+                  this.filters.push(fil)
+                }
+              }
+            }
+          })
+      })
     }
   },
   components: {
@@ -943,12 +1365,27 @@ export default {
       if (val === 0) {
         this.categories = []
       }
+    },
+    series () {
+      this.activeDimension = {
+        location: '',
+        index: -1,
+        name: ''
+      }
+    },
+    categories () {
+      this.activeDimension = {
+        location: '',
+        index: -1,
+        name: ''
+      }
     }
   },
   created () {
     if (this.datasets.length > 0) {
       this.dataset = this.datasets[0]
     }
+    this.vizId = this.$route.params.id
     fetch('/es/indices').then((response) => {
       response.json().then((indices) => {
         this.datasets = indices
@@ -956,6 +1393,9 @@ export default {
     }).catch((err) => {
       console.log(err)
     })
+    if (this.vizId) {
+      this.getViz()
+    }
   }
 }
 </script>

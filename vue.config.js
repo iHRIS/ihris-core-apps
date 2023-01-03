@@ -3,6 +3,10 @@ module.exports = {
 
   devServer: {
     proxy: {
+      '^/fhir': {
+        target: 'http://localhost:3000/',
+        logLevel: 'debug'
+      },
       '^/translator': {
         target: 'http://localhost:3000/',
         logLevel: 'debug'

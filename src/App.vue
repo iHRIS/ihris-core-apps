@@ -96,7 +96,7 @@ export default {
   },
   created () {
     document.title = 'Data Visualizer'
-    this.$router.push({ name: 'viz1' })
+    this.$router.push({ name: 'home' })
     this.updateConfig()
     let query = location.search
     query = query.substring(1)
