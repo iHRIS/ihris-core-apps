@@ -63,7 +63,11 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Labels</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ChartLabel subscriber="lineLabel" @lineLabel="lineLabelSettings" />
+              <ChartLabel
+                subscriber="lineLabel"
+                @lineLabel="lineLabelSettings"
+                :values="settings.label"
+              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -76,7 +80,11 @@
           <v-expansion-panel>
             <v-expansion-panel-header>End Label</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ChartLabel subscriber="lineEndLabel" @lineEndLabel="lineEndLabelSettings" />
+              <ChartLabel
+                subscriber="lineEndLabel"
+                @lineEndLabel="lineEndLabelSettings"
+                :values="settings.endLabel"
+              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -105,7 +113,11 @@
                   </v-tooltip>
                 </v-col>
                 <v-col cols="12">
-                  <LineStyle subscriber="labelLineStyle" @labelLineStyle="labelLineStyle" />
+                  <LineStyle
+                    subscriber="labelLineStyle"
+                    @labelLineStyle="labelLineStyle"
+                    :values="settings.labelLine.lineStyle"
+                  />
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -161,7 +173,7 @@
 import LineStyle from '../LineStyle.vue'
 import ChartLabel from '../ChartLabel.vue'
 export default {
-  props: { externalSettings: Object, chartSubType: String },
+  props: { chartSubType: String, options: Object },
   data () {
     return {
       settings: {
@@ -229,11 +241,21 @@ export default {
     }
   },
   created () {
-    if (this.settings.markPoint && this.settings.markPoint.data) {
-      this.markPoint = true
-    }
     if (this.chartSubType === 'area') {
       this.settings.areaStyle = {}
+    }
+    if (this.options.series && this.options.series.length > 0) {
+      const lineOpts = this.options.series.find((ser) => {
+        return ser.type === 'line'
+      })
+      for (const index in lineOpts) {
+        if (this.settings[index]) {
+          this.settings[index] = lineOpts[index]
+        }
+      }
+    }
+    if (this.settings.markPoint && this.settings.markPoint.data) {
+      this.markPoint = true
     }
     this.updated()
   },

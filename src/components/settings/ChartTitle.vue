@@ -18,7 +18,7 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Text Style</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <TextStyle @textStyle='externalSettings' />
+              <TextStyle @textStyle='externalSettings' :values="title.textStyle" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -29,6 +29,7 @@
 <script>
 import TextStyle from './TextStyle.vue'
 export default {
+  props: ['values'],
   data () {
     return {
       title: {
@@ -55,6 +56,9 @@ export default {
     TextStyle
   },
   created () {
+    for (const index in this.values) {
+      this.title[index] = this.values[index]
+    }
     this.expandTextStyle = [0]
     setTimeout(() => {
       this.expandTextStyle = []

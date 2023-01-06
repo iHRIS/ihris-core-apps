@@ -156,7 +156,11 @@
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12">
-                            <ItemStyle subscriber="pointerStyle" @pointerStyle="pointerStyle" />
+                            <ItemStyle
+                              subscriber="pointerStyle"
+                              @pointerStyle="pointerStyle"
+                              :values="settings.pointer.itemStyle"
+                            />
                           </v-col>
                         </v-row>
                       </v-expansion-panel-content>
@@ -174,7 +178,11 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Gauge Chart Title</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <ChartLabel subscriber="gaugeTitleStyle" @gaugeTitleStyle="gaugeTitleStyle" />
+          <ChartLabel
+            subscriber="gaugeTitleStyle"
+            @gaugeTitleStyle="gaugeTitleStyle"
+            :values="settings.title"
+          />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -182,7 +190,12 @@
       <v-expansion-panel>
         <v-expansion-panel-header>Settings of gauge chart detail used to show data</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <ChartLabel :default="settings.title" subscriber="gaugeDetailStyle" @gaugeDetailStyle="gaugeDetailStyle" />
+          <ChartLabel
+            :default="settings.title"
+            subscriber="gaugeDetailStyle"
+            @gaugeDetailStyle="gaugeDetailStyle"
+            :values="settings.detail"
+          />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -192,6 +205,7 @@
 import ItemStyle from '../ItemStyle.vue'
 import ChartLabel from '../ChartLabel.vue'
 export default {
+  props: { options: Object },
   data () {
     return {
       settings: {
@@ -246,6 +260,16 @@ export default {
     }
   },
   created () {
+    if (this.options.series && this.options.series.length > 0) {
+      const gaugeOpts = this.options.series.find((ser) => {
+        return ser.type === 'gauge'
+      })
+      for (const index in gaugeOpts) {
+        if (this.settings[index]) {
+          this.settings[index] = gaugeOpts[index]
+        }
+      }
+    }
     this.radius = this.settings.radius.replace('%', '')
   },
   components: {

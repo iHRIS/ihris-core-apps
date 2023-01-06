@@ -142,7 +142,7 @@
 </template>
 <script>
 export default {
-  props: ['subscriber'],
+  props: ['subscriber', 'values'],
   data () {
     return {
       settings: {
@@ -164,6 +164,13 @@ export default {
   methods: {
     updated () {
       this.$emit(this.subscriber, this.settings)
+    }
+  },
+  created () {
+    for (const index in this.values) {
+      if (Object.keys(this.settings).indexOf(index) !== -1) {
+        this.settings[index] = this.values[index]
+      }
     }
   }
 }

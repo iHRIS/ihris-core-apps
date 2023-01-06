@@ -29,13 +29,13 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Chart Axis Pointer</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ChartAxisPointer @chartAxisPointer='externalSettings' />
+              <ChartAxisPointer @chartAxisPointer='externalSettings' :values="tooltip.axisPointer" />
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel>
             <v-expansion-panel-header>Text Style</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <TextStyle @textStyle='textStyle' />
+              <TextStyle @textStyle='textStyle' :values="tooltip.textStyle" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -47,6 +47,7 @@
 import ChartAxisPointer from './ChartAxisPointer.vue'
 import TextStyle from './TextStyle.vue'
 export default {
+  props: ['values'],
   data () {
     return {
       tooltip: {
@@ -109,6 +110,9 @@ export default {
     TextStyle
   },
   created () {
+    for (const index in this.values) {
+      this.tooltip[index] = this.values[index]
+    }
     this.expandSettings = [0, 1]
     setTimeout(() => {
       this.expandSettings = []

@@ -1,11 +1,12 @@
 <template>
   <div>
-    <ChartAxis @chartAxis="externalSettings" />
+    <ChartAxis @chartAxis="externalSettings" :values="values" />
   </div>
 </template>
 <script>
 import ChartAxis from './ChartAxis.vue'
 export default {
+  props: ['values'],
   data () {
     return {
       yAxis: {}

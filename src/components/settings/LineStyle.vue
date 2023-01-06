@@ -62,7 +62,7 @@
 </template>
 <script>
 export default {
-  props: ['subscriber'],
+  props: ['subscriber', 'values'],
   data () {
     return {
       displayColor: false,
@@ -87,6 +87,13 @@ export default {
   methods: {
     updated () {
       this.$emit(this.subscriber, { name: 'lineStyle', value: this.lineStyle })
+    }
+  },
+  created () {
+    for (const index in this.values) {
+      if (Object.keys(this.lineStyle).indexOf(index) !== -1) {
+        this.lineStyle[index] = this.values[index]
+      }
     }
   }
 }

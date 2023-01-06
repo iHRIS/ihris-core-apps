@@ -4,25 +4,25 @@
       <v-expansion-panel v-if="chartType === 'bar'">
         <v-expansion-panel-header>Bar Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <BarChart @chartSettings="chartSettings" />
+          <BarChart @chartSettings="chartSettings" :options="options" />
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel v-else-if="chartType === 'pie'">
         <v-expansion-panel-header>Pie Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <PieChart @chartSettings="chartSettings" :chartSubType='chartSubType' />
+          <PieChart @chartSettings="chartSettings" :chartSubType='chartSubType' :options="options" />
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel v-else-if="chartType === 'line'">
         <v-expansion-panel-header>Line Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <LineChart @chartSettings="chartSettings" :chartSubType='chartSubType' />
+          <LineChart @chartSettings="chartSettings" :chartSubType='chartSubType' :options="options" />
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel v-else-if="chartType === 'gauge'">
         <v-expansion-panel-header>Gauge Chart</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <GaugeChart @chartSettings="chartSettings" />
+          <GaugeChart @chartSettings="chartSettings" :options="options" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -30,22 +30,22 @@
 </template>
 <script>
 export default {
-  props: ['chartType', 'chartSubType'],
+  props: ['chartType', 'chartSubType', 'options'],
   data () {
     return {
-      expandSettings: [],
-      options: {
-        tooltip: {
-          trigger: 'item'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left'
-        },
-        title: {},
-        axisPointer: {},
-        xAxis: {}
-      }
+      expandSettings: []
+      // options: {
+      //   tooltip: {
+      //     trigger: 'item'
+      //   },
+      //   legend: {
+      //     orient: 'vertical',
+      //     left: 'left'
+      //   },
+      //   title: {},
+      //   axisPointer: {},
+      //   xAxis: {}
+      // }
     }
   },
   components: {

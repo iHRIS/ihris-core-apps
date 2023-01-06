@@ -76,7 +76,7 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Text Style of axis name</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <TextStyle @textStyle='textStyle' />
+              <TextStyle @textStyle='textStyle' :values="axis.nameTextStyle" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -144,7 +144,7 @@
                   <v-switch label="Hide overlapped labels" v-model="axis.axisLabel.hideOverlap" @change="updated"></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <TextStyle @textStyle="axisLabelStyle" />
+                  <TextStyle @textStyle="axisLabelStyle" :values="axis.axisLabel" />
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -163,7 +163,7 @@
                     <v-expansion-panel>
                       <v-expansion-panel-header>Line Style</v-expansion-panel-header>
                       <v-expansion-panel-content>
-                        <LineStyle subscriber="axisLineStyle" @axisLineStyle="axisLineStyle" />
+                        <LineStyle subscriber="axisLineStyle" @axisLineStyle="axisLineStyle" :values="axis.axisLine" />
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -195,7 +195,7 @@
                     <v-expansion-panel>
                       <v-expansion-panel-header>Line Style</v-expansion-panel-header>
                       <v-expansion-panel-content>
-                        <LineStyle subscriber="splitLineStyle" @splitLineStyle="splitLineStyle" />
+                        <LineStyle subscriber="splitLineStyle" @splitLineStyle="splitLineStyle" :values="axis.splitLine" />
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -233,7 +233,7 @@
                     <v-expansion-panel>
                       <v-expansion-panel-header>Line Style</v-expansion-panel-header>
                       <v-expansion-panel-content>
-                        <LineStyle subscriber="axisTickStyle" @axisTickStyle="axisTickStyle" />
+                        <LineStyle subscriber="axisTickStyle" @axisTickStyle="axisTickStyle" :values="axis.axisTick" />
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -246,7 +246,7 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Chart Axis Pointer</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ChartAxisPointer @chartAxisPointer='externalSettings' />
+              <ChartAxisPointer @chartAxisPointer='externalSettings' :values="axis.axisPointer" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -259,6 +259,7 @@ import TextStyle from './TextStyle.vue'
 import LineStyle from './LineStyle.vue'
 import ChartAxisPointer from './ChartAxisPointer.vue'
 export default {
+  props: ['values'],
   data () {
     return {
       displayLineStyleColor: false,
@@ -403,6 +404,13 @@ export default {
     },
     updated () {
       this.$emit('chartAxis', { name: 'axis', value: this.axis })
+    }
+  },
+  created () {
+    for (const index in this.values) {
+      if (Object.keys(this.axis).indexOf(index) !== -1) {
+        this.axis[index] = this.values[index]
+      }
     }
   },
   components: {

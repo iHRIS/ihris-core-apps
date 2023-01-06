@@ -66,7 +66,7 @@
       </v-tooltip>
     </v-col>
     <v-col cols="12">
-      <TextStyle @textStyle='LabelTextStyle' />
+      <TextStyle @textStyle='LabelTextStyle' :values="label" />
     </v-col>
   </v-row>
 </template>

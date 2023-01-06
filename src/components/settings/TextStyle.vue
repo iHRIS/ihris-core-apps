@@ -77,6 +77,7 @@
 </template>
 <script>
 export default {
+  props: ['values'],
   data () {
     return {
       displayColor: false,
@@ -105,6 +106,11 @@ export default {
     }
   },
   created () {
+    for (const index in this.values) {
+      if (Object.keys(this.style).indexOf(index) !== -1) {
+        this.style[index] = this.values[index]
+      }
+    }
     this.updated()
   }
 }

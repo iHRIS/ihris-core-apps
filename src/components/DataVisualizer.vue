@@ -13,12 +13,56 @@
               <v-icon left color="primary">mdi-content-save-check</v-icon> Save
             </v-btn>
           </v-col>
+          <v-col>
+            <v-btn color="tertiary" small @click="confirmDelete = true">
+              <v-icon left color="primary">mdi-delete</v-icon>Delete
+            </v-btn>
+          </v-col>
         </v-row>
       </v-col>
       <v-col cols="9">
         <h2><center>Data Vizualizer</center></h2>
       </v-col>
     </v-row>
+    <v-dialog
+      v-model="confirmDelete"
+      persistent
+      width="330"
+    >
+      <v-system-bar
+        window
+        color="primary"
+        dark
+        height="40px"
+      >
+        <v-spacer></v-spacer>
+        <v-icon @click.native="confirmDelete = false" style="cursor: pointer">
+          mdi-close
+        </v-icon>
+      </v-system-bar>
+      <v-card>
+        <v-card-title class="text-h5">
+          Are you sure you want to delete this visualization?
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="confirmDelete = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="deleteViz"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog
       persistent
       transition="dialog-top-transition"
@@ -332,8 +376,19 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <ChartSettings v-if="chart.type" :chartType="chart.type" :chartSubType="chart.subType" @chartSettings="chartSettings" />
-            <GeneralSettings @generalSettings="generalSettings" />
+            <ChartSettings
+              v-if="chart.type"
+              :chartType="chart.type"
+              :chartSubType="chart.subType"
+              @chartSettings="chartSettings"
+              :options="option"
+            />
+            <GeneralSettings
+              v-if="renderSettings"
+              @generalSettings="generalSettings"
+              :option="option"
+              :titleValues="option.title"
+            />
           </v-col>
         </v-row>
       </v-col>
@@ -568,18 +623,17 @@ export default {
   data () {
     return {
       me: this,
+      renderSettings: false,
       vizId: '',
       data: '',
+      confirmDelete: false,
       loadingData: false,
       displayChart: false,
       datasets: [],
       dataset: {},
-      // dataset: { name: 'allpractitioners', display: 'Practitioners List (All practitioners)', id: 'ihris-es-report-all-practitioners' },
       dimensions: [],
       categories: [],
       series: [],
-      // categories: [{ name: 'cadre', display: 'Cadre', type: 'text' }, { name: 'gender', display: 'Gender', type: 'text' }],
-      // series: [{ name: 'job', display: 'Job Title', type: 'text', aggsBy: { name: 'value_count', display: 'CNT' } }],
       filters: [],
       aggregations: [{
         name: 'value_count',
@@ -958,6 +1012,7 @@ export default {
       })
     },
     moveDimensionValue (from, to, moveAll) {
+      this[this.activeDimension.location][this.activeDimension.index].defaultFilter = 'selected'
       if (moveAll) {
         this[this.activeDimension.location][this.activeDimension.index][to] = [
           ...this[this.activeDimension.location][this.activeDimension.index][to],
@@ -1219,12 +1274,19 @@ export default {
           }
           response.json().then((data) => {
             this.vizId = data.id
-            console.log('ID:', data.id)
           })
         })
         .catch((error) => {
           console.error('Error:', error)
         })
+    },
+    deleteViz () {
+      fetch('/fhir/Basic/' + this.vizId, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
     },
     getViz () {
       fetch('/fhir/Basic/' + this.vizId).then((response) => {
@@ -1325,7 +1387,17 @@ export default {
                   this.filters.push(fil)
                 }
               }
+              if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings') {
+                const settings = vizData.valueBase64Binary
+                try {
+                  this.option = JSON.parse(window.atob(settings))
+                } catch (error) {
+                  console.log(error)
+                }
+              }
             }
+            this.renderSettings = true
+            this.buildQuery()
           })
       })
     }
@@ -1389,13 +1461,15 @@ export default {
     fetch('/es/indices').then((response) => {
       response.json().then((indices) => {
         this.datasets = indices
+        if (this.vizId) {
+          this.getViz()
+        } else {
+          this.renderSettings = true
+        }
       })
     }).catch((err) => {
       console.log(err)
     })
-    if (this.vizId) {
-      this.getViz()
-    }
   }
 }
 </script>

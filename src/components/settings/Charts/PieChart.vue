@@ -278,7 +278,7 @@
                   </v-tooltip>
                 </v-col>
                 <v-col cols="12">
-                  <TextStyle @textStyle='LabelTextStyle' />
+                  <TextStyle @textStyle='LabelTextStyle' :values="settings.label" />
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -354,7 +354,7 @@
 <script>
 import TextStyle from '../TextStyle.vue'
 export default {
-  props: { externalSettings: Object, chartSubType: String },
+  props: { chartSubType: String, options: Object },
   data () {
     return {
       settings: {
@@ -459,6 +459,16 @@ export default {
         borderRadius: 10,
         borderColor: '#fff',
         borderWidth: 2
+      }
+    }
+    if (this.options.series && this.options.series.length > 0) {
+      const pieOpts = this.options.series.find((ser) => {
+        return ser.type === 'pie'
+      })
+      for (const index in pieOpts) {
+        if (this.settings[index]) {
+          this.settings[index] = pieOpts[index]
+        }
       }
     }
     this.innerRadius = this.settings.radius[0].replace('%', '')

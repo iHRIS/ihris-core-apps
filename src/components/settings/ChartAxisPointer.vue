@@ -44,7 +44,7 @@
                 ></v-text-field>
               </div>
               <div>
-                <TextStyle @textStyle='labelStyle' />
+                <TextStyle @textStyle='labelStyle' :values="axisPointer.label"/>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -88,6 +88,7 @@
 <script>
 import TextStyle from './TextStyle.vue'
 export default {
+  props: ['values'],
   data () {
     return {
       displayColor: false,
@@ -138,6 +139,9 @@ export default {
     }
   },
   created () {
+    for (const index in this.values) {
+      this.axisPointer[index] = this.values[index]
+    }
     this.expandSettings = [0, 1]
     setTimeout(() => {
       this.expandSettings = []

@@ -110,7 +110,11 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Labels</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ChartLabel subscriber="barLabel" @barLabel="barLabelSettings" />
+              <ChartLabel
+                subscriber="barLabel"
+                @barLabel="barLabelSettings"
+                :values="settings.label"
+              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -139,7 +143,11 @@
                   </v-tooltip>
                 </v-col>
                 <v-col cols="12">
-                  <LineStyle subscriber="labelLineStyle" @labelLineStyle="labelLineStyle" />
+                  <LineStyle
+                    subscriber="labelLineStyle"
+                    @labelLineStyle="labelLineStyle"
+                    :values="settings.labelLine.lineStyle"
+                  />
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -154,7 +162,11 @@
           <v-expansion-panel>
             <v-expansion-panel-header>Bars Settings</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ItemStyle subscriber="barStyle" @barStyle="barStyle" />
+              <ItemStyle
+                subscriber="barStyle"
+                @barStyle="barStyle"
+                :values="settings.itemStyle"
+              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -222,7 +234,7 @@ import LineStyle from '../LineStyle.vue'
 import ChartLabel from '../ChartLabel.vue'
 import ItemStyle from '../ItemStyle.vue'
 export default {
-  props: { externalSettings: Object, type: String },
+  props: { type: String, options: Object },
   data () {
     return {
       settings: {
@@ -276,6 +288,17 @@ export default {
     }
   },
   created () {
+    if (this.options.series && this.options.series.length > 0) {
+      const barOpts = this.options.series.find((ser) => {
+        return ser.type === 'bar'
+      })
+      for (const index in barOpts) {
+        if (this.settings[index]) {
+          this.settings[index] = barOpts[index]
+        }
+      }
+    }
+
     this.updated()
     if (this.settings.barGap) {
       this.barGap = this.settings.barGap.replace('%', '')

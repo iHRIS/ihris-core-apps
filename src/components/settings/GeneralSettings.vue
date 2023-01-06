@@ -4,7 +4,7 @@
       <v-expansion-panel v-for='(set, index) in settings' :key='index'>
         <v-expansion-panel-header>{{set.header}}</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <component :is='set.component' @[set.updateEvent]='externalSettings' />
+          <component :is='set.component' @[set.updateEvent]='externalSettings' v-bind="{values: me[set.optionObject + 'Values']}" />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -18,34 +18,41 @@ import ChartAxisPointer from './ChartAxisPointer.vue'
 import ChartXaxis from './ChartXaxis.vue'
 import ChartYaxis from './ChartYaxis.vue'
 export default {
-  props: ['chartType'],
+  props: ['chartType', 'option', 'titleValues', 'legendValues', 'tooltipValues', 'axisPointerValues', 'xAxisValues', 'yAxisValues'],
   data () {
     return {
       expandSettings: [],
+      me: this,
       settings: [{
         header: 'Chart Title',
         component: 'ChartTitle',
-        updateEvent: 'chartTitle'
+        updateEvent: 'chartTitle',
+        optionObject: 'title'
       }, {
         header: 'Chart Legend',
         component: 'ChartLegend',
-        updateEvent: 'chartLegend'
+        updateEvent: 'chartLegend',
+        optionObject: 'legend'
       }, {
         header: 'Chart Tooltip',
         component: 'ChartToolTip',
-        updateEvent: 'chartTooltip'
+        updateEvent: 'chartTooltip',
+        optionObject: 'tooltip'
       }, {
         header: 'Chart Axis Pointer',
         component: 'ChartAxisPointer',
-        updateEvent: 'chartAxisPointer'
+        updateEvent: 'chartAxisPointer',
+        optionObject: 'axisPointer'
       }, {
         header: 'Chart X Axis',
         component: 'ChartXaxis',
-        updateEvent: 'chartXaxis'
+        updateEvent: 'chartXaxis',
+        optionObject: 'xAxis'
       }, {
         header: 'Chart Y Axis',
         component: 'ChartYaxis',
-        updateEvent: 'chartYaxis'
+        updateEvent: 'chartYaxis',
+        optionObject: 'yAxis'
       }],
       options: {
         tooltip: {
