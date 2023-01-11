@@ -30,7 +30,7 @@
               <v-list-item
                 v-for="(value, i) in this.visualizations"
                 :key="i"
-                @click="$router.push({path: '/viz1/' + value.id})"
+                @click="$router.push({path: '/vizBuilder/' + value.id})"
               >
                 <v-list-item-content>
                   <v-list-item-title>
@@ -61,8 +61,13 @@
         </v-btn>
       </v-col>
       <v-col cols="auto">
-        <v-btn color="success" x-large @click="$router.push({name: 'viz1'})">
+        <v-btn color="success" x-large @click="$router.push({name: 'vizBuilder'})">
           <v-icon left x-large>mdi-plus</v-icon>New
+        </v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="success" x-large @click="$router.push({name: 'dashBuilder'})">
+          <v-icon left x-large>mdi-plus</v-icon>New Dashboard
         </v-btn>
       </v-col>
     </v-row>
@@ -88,7 +93,7 @@ export default {
     getViz (url) {
       return new Promise((resolve, reject) => {
         if (!url) {
-          url = '/fhir/Basic?_profile=http://ihris.org/fhir/StructureDefinition/ihris-data-visualizer'
+          url = '/fhir/Basic?_profile=http://ihris.org/fhir/StructureDefinition/ihris-data-visualization'
         }
         fetch(url).then((response) => {
           response.json()

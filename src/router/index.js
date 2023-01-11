@@ -9,9 +9,13 @@ const routes = [{
   name: 'viz2',
   component: () => import('../components/DataVisualizer2.vue')
 }, {
-  path: '/viz1/:id?',
-  name: 'viz1',
-  component: () => import('../components/DataVisualizer.vue')
+  path: '/vizBuilder/:id?',
+  name: 'vizBuilder',
+  component: () => import('../components/VisualizationBuilder.vue')
+}, {
+  path: '/dashBuilder/:id?',
+  name: 'dashBuilder',
+  component: () => import('../components/DashboardBuilder.vue')
 }, {
   path: '/home',
   name: 'home',
