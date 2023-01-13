@@ -2,23 +2,17 @@
   <v-container fluid>
     <v-row>
       <v-col cols="3">
-        <v-row>
-          <v-col>
-            <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
-              <v-icon left color="primary">mdi-home</v-icon> Home
-            </v-btn>
-          </v-col>
-          <v-col>
-            <v-btn color="tertiary" small @click="save">
-              <v-icon left color="primary">mdi-content-save-check</v-icon> Save
-            </v-btn>
-          </v-col>
-          <v-col>
-            <v-btn color="tertiary" small @click="confirmDelete = true">
-              <v-icon left color="primary">mdi-delete</v-icon>Delete
-            </v-btn>
-          </v-col>
-        </v-row>
+        <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
+          <v-icon left color="primary">mdi-home</v-icon> Home
+        </v-btn>
+        &nbsp;
+        <v-btn color="tertiary" small @click="save">
+          <v-icon left color="primary">mdi-content-save-check</v-icon> Save
+        </v-btn>
+        &nbsp;
+        <v-btn color="tertiary" small @click="confirmDelete = true">
+          <v-icon left color="primary">mdi-delete</v-icon>Delete
+        </v-btn>
       </v-col>
       <v-col cols="9">
         <h2><center>Data Vizualizer</center></h2>
@@ -377,7 +371,7 @@
         <v-row>
           <v-col cols="12">
             <ChartSettings
-              v-if="chart.type"
+              v-if="chart.type && renderSettings"
               :chartType="chart.type"
               :chartSubType="chart.subType"
               @chartSettings="chartSettings"
@@ -1161,6 +1155,11 @@ export default {
       }
     },
     save () {
+      // deep copy
+      const options = JSON.parse(JSON.stringify(this.option))
+      for (const opt of options.series) {
+        delete opt.data
+      }
       const visualization = {
         resourceType: 'Basic',
         meta: {
@@ -1188,7 +1187,7 @@ export default {
           }]
         }, {
           url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings',
-          valueBase64Binary: window.btoa(JSON.stringify(this.option))
+          valueBase64Binary: window.btoa(JSON.stringify(options))
         }, {
           url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-permissions',
           extension: [{
@@ -1276,13 +1275,22 @@ export default {
       })
         .then((response) => {
           if (response.status !== 200 && response.status !== 201) {
+            this.$store.state.snackbar.enabled = true
+            this.$store.state.snackbar.text = 'Failed to save Visualization!'
+            this.$store.state.snackbar.color = 'error'
             return
           }
           response.json().then((data) => {
+            this.$store.state.snackbar.enabled = true
+            this.$store.state.snackbar.text = 'Visualization saved successfully!'
+            this.$store.state.snackbar.color = 'primary'
             this.vizId = data.id
           })
         })
         .catch((error) => {
+          this.$store.state.snackbar.enabled = true
+          this.$store.state.snackbar.text = 'Failed to save Visualization!'
+          this.$store.state.snackbar.color = 'error'
           console.error('Error:', error)
         })
     },
@@ -1404,6 +1412,18 @@ export default {
                 const settings = vizData.valueBase64Binary
                 try {
                   this.option = JSON.parse(window.atob(settings))
+                  for (const chartOpt of this.option.series) {
+                    const exist = this.chartOptions.find((opt) => {
+                      return opt.type === chartOpt.type
+                    })
+                    if (!exist) {
+                      this.chartOptions.push(chartOpt)
+                      const chart = this.$store.state.charts.find((chart) => {
+                        return chart.type === chartOpt.type
+                      })
+                      this.chart = chart
+                    }
+                  }
                 } catch (error) {
                   console.log(error)
                 }
@@ -1477,6 +1497,7 @@ export default {
         if (this.vizId) {
           this.getViz()
         } else {
+          this.vizId = ''
           this.renderSettings = true
         }
       })

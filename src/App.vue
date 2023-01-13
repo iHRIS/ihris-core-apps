@@ -2,7 +2,26 @@
   <v-app id="top">
     <IhrisHeader app :header="header" @loggedout="updateConfig" />
     <v-main>
-      <!-- <DataVisualizer /> -->
+      <v-snackbar
+        v-model="$store.state.snackbar.enabled"
+        timeout="2000"
+        :color="$store.state.snackbar.color"
+        dark
+      >
+        {{ $store.state.snackbar.text }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn
+            dark
+            color="blue"
+            text
+            v-bind="attrs"
+            @click="$store.state.snackbar.enabled = false"
+          >
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
       <router-view />
     </v-main>
     <IhrisFooter :footer="footer" />
@@ -11,7 +30,6 @@
 <script>
 import IhrisHeader from './components/IhrisHeader'
 import IhrisFooter from './components/IhrisFooter'
-// import DataVisualizer from './components/DataVisualizer.vue'
 
 export default {
   data: function () {
@@ -38,7 +56,6 @@ export default {
   components: {
     IhrisHeader,
     IhrisFooter
-    // DataVisualizer
   },
   methods: {
     updateConfig: function () {

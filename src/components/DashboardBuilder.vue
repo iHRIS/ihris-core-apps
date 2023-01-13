@@ -1,23 +1,5 @@
 <template>
-  <v-container grid-list-xs>
-    <v-snackbar
-      v-model="snackbar"
-      timeout="2000"
-      :color="snackbarColor"
-    >
-      {{ snackbarText }}
-
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="blue"
-          text
-          v-bind="attrs"
-          @click="snackbar = false"
-        >
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
+  <v-container fluid>
     <v-dialog
       transition="dialog-top-transition"
       v-model="displayVizList"
@@ -81,16 +63,20 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="7">
-            <v-btn color="tertiary" small @click="listViz">
-              <v-icon left color="primary">mdi-plus</v-icon> Add Visualization
+            <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
+              <v-icon left color="primary">mdi-home</v-icon> Home
+            </v-btn>
+            &nbsp;
+            <v-btn color="tertiary" small @click="reload">
+              <v-icon left color="primary">mdi-reload</v-icon> Reload
             </v-btn>
             &nbsp;
             <v-btn color="tertiary" small @click="save" :disabled="!canSave">
               <v-icon left color="primary">mdi-content-save-check</v-icon> Save
             </v-btn>
             &nbsp;
-            <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
-              <v-icon left color="primary">mdi-home</v-icon> Home
+            <v-btn color="tertiary" small @click="listViz">
+              <v-icon left color="primary">mdi-plus</v-icon> Add Visualization
             </v-btn>
           </v-col>
         </v-row>
@@ -125,13 +111,41 @@
             @resize="resizeEvent"
             @resized="resizedEvent"
           >
-            <span class="text">
-              <VisualizationViewer
-                :id="viz.id"
-                :rerender="viz.w/viz.h"
-                :height="viz.hPx"
-              />
-            </span>
+          <v-card :height="viz.hPx+37">
+            <v-menu
+              offset-y
+              origin="center center"
+              transition="scale-transition"
+              rounded="b-xl"
+              :close-on-content-click="false"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  dark
+                  color="primary"
+                  small
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi-dots-horizontal</v-icon>
+                </v-btn>
+              </template>
+              <v-list rounded>
+                <v-list-item link @click="removeViz(viz.i)">
+                  <v-list-item-icon>
+                    <v-icon>mdi-minus</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Delete Visualization</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+            <VisualizationViewer
+              :id="viz.id"
+              :rerender="viz.rerender"
+              :height="viz.hPx"
+            />
+          </v-card>
           </grid-item>
         </grid-layout>
       </v-col>
@@ -150,9 +164,7 @@ export default {
       availableViz: [],
       title: '',
       dashboardId: '',
-      snackbarText: '',
-      snackbarColor: 'primary',
-      snackbar: false
+      rerenderViz: 0
     }
   },
   computed: {
@@ -164,17 +176,68 @@ export default {
     }
   },
   methods: {
+    getDashboard () {
+      this.visualizations = []
+      fetch('/fhir/Basic/' + this.dashboardId).then((response) => {
+        response.json()
+          .then((data) => {
+            for (const extension of data.extension) {
+              if (extension.url === 'http://ihris.org/fhir/StructureDefinition/ihris-basic-name') {
+                this.title = extension.valueString
+              }
+              if (extension.url === 'http://ihris.org/fhir/StructureDefinition/ihris-dashboard-visualization') {
+                const id = extension.extension.find((ext) => {
+                  return ext.url === 'vizID'
+                }).valueString
+                const x = extension.extension.find((ext) => {
+                  return ext.url === 'horizontal'
+                }).valueDecimal
+                const y = extension.extension.find((ext) => {
+                  return ext.url === 'vertical'
+                }).valueDecimal
+                const w = extension.extension.find((ext) => {
+                  return ext.url === 'width'
+                }).valueDecimal
+                const h = extension.extension.find((ext) => {
+                  return ext.url === 'height'
+                }).valueDecimal
+                const hPx = extension.extension.find((ext) => {
+                  return ext.url === 'heightPx'
+                }).valueDecimal
+                const i = extension.extension.find((ext) => {
+                  return ext.url === 'itemID'
+                }).valueInteger
+                const stat = extension.extension.find((ext) => {
+                  return ext.url === 'static'
+                }).valueBoolean
+                this.visualizations.push({
+                  id,
+                  x,
+                  y,
+                  w,
+                  h,
+                  hPx,
+                  i,
+                  static: stat
+                })
+              }
+            }
+          })
+      })
+    },
     resizeEvent: function (i, newH, newW, newHPx, newWPx) {
       const viz = this.visualizations.find((viz) => {
         return viz.i === i
       })
-      viz.hPx = newHPx - 60
+      viz.hPx = newHPx - 36
+      viz.rerender++
     },
     resizedEvent (i, newH, newW, newHPx, newWPx) {
       const viz = this.visualizations.find((viz) => {
         return viz.i === i
       })
-      viz.hPx = newHPx - 60
+      viz.hPx = newHPx - 36
+      viz.rerender++
     },
     listViz () {
       this.loadingViz = true
@@ -234,10 +297,11 @@ export default {
         x: 0,
         y: maxY,
         w: 6,
-        h: 12,
+        h: 11.2,
         hPx: 400,
         i: this.visualizations.length,
-        static: false
+        static: false,
+        rerender: 0
       })
     },
     save () {
@@ -305,28 +369,46 @@ export default {
       })
         .then((response) => {
           if (response.status !== 200 && response.status !== 201) {
-            this.snackbar = true
-            this.snackbarText = 'Failed to save Dashboard!'
-            this.snackbarColor = 'error'
+            this.$store.state.snackbar.enabled = true
+            this.$store.state.snackbar.text = 'Failed to save Dashboard!'
+            this.$store.state.snackbar.color = 'error'
             return
           }
           response.json().then((data) => {
-            this.snackbar = true
-            this.snackbarText = 'Dashboard saved successfully!'
-            this.snackbarColor = 'primary'
+            this.$store.state.snackbar.enabled = true
+            this.$store.state.snackbar.text = 'Dashboard saved successfully!'
+            this.$store.state.snackbar.color = 'primary'
             this.dashboardId = data.id
           })
         })
         .catch((error) => {
-          this.snackbar = true
-          this.snackbarText = 'Failed to save Dashboard!'
-          this.snackbarColor = 'error'
+          this.$store.state.snackbar.enabled = true
+          this.$store.state.snackbar.text = 'Failed to save Dashboard!'
+          this.$store.state.snackbar.color = 'error'
           console.error('Error:', error)
         })
+    },
+    removeViz (i) {
+      const index = this.visualizations.findIndex((viz) => {
+        return viz.i === i
+      })
+      if (index > -1) {
+        this.visualizations.splice(index, 1)
+      }
+    },
+    reload () {
+      if (this.dashboardId) {
+        this.getDashboard()
+      } else {
+        this.visualizations = []
+      }
     }
   },
   created () {
     this.dashboardId = this.$route.params.id
+    if (this.dashboardId) {
+      this.getDashboard()
+    }
   },
   components: {
     VisualizationViewer,

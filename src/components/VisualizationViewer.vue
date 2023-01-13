@@ -1,15 +1,11 @@
 <template>
   <v-container fluid>
-    <v-card v-if="displayChart">
-      <v-card-text>
-        <v-chart
-          :style="{height: height+'px'}"
-          :key="rerender"
-          :option="option"
-          v-if="displayChart"
-        />
-      </v-card-text>
-    </v-card>
+    <v-chart
+      :style="{height: height+'px'}"
+      :key="rerender"
+      :option="option"
+      v-if="displayChart"
+    />
     <v-progress-linear
       color="red lighten-2"
       buffer-value="0"
@@ -50,7 +46,6 @@ export default {
   data () {
     return {
       me: this,
-      renderSettings: false,
       vizId: '',
       data: '',
       loadingData: false,
@@ -508,12 +503,24 @@ export default {
                 const settings = vizData.valueBase64Binary
                 try {
                   this.option = JSON.parse(window.atob(settings))
+                  for (const chartOpt of this.option.series) {
+                    const exist = this.chartOptions.find((opt) => {
+                      return opt.type === chartOpt.type
+                    })
+                    if (!exist) {
+                      delete chartOpt.name
+                      this.chartOptions.push(chartOpt)
+                      const chart = this.$store.state.charts.find((chart) => {
+                        return chart.type === chartOpt.type
+                      })
+                      this.chart = chart
+                    }
+                  }
                 } catch (error) {
                   console.log(error)
                 }
               }
             }
-            this.renderSettings = true
             this.buildQuery()
           })
       })
@@ -553,10 +560,10 @@ export default {
     }
   },
   created () {
-    if (this.$route.params.id) {
-      this.vizId = this.$route.params.id
-    } else if (this.id) {
+    if (this.id) {
       this.vizId = this.id
+    } else if (this.$route.params.id) {
+      this.vizId = this.$route.params.id
     }
     if (this.vizId) {
       this.getViz()
