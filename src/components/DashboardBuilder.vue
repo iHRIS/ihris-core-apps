@@ -82,11 +82,82 @@
         </v-row>
       </v-col>
       <v-col cols="12">
+        <v-autocomplete
+          :items="dimensions"
+          item-text="display"
+          item-value="name"
+          return-object
+          dense
+          filled
+          label="Filter By"
+        ></v-autocomplete>
         <template v-if="visualizations.length === 0">
           <center>
             Your dashboard is blank. Click Add Visualization button to add dashboard items
           </center>
         </template>
+        <v-bottom-sheet inset v-model="move_resize_dialog" width="300">
+          <v-card>
+            <v-row>
+              <v-col>
+                <v-responsive
+                  max-width="400"
+                  class="mx-auto mb-4"
+                >
+                  <v-text-field
+                    v-model="chart_layout.x"
+                    type="number"
+                    label="Horizontal"
+                    min="-100"
+                    max="100"
+                  ></v-text-field>
+                </v-responsive>
+              </v-col>
+              <v-col>
+                <v-responsive
+                  max-width="400"
+                >
+                  <v-text-field
+                    v-model="chart_layout.y"
+                    type="number"
+                    label="Vertical"
+                    min="-100"
+                    max="100"
+                  ></v-text-field>
+                </v-responsive>
+              </v-col>
+              </v-row>
+              <v-row>
+              <v-col>
+                <v-responsive
+                  max-width="400"
+                  class="mx-auto mb-4"
+                >
+                  <v-text-field
+                    v-model="chart_layout.w"
+                    type="number"
+                    label="Width"
+                    min="-100"
+                    max="100"
+                  ></v-text-field>
+                </v-responsive>
+              </v-col>
+              <v-col>
+                <v-responsive
+                  max-width="400"
+                >
+                  <v-text-field
+                    v-model="chart_layout.h"
+                    type="number"
+                    label="Height"
+                    min="-100"
+                    max="100"
+                  ></v-text-field>
+                </v-responsive>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-bottom-sheet>
         <grid-layout
           :layout.sync="visualizations"
           :col-num="14"
@@ -131,19 +202,35 @@
                   <v-icon>mdi-dots-horizontal</v-icon>
                 </v-btn>
               </template>
-              <v-list rounded>
+              <v-list rounded dense>
                 <v-list-item link @click="removeViz(viz.i)">
                   <v-list-item-icon>
-                    <v-icon>mdi-minus</v-icon>
+                    <v-icon small>mdi-minus</v-icon>
                   </v-list-item-icon>
-                  <v-list-item-title>Delete Visualization</v-list-item-title>
+                  <v-list-item-content>
+                    <v-list-item-title>Remove Visualization</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item link @click="$router.push({path: '/vizBuilder/' + viz.id})">
+                  <v-list-item-icon>
+                    <v-icon small>mdi-pencil</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Edit</v-list-item-title>
+                </v-list-item>
+                <v-list-item link @click="move_resize(viz)">
+                  <v-list-item-icon>
+                    <v-icon small>mdi-cursor-move</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Move/Resize</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
-            <VisualizationViewer
+            <VisualizationBuilder
               :id="viz.id"
-              :rerender="viz.rerender"
-              :height="viz.hPx"
+              :rerenderViz="viz.rerender"
+              :vizHeight="viz.hPx"
+              :editingViz="false"
+              @dimensions="popDimensions"
             />
           </v-card>
           </grid-item>
@@ -154,17 +241,20 @@
 </template>
 <script>
 import { GridLayout, GridItem } from 'vue-grid-layout'
-import VisualizationViewer from '@/components/VisualizationViewer.vue'
+import VisualizationBuilder from '@/components/VisualizationBuilder.vue'
 export default {
   data () {
     return {
       visualizations: [],
+      dimensions: [],
       displayVizList: false,
       loadingViz: false,
       availableViz: [],
       title: '',
       dashboardId: '',
-      rerenderViz: 0
+      rerenderViz: 0,
+      move_resize_dialog: false,
+      chart_layout: {}
     }
   },
   computed: {
@@ -176,6 +266,16 @@ export default {
     }
   },
   methods: {
+    popDimensions (dims) {
+      for (const dim of dims) {
+        const exists = this.dimensions.find((popDim) => {
+          return popDim.name === dim.name
+        })
+        if (!exists) {
+          this.dimensions.push(dim)
+        }
+      }
+    },
     getDashboard () {
       this.visualizations = []
       fetch('/fhir/Basic/' + this.dashboardId).then((response) => {
@@ -402,6 +502,10 @@ export default {
       } else {
         this.visualizations = []
       }
+    },
+    move_resize (viz) {
+      this.chart_layout = viz
+      this.move_resize_dialog = true
     }
   },
   created () {
@@ -411,7 +515,7 @@ export default {
     }
   },
   components: {
-    VisualizationViewer,
+    VisualizationBuilder,
     GridLayout,
     GridItem
   }

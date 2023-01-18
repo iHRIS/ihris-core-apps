@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row>
+    <v-row v-if="editingViz">
       <v-col cols="3">
         <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
           <v-icon left color="primary">mdi-home</v-icon> Home
@@ -227,7 +227,7 @@
       </v-card>
     </v-dialog>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="4" v-if="editingViz">
         <v-row>
           <v-col cols="6">
             <input type="button" id="hiddenActivator">
@@ -253,7 +253,7 @@
                       @start="dragStart"
                       @end="dragEnd"
                       :move="dragging"
-                      :group="{ name: 'people', pull: 'clone', put: false }"
+                      :group="{ name: 'visualization', pull: 'clone', put: false }"
                       animation=650
                     >
                       <li
@@ -283,7 +283,7 @@
                       @end="dragEnd"
                       :move="dragging"
                       id="filters"
-                      group="people"
+                      group="visualization"
                       animation=650
                     >
                       <v-chip v-for="(filter, index) in filters" :key="index" color="black" dark small>
@@ -307,6 +307,12 @@
                             </v-btn>
                           </template>
                           <v-list rounded>
+                            <v-list-item link @click="getDimensionValues('filters', index)">
+                              <v-list-item-icon>
+                                <v-icon>mdi-filter-minus</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-title>Filter Values</v-list-item-title>
+                            </v-list-item>
                             <v-list-item link @click="removeDimension('filters', index)">
                               <v-list-item-icon>
                                 <v-icon>mdi-minus-circle</v-icon>
@@ -386,8 +392,8 @@
           </v-col>
         </v-row>
       </v-col>
-      <v-col cols="8">
-        <v-row v-if="maxCategories > 0">
+      <v-col :cols="vizWidth">
+        <v-row v-if="editingViz && maxCategories > 0">
           <v-col cols="1">Category</v-col>
             &nbsp;
             <v-col cols="10">
@@ -399,7 +405,7 @@
                   @start="dragStart"
                   @end="dragEnd"
                   :move="dragging"
-                  group="people"
+                  group="visualization"
                   animation=650
                 >
                   <v-chip v-for="(cat, index) in categories" :key="index" color="green" dark small>
@@ -456,7 +462,7 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="editingViz">
           <v-col cols="1">Series</v-col>
             &nbsp;
           <v-col cols="7">
@@ -468,7 +474,7 @@
                   @end="dragEnd"
                   :move="dragging"
                   id="series"
-                  group="people"
+                  group="visualization"
                   animation=650
                 >
                   <v-chip v-for="(ser, index) in series" :key="index" color="blue" dark small style="cursor: move">
@@ -563,12 +569,21 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <v-card v-if="displayChart">
+            <v-card v-if="displayChart && editingViz">
               <v-card-text>
-                <v-chart class="chart" :option="option" v-if="displayChart" />
-                <v-spacer></v-spacer> <v-btn color="success" to="viz2" text>Second Design</v-btn>
+                <v-chart
+                  :style="{height: vizHeight + 'px'}"
+                  :key="rerenderViz"
+                  :option="option"
+                />
               </v-card-text>
             </v-card>
+            <v-chart
+              v-else-if="displayChart"
+              :style="{height: vizHeight + 'px'}"
+              :key="rerenderViz"
+              :option="option"
+            />
             <v-progress-linear
               color="red lighten-2"
               buffer-value="0"
@@ -614,6 +629,22 @@ use([
 ])
 
 export default {
+  props: {
+    editingViz: {
+      type: Boolean,
+      default: true
+    },
+    rerenderViz: {
+      type: Number
+    },
+    vizHeight: {
+      type: Number,
+      default: 400
+    },
+    id: {
+      type: String
+    }
+  },
   data () {
     return {
       me: this,
@@ -718,6 +749,29 @@ export default {
             terms.terms[field].push(value)
           }
           if (series.filterCondition === 'exclude') {
+            filter.bool.must_not.push(terms)
+          } else {
+            filter.bool.must.push(terms)
+          }
+        }
+      }
+      for (const filters of this.filters) {
+        let field = filters.name
+        if (filters.type === 'text') {
+          field += '.keyword'
+        }
+        if (filters.defaultFilter !== 'selected') {
+          continue
+        }
+        if (Array.isArray(filters.selectedValues)) {
+          const terms = {
+            terms: {}
+          }
+          terms.terms[field] = []
+          for (const value of filters.selectedValues) {
+            terms.terms[field].push(value)
+          }
+          if (filters.filterCondition === 'exclude') {
             filter.bool.must_not.push(terms)
           } else {
             filter.bool.must.push(terms)
@@ -972,7 +1026,7 @@ export default {
       this.displayChart = true
     },
     getDimensionValues (type, indexInType) {
-      if (type !== 'categories' && type !== 'series') {
+      if (type !== 'categories' && type !== 'series' && type !== 'filters') {
         return false
       }
       const dimension = this[type][indexInType].name
@@ -1112,6 +1166,7 @@ export default {
         fetch('/es/listFields/' + this.dataset.name + '?id=' + this.dataset.id).then((response) => {
           response.json().then((fields) => {
             this.dimensions = fields
+            this.$emit('dimensions', this.dimensions)
             return resolve()
           })
         }).catch((err) => {
@@ -1256,9 +1311,31 @@ export default {
         })
       }
       for (const fil of this.filters) {
+        const fils = [{
+          url: 'name',
+          valueString: fil.name
+        }]
+        if (fil.defaultFilter) {
+          fils.push({
+            url: 'defaultFilter',
+            valueString: fil.defaultFilter
+          })
+        }
+        if (fil.filterCondition) {
+          fils.push({
+            url: 'filterCondition',
+            valueString: fil.filterCondition
+          })
+        }
+        if (fil.selectedValues) {
+          fils.push({
+            url: 'selectedValues',
+            valueString: window.btoa(JSON.stringify(fil.selectedValues))
+          })
+        }
         visualization.extension.push({
           url: 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-filters',
-          valueString: fil.name
+          extension: fils
         })
       }
       let method = 'POST'
@@ -1400,12 +1477,39 @@ export default {
                   this.series.push(serDim)
                 }
               }
+
               if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-filters') {
-                const fil = this.dimensions.find((dim) => {
-                  return dim.name === vizData.valueString
+                const name = vizData.extension.find((ext) => {
+                  return ext.url === 'name'
                 })
-                if (fil) {
-                  this.filters.push(fil)
+                const filDim = this.dimensions.find((dim) => {
+                  return dim.name === name.valueString
+                })
+                if (filDim) {
+                  let selectedValues = vizData.extension.find((ext) => {
+                    return ext.url === 'selectedValues'
+                  })
+                  if (selectedValues) {
+                    try {
+                      selectedValues = JSON.parse(window.atob(selectedValues.valueString))
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    filDim.selectedValues = selectedValues
+                  }
+                  const defaultFilter = vizData.extension.find((ext) => {
+                    return ext.url === 'defaultFilter'
+                  })
+                  if (defaultFilter) {
+                    filDim.defaultFilter = defaultFilter.valueString
+                  }
+                  const filterCondition = vizData.extension.find((ext) => {
+                    return ext.url === 'filterCondition'
+                  })
+                  if (filterCondition) {
+                    filDim.filterCondition = filterCondition.valueString
+                  }
+                  this.filters.push(filDim)
                 }
               }
               if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings') {
@@ -1417,6 +1521,7 @@ export default {
                       return opt.type === chartOpt.type
                     })
                     if (!exist) {
+                      delete chartOpt.name
                       this.chartOptions.push(chartOpt)
                       const chart = this.$store.state.charts.find((chart) => {
                         return chart.type === chartOpt.type
@@ -1443,6 +1548,12 @@ export default {
     ChartSettings
   },
   computed: {
+    vizWidth () {
+      if (this.editingViz) {
+        return 8
+      }
+      return 12
+    },
     canDisplayChart () {
       if (this.chart.type && this.series.length > 0 && ((this.maxCategories > 0 && this.categories.length > 0) || this.maxCategories === 0)) {
         return true
@@ -1490,7 +1601,11 @@ export default {
     if (this.datasets.length > 0) {
       this.dataset = this.datasets[0]
     }
-    this.vizId = this.$route.params.id
+    if (this.id) {
+      this.vizId = this.id
+    } else if (this.$route.params.id) {
+      this.vizId = this.$route.params.id
+    }
     fetch('/es/indices').then((response) => {
       response.json().then((indices) => {
         this.datasets = indices
