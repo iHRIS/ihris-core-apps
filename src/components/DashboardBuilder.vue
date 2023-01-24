@@ -1,6 +1,72 @@
 <template>
   <v-container fluid>
     <v-dialog
+      persistent
+      transition="dialog-top-transition"
+      v-model="showValuesSelector"
+      width="560px"
+    >
+      <v-system-bar
+        window
+        color="primary"
+        dark
+        height="40px"
+      >
+        <b>Values For {{activeDimension.data.display}}</b>
+        <v-spacer></v-spacer>
+        <v-icon @click.native="showValuesSelector = false" style="cursor: pointer">mdi-close</v-icon>
+      </v-system-bar>
+      <v-card class="overflow-auto">
+        <v-card-actions>
+          <v-radio-group
+            row
+            v-model="activeDimension.filterCondition"
+          >
+            <v-radio
+              label="Include"
+              value="include"
+            ></v-radio>
+            <v-radio
+              label="Exclude"
+              value="exclude"
+            ></v-radio>
+          </v-radio-group>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" small @click="applyFilters">Apply</v-btn>
+        </v-card-actions>
+        <v-card-text>
+          <template
+            v-for="(filter, dimensionIndex) in filters"
+          >
+            <template v-if="filter.name === activeDimension.data.name">
+              <v-chip
+                v-for="(value, valueIndex) in filter.values"
+                :key="value.name"
+                class="ma-2"
+                color="green"
+                outlined
+                close
+                @click:close="removeFilter(dimensionIndex, valueIndex)"
+              >
+                {{ value.name }}
+              </v-chip>
+            </template>
+          </template>
+          <v-data-table
+            hide-default-header
+            :items-per-page="27"
+            :headers="[{ value: 'name' }]"
+            :items="activeDimension.dimValues"
+            :loading="activeDimension.loading"
+            dense
+            item-key="name"
+            show-select
+            v-model="activeDimension.selectedValues"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+    <v-dialog
       transition="dialog-top-transition"
       v-model="displayVizList"
       width="960px"
@@ -90,7 +156,21 @@
           dense
           filled
           label="Filter By"
+          @change="activateDimension"
         ></v-autocomplete>
+        <template v-for="(filter, dimensionIndex) in filters">
+          <v-chip
+            v-for="(value, valueIndex) in filter.values"
+            :key="value.name"
+            class="ma-2"
+            color="green"
+            outlined
+            close
+            @click:close="removeFilter(dimensionIndex, valueIndex)"
+          >
+          {{ filter.display }}: {{ value.name }}
+          </v-chip>
+        </template>
         <template v-if="visualizations.length === 0">
           <center>
             Your dashboard is blank. Click Add Visualization button to add dashboard items
@@ -227,9 +307,11 @@
             </v-menu>
             <VisualizationBuilder
               :id="viz.id"
-              :rerenderViz="viz.rerender"
+              :softRerenderViz="viz.rerender"
+              :hardRerenderViz="hardRerenderViz"
               :vizHeight="viz.hPx"
               :editingViz="false"
+              :externalFilters="filters"
               @dimensions="popDimensions"
             />
           </v-card>
@@ -250,11 +332,46 @@ export default {
       displayVizList: false,
       loadingViz: false,
       availableViz: [],
+      hardRerenderViz: 0,
       title: '',
       dashboardId: '',
-      rerenderViz: 0,
       move_resize_dialog: false,
-      chart_layout: {}
+      chart_layout: {},
+      showValuesSelector: false,
+      filters: [],
+      activeDimension: {
+        dimValues: [],
+        selectedValues: [],
+        filterCondition: 'include',
+        data: {},
+        loading: false
+      }
+    }
+  },
+  watch: {
+    activeDimension: {
+      handler () {
+        const index = this.filters.findIndex((filter) => {
+          return filter.name === this.activeDimension.data.name
+        })
+        const filter = {
+          name: this.activeDimension.data.name,
+          display: this.activeDimension.data.display,
+          values: this.activeDimension.selectedValues,
+          type: this.activeDimension.data.type,
+          filterCondition: this.activeDimension.filterCondition
+        }
+        if (this.activeDimension.selectedValues.length === 0) {
+          if (index > -1) {
+            this.filters.splice(index, 1)
+          }
+        } else if (index === -1) {
+          this.$set(this.filters, this.filters.length, filter)
+        } else {
+          this.$set(this.filters, index, filter)
+        }
+      },
+      deep: true
     }
   },
   computed: {
@@ -266,12 +383,55 @@ export default {
     }
   },
   methods: {
+    applyFilters () {
+      this.showValuesSelector = false
+      this.reloadAllViz()
+    },
+    removeFilter (dimensionIndex, valueIndex) {
+      this.filters[dimensionIndex].values.splice(valueIndex, 1)
+      this.$set(this.filters, dimensionIndex, this.filters[dimensionIndex])
+      this.reloadAllViz()
+    },
+    reloadAllViz () {
+      this.hardRerenderViz++
+    },
+    activateDimension (val) {
+      this.activeDimension.data = val
+      this.showValuesSelector = true
+      this.activeDimension.loading = true
+      this.activeDimension.dimValues = []
+      this.activeDimension.selectedValues = []
+      this.activeDimension.filterCondition = 'include'
+      const filter = this.filters.find((filter) => {
+        return filter.name === this.activeDimension.data.name
+      })
+      if (filter) {
+        this.activeDimension.filterCondition = filter.filterCondition
+        this.activeDimension.selectedValues = JSON.parse(JSON.stringify(filter.values))
+      }
+      const url = `/es/populateFilter/${val.dataset.name}/${val.name}?dataType=${val.type}`
+      fetch(url, {
+        method: 'GET'
+      }).then((response) => {
+        response
+          .json()
+          .then((data) => {
+            this.activeDimension.loading = false
+            for (const bucket of data) {
+              this.activeDimension.dimValues.push({
+                name: bucket.key.value
+              })
+            }
+          })
+      })
+    },
     popDimensions (dims) {
-      for (const dim of dims) {
+      for (const dim of dims.data) {
         const exists = this.dimensions.find((popDim) => {
           return popDim.name === dim.name
         })
         if (!exists) {
+          dim.dataset = dims.dataset
           this.dimensions.push(dim)
         }
       }

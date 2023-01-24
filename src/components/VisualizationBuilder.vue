@@ -573,7 +573,7 @@
               <v-card-text>
                 <v-chart
                   :style="{height: vizHeight + 'px'}"
-                  :key="rerenderViz"
+                  :key="softRerenderViz"
                   :option="option"
                 />
               </v-card-text>
@@ -581,7 +581,7 @@
             <v-chart
               v-else-if="displayChart"
               :style="{height: vizHeight + 'px'}"
-              :key="rerenderViz"
+              :key="softRerenderViz"
               :option="option"
             />
             <v-progress-linear
@@ -630,11 +630,20 @@ use([
 
 export default {
   props: {
+    externalFilters: {
+      type: Array,
+      default: function () {
+        return []
+      }
+    },
     editingViz: {
       type: Boolean,
       default: true
     },
-    rerenderViz: {
+    softRerenderViz: {
+      type: Number
+    },
+    hardRerenderViz: {
       type: Number
     },
     vizHeight: {
@@ -769,6 +778,26 @@ export default {
           }
           terms.terms[field] = []
           for (const value of filters.selectedValues) {
+            terms.terms[field].push(value)
+          }
+          if (filters.filterCondition === 'exclude') {
+            filter.bool.must_not.push(terms)
+          } else {
+            filter.bool.must.push(terms)
+          }
+        }
+      }
+      for (const filters of this.externalFilters) {
+        let field = filters.name
+        if (filters.type === 'text') {
+          field += '.keyword'
+        }
+        if (Array.isArray(filters.values)) {
+          const terms = {
+            terms: {}
+          }
+          terms.terms[field] = []
+          for (const value of filters.values) {
             terms.terms[field].push(value)
           }
           if (filters.filterCondition === 'exclude') {
@@ -1166,7 +1195,11 @@ export default {
         fetch('/es/listFields/' + this.dataset.name + '?id=' + this.dataset.id).then((response) => {
           response.json().then((fields) => {
             this.dimensions = fields
-            this.$emit('dimensions', this.dimensions)
+            this.dimensions.dataset = this.dataset.name
+            this.$emit('dimensions', {
+              dataset: { name: this.dataset.name, display: this.dataset.display },
+              data: this.dimensions
+            })
             return resolve()
           })
         }).catch((err) => {
@@ -1392,9 +1425,13 @@ export default {
             const datasetId = datasetExt.extension.find((ext) => {
               return ext.url === 'id'
             }).valueString
+            const datasetDisplay = this.datasets.find((dtst) => {
+              return dtst.id === datasetId
+            }).display
             this.dataset = {
               id: datasetId,
-              name: datasetName
+              name: datasetName,
+              display: datasetDisplay
             }
             await this.datasetSelected()
             for (const vizData of data.extension) {
@@ -1595,6 +1632,9 @@ export default {
         index: -1,
         name: ''
       }
+    },
+    hardRerenderViz () {
+      this.buildQuery()
     }
   },
   created () {
