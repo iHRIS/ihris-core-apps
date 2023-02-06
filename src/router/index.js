@@ -15,7 +15,8 @@ const routes = [{
 }, {
   path: '/dashBuilder/:id?',
   name: 'dashBuilder',
-  component: () => import('../components/DashboardBuilder.vue')
+  component: () => import('../components/DashboardBuilder.vue'),
+  props: true
 }, {
   path: '/home',
   name: 'home',

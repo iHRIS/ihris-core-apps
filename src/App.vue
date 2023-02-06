@@ -22,7 +22,7 @@
           </v-btn>
         </template>
       </v-snackbar>
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </v-main>
     <IhrisFooter :footer="footer" />
   </v-app>

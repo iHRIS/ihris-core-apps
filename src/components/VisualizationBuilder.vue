@@ -1,23 +1,90 @@
 <template>
   <v-container fluid>
     <v-row v-if="editingViz">
-      <v-col cols="3">
+      <v-col cols="auto">
         <v-btn color="tertiary" small @click="$router.push({name: 'home'})">
           <v-icon left color="primary">mdi-home</v-icon> Home
         </v-btn>
-        &nbsp;
+      </v-col>
+      <v-col cols="auto">
         <v-btn color="tertiary" small @click="save">
           <v-icon left color="primary">mdi-content-save-check</v-icon> Save
         </v-btn>
-        &nbsp;
+      </v-col>
+      <v-col cols="auto">
         <v-btn color="tertiary" small @click="confirmDelete = true">
           <v-icon left color="primary">mdi-delete</v-icon>Delete
         </v-btn>
       </v-col>
-      <v-col cols="9">
+      <v-spacer></v-spacer>
+      <v-col cols="auto">
         <h2><center>Data Vizualizer</center></h2>
       </v-col>
+      <v-spacer></v-spacer>
+      <v-col cols="auto">
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              color="tertiary"
+              small
+              v-bind="attrs"
+              v-on="on"
+              @click="listViz"
+            >
+              <v-icon left color="primary">mdi-open-in-app</v-icon>Open
+            </v-btn>
+          </template>
+          <span>Open Another Visualization</span>
+        </v-tooltip>
+      </v-col>
     </v-row>
+    <v-dialog
+      persistent
+      transition="dialog-top-transition"
+      v-model="displayVizList"
+      width="960px"
+    >
+      <v-system-bar
+        window
+        color="primary"
+        dark
+        height="40px"
+      >
+        <b>Available Vizualizations</b>
+        <v-spacer></v-spacer>
+        <v-icon @click.native="displayVizList = false" style="cursor: pointer">mdi-close</v-icon>
+      </v-system-bar>
+      <v-progress-linear :indeterminate="loadingData" :active="loadingData" color="secondary"></v-progress-linear>
+      <v-card>
+        <v-card-text>
+          <template v-if="visualizations.length > 0">
+            <v-list
+              shaped
+              dense
+            >
+              <v-list-item-group
+                color="primary"
+              >
+              <v-list-item
+                v-for="(value, i) in this.visualizations"
+                :key="i"
+                @click="$router.push({path: '/vizBuilder/' + value.id})"
+              >
+                <v-list-item-content>
+                  <v-list-item-title>
+                    <v-icon>mdi-menu-right</v-icon>
+                    <label style="font-size: 13px; cursor: pointer;">
+                      {{value.name}}
+                    </label>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </template>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-dialog
       v-model="confirmDelete"
       persistent
@@ -71,12 +138,13 @@
       >
         <b>Values For {{activeDimension.name}}</b>
         <v-spacer></v-spacer>
-        <v-icon @click.native="showValuesSelector = false" style="cursor: pointer">mdi-close</v-icon>
+        <v-icon @click.native="closeValuesSelector" style="cursor: pointer">mdi-close</v-icon>
       </v-system-bar>
       <v-card>
         <v-card-actions v-if="activeDimension.index > -1">
           <v-radio-group
             row
+            dense
             v-model="me[activeDimension.location][activeDimension.index].defaultFilter"
           >
             <v-radio
@@ -89,14 +157,15 @@
             ></v-radio>
           </v-radio-group>
           <v-spacer></v-spacer>
-          <v-btn color="success" @click="showValuesSelector = false" small>Save</v-btn>
+          <v-btn color="success" @click="closeValuesSelector" small>Save</v-btn>
         </v-card-actions>
         <v-card-text v-if="activeDimension.index > -1 && me[activeDimension.location][activeDimension.index].defaultFilter !== 'all'">
           <v-row>
             <v-col cols="6">
-              All Values
-              <v-card height="638" class="overflow-auto">
+              All Values<br><br>
+              <v-card height="499" class="overflow-auto">
                 <v-card-text>
+                  <v-progress-linear :indeterminate="true" v-if="activeDimension.loading" />
                   <v-list
                     shaped
                     dense
@@ -173,13 +242,14 @@
               </v-btn>
             </v-col>
             <v-col cols="5">
-              <v-row>
-                <v-col cols="5">
+              <v-layout row wrap>
+                <v-flex>
                   Selected Values -
-                </v-col>
-                <v-col cols="7">
+                </v-flex>
+                <v-flex>
                   <v-radio-group
                     row
+                    dense
                     v-model="me[activeDimension.location][activeDimension.index].filterCondition"
                   >
                     <v-radio
@@ -191,9 +261,9 @@
                       value="exclude"
                     ></v-radio>
                   </v-radio-group>
-                </v-col>
-              </v-row>
-              <v-card height="638" class="overflow-auto">
+                </v-flex>
+              </v-layout>
+              <v-card height="499" class="overflow-auto">
                 <v-card-text>
                   <v-list
                     shaped
@@ -354,7 +424,7 @@
                   <v-card-text>
                     <v-row>
                       <v-col cols="2">
-                        <v-icon x-large color="purple">
+                        <v-icon large color="purple">
                           {{chart.icon}}
                         </v-icon>
                       </v-col>
@@ -657,6 +727,8 @@ export default {
   data () {
     return {
       me: this,
+      visualizations: [],
+      displayVizList: false,
       renderSettings: false,
       vizId: '',
       data: '',
@@ -682,7 +754,8 @@ export default {
       activeDimension: {
         location: '',
         index: -1,
-        name: ''
+        name: '',
+        loading: false
       },
       showChartsList: false,
       showValuesSelector: false,
@@ -1058,6 +1131,11 @@ export default {
       if (type !== 'categories' && type !== 'series' && type !== 'filters') {
         return false
       }
+      this.showValuesSelector = true
+      this.activeDimension.location = type
+      this.activeDimension.loading = true
+      this.activeDimension.name = this[type][indexInType].display
+      this.activeDimension.index = indexInType
       const dimension = this[type][indexInType].name
       const url = `/es/populateFilter/${this.dataset.name}/${dimension}?dataType=${this[type][indexInType].type}`
       this.$set(this[type][indexInType], 'allValues', [])
@@ -1081,10 +1159,7 @@ export default {
                 )
               }
             }
-            this.activeDimension.location = type
-            this.activeDimension.name = this[type][indexInType].display
-            this.activeDimension.index = indexInType
-            this.showValuesSelector = true
+            this.activeDimension.loading = false
           })
       })
     },
@@ -1121,6 +1196,17 @@ export default {
     removeDimension (from, position) {
       this[from].splice(position, 1)
       document.getElementById('hiddenActivator').click()
+    },
+    closeValuesSelector () {
+      this.showValuesSelector = false
+      setTimeout(() => {
+        this.activeDimension = {
+          location: '',
+          index: -1,
+          name: '',
+          loading: false
+        }
+      }, 1000)
     },
     move (from, to, position) {
       if (to === 'series') {
@@ -1412,7 +1498,7 @@ export default {
         }
       })
     },
-    getViz () {
+    getVizById () {
       fetch('/fhir/Basic/' + this.vizId).then((response) => {
         response.json()
           .then(async (data) => {
@@ -1523,6 +1609,7 @@ export default {
                   return dim.name === name.valueString
                 })
                 if (filDim) {
+                  this.$set(this.filters, this.filters.length, filDim)
                   let selectedValues = vizData.extension.find((ext) => {
                     return ext.url === 'selectedValues'
                   })
@@ -1532,21 +1619,20 @@ export default {
                     } catch (error) {
                       console.log(error)
                     }
-                    filDim.selectedValues = selectedValues
+                    this.$set(this.filters[this.filters.length - 1], 'selectedValues', selectedValues)
                   }
                   const defaultFilter = vizData.extension.find((ext) => {
                     return ext.url === 'defaultFilter'
                   })
                   if (defaultFilter) {
-                    filDim.defaultFilter = defaultFilter.valueString
+                    this.$set(this.filters[this.filters.length - 1], 'defaultFilter', defaultFilter.valueString)
                   }
                   const filterCondition = vizData.extension.find((ext) => {
                     return ext.url === 'filterCondition'
                   })
                   if (filterCondition) {
-                    filDim.filterCondition = filterCondition.valueString
+                    this.$set(this.filters[this.filters.length - 1], 'filterCondition', filterCondition.valueString)
                   }
-                  this.filters.push(filDim)
                 }
               }
               if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings') {
@@ -1574,6 +1660,48 @@ export default {
             this.renderSettings = true
             this.buildQuery()
           })
+      })
+    },
+    getVizByUrl (url) {
+      return new Promise((resolve, reject) => {
+        if (!url) {
+          url = '/fhir/Basic?_profile=http://ihris.org/fhir/StructureDefinition/ihris-data-visualization'
+        }
+        fetch(url).then((response) => {
+          response.json()
+            .then((data) => {
+              for (const entry of data.entry) {
+                const name = entry.resource.extension.find((ext) => {
+                  return ext.url === 'http://ihris.org/fhir/StructureDefinition/ihris-basic-name'
+                })
+                if (name) {
+                  this.visualizations.push({
+                    id: entry.resource.id,
+                    name: name.valueString
+                  })
+                }
+              }
+              const next = data.link.find((link) => {
+                return link.relation === 'next'
+              })
+              if (next) {
+                this.getViz(next.url).then(() => {
+                  return resolve()
+                }).catch((err) => {
+                  return reject(err)
+                })
+              } else {
+                return resolve()
+              }
+            })
+        })
+      })
+    },
+    listViz () {
+      this.loadingData = true
+      this.displayVizList = true
+      this.getVizByUrl().then(() => {
+        this.loadingData = false
       })
     }
   },
@@ -1650,7 +1778,7 @@ export default {
       response.json().then((indices) => {
         this.datasets = indices
         if (this.vizId) {
-          this.getViz()
+          this.getVizById()
         } else {
           this.vizId = ''
           this.renderSettings = true

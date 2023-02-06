@@ -54,7 +54,7 @@ export default new Vuex.Store({
     }, {
       type: 'metric',
       subType: '',
-      icon: 'mdi-gauge',
+      icon: 'mdi-numeric-10-circle',
       title: 'Metric',
       description: 'Show a calculation as a single number'
     }, {
