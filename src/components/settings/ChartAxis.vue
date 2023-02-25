@@ -276,7 +276,7 @@ export default {
         nameTextStyle: {},
         inverse: false,
         min: 'dataMin',
-        max: '',
+        max: 'dataMax',
         axisLine: {
           show: true,
           onZero: true,
@@ -319,7 +319,7 @@ export default {
           }
         },
         splitLine: {
-          show: true,
+          show: false,
           interval: 0,
           lineStyle: {
             color: '#333',
@@ -411,6 +411,9 @@ export default {
       if (Object.keys(this.axis).indexOf(index) !== -1) {
         this.axis[index] = this.values[index]
       }
+    }
+    if (!this.values || this.values.length === 0) {
+      this.updated()
     }
   },
   components: {

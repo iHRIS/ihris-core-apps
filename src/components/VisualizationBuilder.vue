@@ -389,13 +389,13 @@
                               </v-list-item-icon>
                               <v-list-item-title>Remove</v-list-item-title>
                             </v-list-item>
-                            <v-list-item link @click="move('filters', 'series', index)" :disabled="series.length > 0">
+                            <v-list-item link @click="move('filters', 'series', index)" :disabled="series.length >= chart.maxSeries">
                               <v-list-item-icon>
                                 <v-icon>mdi-cursor-move</v-icon>
                               </v-list-item-icon>
                               <v-list-item-title>Move to series</v-list-item-title>
                             </v-list-item>
-                            <v-list-item link @click="move('filters', 'categories', index)" :disabled="categories.length >= maxCategories">
+                            <v-list-item link @click="move('filters', 'categories', index)" :disabled="categories.length >= chart.maxCategories">
                               <v-list-item-icon>
                                 <v-icon>mdi-cursor-move</v-icon>
                               </v-list-item-icon>
@@ -455,15 +455,17 @@
             />
             <GeneralSettings
               v-if="renderSettings"
+              :chartType="chart.type"
+              :chartSubType="chart.subType"
               @generalSettings="generalSettings"
               :option="option"
-              :titleValues="option.title"
+              :key="chart.type+chart.subType"
             />
           </v-col>
         </v-row>
       </v-col>
       <v-col :cols="vizWidth">
-        <v-row v-if="editingViz && maxCategories > 0">
+        <v-row v-if="editingViz && chart.maxCategories > 0">
           <v-col cols="1">Category</v-col>
             &nbsp;
             <v-col cols="10">
@@ -526,7 +528,7 @@
                       </v-list>
                     </v-menu>
                   </v-chip>
-                  <v-chip v-if="dragArea & categories.length < maxCategories">Drop Here</v-chip>
+                  <v-chip v-if="dragArea & categories.length < chart.maxCategories">Drop Here</v-chip>
                 </draggable>
               </v-card-text>
             </v-card>
@@ -605,7 +607,7 @@
                           </v-list-item-icon>
                           <v-list-item-title>Remove</v-list-item-title>
                         </v-list-item>
-                        <v-list-item link @click="move('series', 'categories', index)" :disabled="categories.length >= maxCategories">
+                        <v-list-item link @click="move('series', 'categories', index)" :disabled="categories.length >= chart.maxCategories">
                           <v-list-item-icon>
                             <v-icon>mdi-cursor-move</v-icon>
                           </v-list-item-icon>
@@ -620,7 +622,7 @@
                       </v-list>
                     </v-menu>
                   </v-chip>
-                  <v-chip v-if="dragArea && series.length < 1">Drop Here</v-chip>
+                  <v-chip v-if="dragArea && series.length < chart.maxSeries">Drop Here</v-chip>
                 </draggable>
               </v-card-text>
             </v-card>
@@ -628,7 +630,7 @@
           <v-col cols="1">
             <v-btn
               color="success"
-              @click="buildQuery"
+              @click="getDatasetData"
               small
               :disabled="!canDisplayChart"
             >
@@ -665,10 +667,27 @@
         </v-row>
       </v-col>
     </v-row>
-    <ChartsList :activeChart="chart" :showChartsList="showChartsList" @close="hideChartsList" @chartSelected='chartSelected' />
+    <ChartsList
+      :activeChart="chart"
+      :showChartsList="showChartsList"
+      @close="hideChartsList"
+      @chartSelected='chartSelected'
+    />
+    <axisChart
+      :chartOptions="chartOptions"
+      :dataset="dataset"
+      :series="series"
+      :categories="categories"
+      :chart="chart"
+      :query="query"
+      :options="option"
+      :id="vizId"
+      v-if="option.title"
+    />
   </v-container>
 </template>
 <script>
+import { eventBus } from '@/main'
 import draggable from 'vuedraggable'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -727,6 +746,10 @@ export default {
   data () {
     return {
       me: this,
+      query: {
+        size: 0,
+        query: {}
+      },
       visualizations: [],
       displayVizList: false,
       renderSettings: false,
@@ -759,31 +782,18 @@ export default {
       },
       showChartsList: false,
       showValuesSelector: false,
-      chart: { type: 'bar', subType: '', icon: 'mdi-chart-bar', title: 'Bar Chart', description: 'Presents data with rectangular bars at heights or lengths proportional to the values they represent' },
-      option: {
-        tooltip: {
-          trigger: 'item'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left'
-        },
-        title: {
-          show: true,
-          text: 'My Chart',
-          textAlign: 'auto',
-          left: 'center',
-          textStyle: {}
-        },
-        series: [],
-        xAxis: [],
-        yAxis: {}
-      },
+      chart: {},
+      option: {},
       chartOptions: [],
       dragArea: false
     }
   },
   methods: {
+    getDatasetData () {
+      this.loadingData = true
+      this.displayChart = false
+      eventBus.$emit('getDatasetData')
+    },
     buildFilters () {
       const filter = {
         bool: {
@@ -881,251 +891,6 @@ export default {
         }
       }
       return filter
-    },
-    buildQuery () {
-      this.data = ''
-      const query = {
-        size: 0
-      }
-      let seriesField = this.series[0].name
-      if (this.series[0].type === 'text') {
-        seriesField += '.keyword'
-      }
-      if (this.categories.length > 0) {
-        query.aggs = {
-          categories: {}
-        }
-        if (this.categories.length === 1) {
-          const category = this.categories[0]
-          let field = category.name
-          if (category.type === 'text') {
-            field += '.keyword'
-          }
-          const term = {}
-          term[category.name] = {
-            terms: {
-              field
-            }
-          }
-          query.aggs.categories.composite = {
-            sources: [term]
-          }
-        } else {
-          const terms = []
-          for (const category of this.categories) {
-            let field = category.name
-            if (category.type === 'text') {
-              field += '.keyword'
-            }
-            const term = {}
-            term[category.name] = {
-              terms: {
-                field,
-                missing_bucket: true
-              }
-            }
-            terms.push(term)
-          }
-          query.aggs.categories.composite = {
-            size: 1000,
-            sources: terms
-          }
-        }
-        query.aggs.categories.aggs = {
-          series: {}
-        }
-        if (this.series[0].aggsBy.name === 'value_count' && this.chart.type !== 'pie') {
-          query.aggs.categories.aggs.series.terms = {
-            field: seriesField,
-            order: { _key: 'asc' },
-            // min_doc_count: 0,
-            size: 2000000
-          }
-        } else {
-          const aggBy = this.series[0].aggsBy.name
-          query.aggs.categories.aggs.series[aggBy] = { field: seriesField }
-        }
-      } else {
-        const terms = {}
-        terms[this.series[0].name] = {
-          terms: {
-            field: seriesField
-          }
-        }
-        query.aggs = {
-          series: {
-            composite: {
-              size: 1000,
-              sources: [terms]
-            }
-          }
-        }
-      }
-      const filter = this.buildFilters()
-      query.query = {
-        bool: filter.bool
-      }
-      query.reportOptions = {
-        locationBasedConstraint: true
-      }
-      this.getData(query).then(() => {
-        this.parseResults()
-      })
-    },
-    getData (query) {
-      return new Promise((resolve, reject) => {
-        let category = 'categories'
-        if (this.maxCategories === 0) {
-          category = 'series'
-        }
-        this.loadingData = true
-        this.displayChart = false
-        const url = `/es/${this.dataset.name}/_search?filter_path=aggregations`
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(query)
-        })
-          .then((response) => {
-            response
-              .json()
-              .then((data) => {
-                if (!this.data) {
-                  this.data = data
-                } else if (data.aggregations[category].buckets && data.aggregations[category].buckets.length > 0) {
-                  this.data.aggregations[category].buckets = this.data.aggregations[category].buckets.concat(data.aggregations[category].buckets)
-                }
-                if (data.aggregations && data.aggregations[category].after_key) {
-                  query.aggs[category].composite.after = data.aggregations[category].after_key
-                  this.getData(query).then(() => {
-                    return resolve()
-                  })
-                } else {
-                  return resolve()
-                }
-              })
-              .catch((err) => {
-                console.log(err)
-                return reject(err)
-              })
-          })
-          .catch((err) => {
-            console.log(err)
-          })
-      })
-    },
-    async parseResults () {
-      const level1Cat = []
-      let level2Cat = []
-      const keys = {}
-      const series = {}
-      if (this.data.aggregations.categories) {
-        for (const bucket of this.data.aggregations.categories.buckets) {
-          if (Object.keys(bucket.key).length > 1) {
-            const catKeys = Object.keys(bucket.key)
-            if (!keys[bucket.key[catKeys[0]]]) {
-              keys[bucket.key[catKeys[0]]] = []
-            }
-            keys[bucket.key[catKeys[0]]].push(bucket.key[catKeys[1]])
-          } else {
-            if (typeof bucket.key === 'object') {
-              const keys = Object.keys(bucket.key)
-              for (const key of keys) {
-                level1Cat.push(bucket.key[key])
-              }
-            } else {
-              level1Cat.push(bucket.key)
-            }
-          }
-          if (bucket.series.buckets) {
-            for (const value of bucket.series.buckets) {
-              let name = value.key
-              if (value.key_as_string) {
-                name = value.key_as_string
-              }
-              if (!series[name]) {
-                series[name] = []
-              }
-              series[name].push(value.doc_count)
-            }
-          } else if (bucket.series.value) {
-            if (!series[this.series[0].display]) {
-              series[this.series[0].display] = []
-            }
-            if (this.hasAxis) {
-              series[this.series[0].display].push(bucket.series.value)
-            } else {
-              series[this.series[0].display].push({
-                name: bucket.key[Object.keys(bucket.key)[0]],
-                value: bucket.series.value
-              })
-            }
-          }
-        }
-        if (Object.keys(keys).length > 0) {
-          for (const key in keys) {
-            level2Cat = [...level2Cat, ...keys[key]]
-            level1Cat.push(key)
-          }
-        }
-      } else if (this.data.aggregations.series) {
-        if (!series[this.series[0].display]) {
-          series[this.series[0].display] = []
-        }
-        if (this.data.aggregations.series.buckets) {
-          for (const bucket of this.data.aggregations.series.buckets) {
-            // level1Cat.push(bucket.key)
-            series[this.series[0].display].push({
-              name: bucket.key,
-              value: bucket.doc_count
-            })
-          }
-        } else if (this.data.aggregations.series.value) {
-          series[this.series[0].display].push({
-            name: this.series[0].display,
-            value: this.data.aggregations.series.value
-          })
-        }
-      }
-      this.option.xAxis = []
-      this.option.yAxis = {}
-      this.option.series = []
-      if (level1Cat && level1Cat.length > 0 && this.hasAxis) {
-        if (level2Cat && level2Cat.length > 0) {
-          this.option.xAxis.push({
-            type: 'category',
-            data: level2Cat
-          })
-        }
-        if (level1Cat && level1Cat.length > 0) {
-          this.option.xAxis.push({
-            type: 'category',
-            data: level1Cat
-          })
-        }
-        this.option.yAxis = {
-          type: 'value'
-        }
-      } else {
-        delete this.option.yAxis
-        delete this.option.xAxis
-      }
-      const chartOpt = this.chartOptions.find((opt) => {
-        return opt.type === this.chart.type
-      })
-      for (const seriesName in series) {
-        this.option.series.push({
-          name: seriesName,
-          type: this.chart.type,
-          ...chartOpt,
-          data: series[seriesName]
-        })
-      }
-      await this.$nextTick()
-      this.loadingData = false
-      this.displayChart = true
     },
     getDimensionValues (type, indexInType) {
       if (type !== 'categories' && type !== 'series' && type !== 'filters') {
@@ -1239,11 +1004,11 @@ export default {
       this.dragArea = true
     },
     dragging (evt) {
-      if (evt.to.id === 'categories' && this.categories.length >= this.maxCategories) {
+      if (evt.to.id === 'categories' && this.categories.length >= this.chart.maxCategories) {
         return false
       }
       if (evt.to.id === 'series') {
-        if (this.series.length > 0) {
+        if (this.series.length >= this.chart.maxSeries) {
           return false
         }
         this.setDefaultAgg(evt.draggedContext.element)
@@ -1302,7 +1067,7 @@ export default {
     },
     generalSettings (setting) {
       for (const set in setting) {
-        this.option[set] = setting[set]
+        this.$set(this.option, set, setting[set])
       }
     },
     chartSettings (setting) {
@@ -1552,7 +1317,7 @@ export default {
                   if (filterCondition) {
                     catDim.filterCondition = filterCondition.valueString
                   }
-                  this.categories.push(catDim)
+                  this.$set(this.categories, this.categories.length, catDim)
                 }
               }
               if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-series') {
@@ -1597,7 +1362,7 @@ export default {
                   if (filterCondition) {
                     serDim.filterCondition = filterCondition.valueString
                   }
-                  this.series.push(serDim)
+                  this.$set(this.series, this.series.length, serDim)
                 }
               }
 
@@ -1636,9 +1401,12 @@ export default {
                 }
               }
               if (vizData.url === 'http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings') {
-                const settings = vizData.valueBase64Binary
+                let settings = vizData.valueBase64Binary
                 try {
-                  this.option = JSON.parse(window.atob(settings))
+                  settings = JSON.parse(window.atob(settings))
+                  for (const set in settings) {
+                    this.$set(this.option, set, settings[set])
+                  }
                   for (const chartOpt of this.option.series) {
                     const exist = this.chartOptions.find((opt) => {
                       return opt.type === chartOpt.type
@@ -1658,7 +1426,8 @@ export default {
               }
             }
             this.renderSettings = true
-            this.buildQuery()
+            await this.$nextTick()
+            this.getDatasetData()
           })
       })
     },
@@ -1685,7 +1454,7 @@ export default {
                 return link.relation === 'next'
               })
               if (next) {
-                this.getViz(next.url).then(() => {
+                this.getVizByUrl(next.url).then(() => {
                   return resolve()
                 }).catch((err) => {
                   return reject(err)
@@ -1710,7 +1479,8 @@ export default {
     ChartsList,
     VChart,
     GeneralSettings,
-    ChartSettings
+    ChartSettings,
+    axisChart: () => import(/* webpackChunkName: "axis-chart" */ './charts/axisCharts')
   },
   computed: {
     vizWidth () {
@@ -1720,31 +1490,21 @@ export default {
       return 12
     },
     canDisplayChart () {
-      if (this.chart.type && this.series.length > 0 && ((this.maxCategories > 0 && this.categories.length > 0) || this.maxCategories === 0)) {
+      if (
+        this.chart.type &&
+        (this.categories.length >= this.chart.minCategories) &&
+        (this.series.length >= this.chart.minSeries)
+      ) {
         return true
       }
       return false
-    },
-    hasAxis () {
-      if (this.chart.type === 'pie' || this.chart.type === 'gauge') {
-        return false
-      }
-      return true
-    },
-    maxCategories () {
-      if (this.chart.type === 'pie') {
-        return 1
-      }
-      if (this.chart.type === 'gauge') {
-        return 0
-      }
-      return 2
     }
   },
   watch: {
-    maxCategories (val) {
-      if (val === 0) {
-        this.categories = []
+    filters () {
+      const filter = this.buildFilters()
+      this.query.query = {
+        bool: filter.bool
       }
     },
     series () {
@@ -1762,10 +1522,13 @@ export default {
       }
     },
     hardRerenderViz () {
-      this.buildQuery()
+      this.getDatasetData()
     }
   },
   created () {
+    this.query.reportOptions = {
+      locationBasedConstraint: true
+    }
     if (this.datasets.length > 0) {
       this.dataset = this.datasets[0]
     }
@@ -1773,6 +1536,13 @@ export default {
       this.vizId = this.id
     } else if (this.$route.params.id) {
       this.vizId = this.$route.params.id
+    } else {
+      const chart = this.$store.state.charts.find((chart) => {
+        return chart.type === 'bar'
+      })
+      for (const ch in chart) {
+        this.$set(this.chart, ch, chart[ch])
+      }
     }
     fetch('/es/indices').then((response) => {
       response.json().then((indices) => {
@@ -1786,6 +1556,11 @@ export default {
       })
     }).catch((err) => {
       console.log(err)
+    })
+    eventBus.$on('datasetDataReady', (opt) => {
+      this.option = opt
+      this.loadingData = false
+      this.displayChart = true
     })
   }
 }

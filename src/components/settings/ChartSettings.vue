@@ -34,18 +34,6 @@ export default {
   data () {
     return {
       expandSettings: []
-      // options: {
-      //   tooltip: {
-      //     trigger: 'item'
-      //   },
-      //   legend: {
-      //     orient: 'vertical',
-      //     left: 'left'
-      //   },
-      //   title: {},
-      //   axisPointer: {},
-      //   xAxis: {}
-      // }
     }
   },
   components: {

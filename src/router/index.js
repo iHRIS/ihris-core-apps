@@ -5,10 +5,6 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [{
-  path: '/viz2',
-  name: 'viz2',
-  component: () => import('../components/DataVisualizer2.vue')
-}, {
   path: '/vizBuilder/:id?',
   name: 'vizBuilder',
   component: () => import('../components/VisualizationBuilder.vue')

@@ -1,12 +1,14 @@
 <template>
   <div>
     <v-expansion-panels multiple focusable v-model="expandSettings">
-      <v-expansion-panel v-for='(set, index) in settings' :key='index'>
-        <v-expansion-panel-header>{{set.header}}</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <component :is='set.component' @[set.updateEvent]='externalSettings' v-bind="{values: me[set.optionObject + 'Values']}" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+      <template v-for='(set, index) in settings'>
+        <v-expansion-panel :key='index' v-if="set.charts.indexOf(chartType) != -1">
+          <v-expansion-panel-header>{{set.header}}</v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <component :is='set.component' @[set.updateEvent]='externalSettings' v-bind="{values: option[set.optionObject]}" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </template>
     </v-expansion-panels>
   </div>
 </template>
@@ -17,55 +19,57 @@ import ChartToolTip from './ChartToolTip.vue'
 import ChartAxisPointer from './ChartAxisPointer.vue'
 import ChartXaxis from './ChartXaxis.vue'
 import ChartYaxis from './ChartYaxis.vue'
+import ChartMetric from './ChartMetric.vue'
+
 export default {
-  props: ['chartType', 'option', 'titleValues', 'legendValues', 'tooltipValues', 'axisPointerValues', 'xAxisValues', 'yAxisValues'],
+  props: ['chartType', 'chartSubType', 'option'],
   data () {
     return {
       expandSettings: [],
-      me: this,
       settings: [{
         header: 'Chart Title',
         component: 'ChartTitle',
         updateEvent: 'chartTitle',
-        optionObject: 'title'
+        optionObject: 'title',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
       }, {
         header: 'Chart Legend',
         component: 'ChartLegend',
         updateEvent: 'chartLegend',
-        optionObject: 'legend'
+        optionObject: 'legend',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
       }, {
         header: 'Chart Tooltip',
         component: 'ChartToolTip',
         updateEvent: 'chartTooltip',
-        optionObject: 'tooltip'
+        optionObject: 'tooltip',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
       }, {
         header: 'Chart Axis Pointer',
         component: 'ChartAxisPointer',
         updateEvent: 'chartAxisPointer',
-        optionObject: 'axisPointer'
+        optionObject: 'axisPointer',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
       }, {
         header: 'Chart X Axis',
         component: 'ChartXaxis',
         updateEvent: 'chartXaxis',
-        optionObject: 'xAxis'
+        optionObject: 'xAxis',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
       }, {
         header: 'Chart Y Axis',
         component: 'ChartYaxis',
         updateEvent: 'chartYaxis',
-        optionObject: 'yAxis'
+        optionObject: 'yAxis',
+        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
+      }, {
+        header: 'Metric',
+        component: 'ChartMetric',
+        updateEvent: 'chartMetric',
+        optionObject: 'graphic',
+        charts: ['metric']
       }],
-      options: {
-        tooltip: {
-          trigger: 'item'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left'
-        },
-        title: {},
-        axisPointer: {},
-        xAxis: {}
-      }
+      options: {}
     }
   },
   components: {
@@ -74,7 +78,8 @@ export default {
     ChartToolTip,
     ChartAxisPointer,
     ChartXaxis,
-    ChartYaxis
+    ChartYaxis,
+    ChartMetric
   },
   methods: {
     externalSettings (setting) {
