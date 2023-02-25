@@ -4,31 +4,31 @@
   </div>
 </template>
 <script>
-import ChartAxis from './ChartAxis.vue'
+import ChartAxis from "./ChartAxis.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
-      yAxis: {}
-    }
+      yAxis: {},
+    };
   },
   methods: {
-    externalSettings (setting) {
-      this.yAxis = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.yAxis = setting.value;
+      this.updated();
     },
-    setDefaults () {
-      this.yAxis.type = 'value'
+    setDefaults() {
+      this.yAxis.type = "value";
     },
-    updated () {
+    updated() {
       if (!this.values || this.values.length === 0) {
-        this.setDefaults()
+        this.setDefaults();
       }
-      this.$emit('chartYaxis', { name: 'yAxis', value: this.yAxis })
-    }
+      this.$emit("chartYaxis", { name: "yAxis", value: this.yAxis });
+    },
   },
   components: {
-    ChartAxis
-  }
-}
+    ChartAxis,
+  },
+};
 </script>

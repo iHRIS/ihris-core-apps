@@ -1,19 +1,13 @@
 <template>
   <v-container grid-list-xs>
-    <v-dialog
-      v-model="displayBColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayBColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
         v-model="settings.backgroundStyle.color"
       ></v-color-picker>
     </v-dialog>
-    <v-dialog
-      v-model="displayBBorderColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayBBorderColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
@@ -26,71 +20,68 @@
       label="Color By"
       @change="updated"
     ></v-select>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-switch
-          v-bind="attrs"
-          v-on="on"
-          label="Mark point in a chart"
-          v-model="markPoint"
-          @change="markPointSwitch"
-        />
-      </template>
-      <span>Display a mark for the highest/minimum value on the line</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-switch
-          v-bind="attrs"
-          v-on="on"
-          label="Show background"
-          v-model="settings.showBackground"
-          @change="updated"
-        />
-      </template>
-      <span>Whether to show background behind each bar. Use backgroundStyle to set background style</span>
-    </v-tooltip>
+    <v-switch
+      color="blue"
+      label="Mark point in a chart"
+      v-model="markPoint"
+      @change="markPointSwitch"
+    >
+      <v-tooltip activator="parent" location="bottom"
+        >Display a mark for the highest/minimum value on the line</v-tooltip
+      >
+    </v-switch>
+    <v-switch
+      color="blue"
+      label="Show background"
+      v-model="settings.showBackground"
+      @change="updated"
+    >
+      <v-tooltip activator="parent" location="bottom"
+        >Whether to show background behind each bar. Use backgroundStyle to set
+        background style</v-tooltip
+      >
+    </v-switch>
     <v-expansion-panels multiple focusable>
       <v-expansion-panel>
-        <v-expansion-panel-header>Bar Background Style</v-expansion-panel-header>
-        <v-expansion-panel-content>
+        <v-expansion-panel-title>Bar Background Style</v-expansion-panel-title>
+        <v-expansion-panel-text>
           <v-row>
+            <v-col cols="6"> Color: </v-col>
             <v-col cols="6">
-              Color:
-            </v-col>
-            <v-col cols="6">
-              <v-card :color="settings.backgroundStyle.color" width="30px" height="20" @click="displayBColor = true">
-                <v-card-text @click="displayBColor = true">
-
-                </v-card-text>
+              <v-card
+                :color="settings.backgroundStyle.color"
+                width="30px"
+                height="20"
+                @click="displayBColor = true"
+              >
+                <v-card-text @click="displayBColor = true"> </v-card-text>
               </v-card>
             </v-col>
+            <v-col cols="6"> Color: </v-col>
             <v-col cols="6">
-              Color:
-            </v-col>
-            <v-col cols="6">
-              <v-card :color="settings.backgroundStyle.borderColor" width="30px" height="20" @click="displayBBorderColor = true">
-                <v-card-text @click="displayBBorderColor = true">
-
-                </v-card-text>
+              <v-card
+                :color="settings.backgroundStyle.borderColor"
+                width="30px"
+                height="20"
+                @click="displayBBorderColor = true"
+              >
+                <v-card-text @click="displayBBorderColor = true"> </v-card-text>
               </v-card>
             </v-col>
             <v-col cols="12">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-bind="attrs"
-                    v-on="on"
-                    v-model="settings.backgroundStyle.borderWidth"
-                    type="number"
-                    label="Border width"
-                    min="0"
-                    max="40"
-                    @input="updated"
-                  ></v-text-field>
-                </template>
-                <span>The border width of bar. defaults to have no border</span>
-              </v-tooltip>
+              <v-text-field
+                v-model="settings.backgroundStyle.borderWidth"
+                type="number"
+                label="Border width"
+                min="0"
+                max="40"
+                @input="updated"
+              >
+                <v-tooltip activator="parent" location="bottom"
+                  >The border width of bar. defaults to have no
+                  border</v-tooltip
+                >
+              </v-text-field>
             </v-col>
             <v-col cols="12">
               <v-select
@@ -101,123 +92,105 @@
               ></v-select>
             </v-col>
           </v-row>
-        </v-expansion-panel-content>
+        </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-expansion-panels multiple focusable v-bind="attrs" v-on="on">
-          <v-expansion-panel>
-            <v-expansion-panel-header>Labels</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ChartLabel
-                subscriber="barLabel"
-                @barLabel="barLabelSettings"
-                :values="settings.label"
+    <v-expansion-panels multiple focusable>
+      <v-expansion-panel>
+        <v-expansion-panel-title>Labels</v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <ChartLabel
+            subscriber="barLabel"
+            @barLabel="barLabelSettings"
+            :values="settings.label"
+          />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+      <v-tooltip activator="parent" location="bottom"
+        >Settings about labels of a bar</v-tooltip
+      >
+    </v-expansion-panels>
+    <v-expansion-panels multiple focusable>
+      <v-expansion-panel>
+        <v-expansion-panel-title>Label Line</v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <v-row>
+            <v-col cols="12">
+              <v-switch
+                color="blue"
+                label="Show/Hide"
+                v-model="settings.labelLine.show"
+                @change="updated"
+              >
+                <v-tooltip activator="parent" location="bottom"
+                  >Show or Hide label line</v-tooltip
+                >
+              </v-switch>
+            </v-col>
+            <v-col cols="12">
+              <LineStyle
+                subscriber="labelLineStyle"
+                @labelLineStyle="labelLineStyle"
+                :values="settings.labelLine.lineStyle"
               />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </template>
-      <span>Settings about labels of a bar</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-expansion-panels multiple focusable v-bind="attrs" v-on="on">
-          <v-expansion-panel>
-            <v-expansion-panel-header>Label Line</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <v-row>
-                <v-col cols="12">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-switch
-                        v-bind="attrs"
-                        v-on="on"
-                        label="Show/Hide"
-                        v-model="settings.labelLine.show"
-                        @change="updated"
-                      />
-                    </template>
-                    <span>Show or Hide label line</span>
-                  </v-tooltip>
-                </v-col>
-                <v-col cols="12">
-                  <LineStyle
-                    subscriber="labelLineStyle"
-                    @labelLineStyle="labelLineStyle"
-                    :values="settings.labelLine.lineStyle"
-                  />
-                </v-col>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </template>
-      <span>Configuration of label guide line</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-expansion-panels multiple focusable v-bind="attrs" v-on="on">
-          <v-expansion-panel>
-            <v-expansion-panel-header>Bars Settings</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ItemStyle
-                subscriber="barStyle"
-                @barStyle="barStyle"
-                :values="settings.itemStyle"
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </template>
-      <span>Settings about bars of a bar chart</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-text-field
-          v-bind="attrs"
-          v-on="on"
-          v-model="settings.barWidth"
-          type="number"
-          label="Bar width"
-          min="0"
-          max="100"
-          @input="updated"
-        ></v-text-field>
-      </template>
-      <span>The width of the bar. Adaptive when not specified</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-text-field
-          v-bind="attrs"
-          v-on="on"
-          v-model="settings.barMaxWidth"
-          type="number"
-          label="Bar maximum width"
-          min="0"
-          max="100"
-          @input="updated"
-        ></v-text-field>
-      </template>
-      <span>The maximum width of the bar. Has higer priority than barWidth</span>
-    </v-tooltip>
-    <v-tooltip bottom>
-      <template v-slot:activator="{ on, attrs }">
-        <v-text-field
-          v-bind="attrs"
-          v-on="on"
-          v-model="settings.barMinWidth"
-          type="number"
-          label="Bar minimum width"
-          min="0"
-          max="100"
-          @input="updated"
-        ></v-text-field>
-      </template>
-      <span>The minimum width of the bar. Has higer priority than barWidth</span>
-    </v-tooltip>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+      <v-tooltip activator="parent" location="bottom"
+        >Configuration of label guide line</v-tooltip
+      >
+    </v-expansion-panels>
+    <v-expansion-panels multiple focusable>
+      <v-expansion-panel>
+        <v-expansion-panel-title>Bars Settings</v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <ItemStyle
+            subscriber="barStyle"
+            @barStyle="barStyle"
+            :values="settings.itemStyle"
+          />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <v-text-field
+      v-model="settings.barWidth"
+      type="number"
+      label="Bar width"
+      min="0"
+      max="100"
+      @input="updated"
+    >
+      <v-tooltip activator="parent" location="bottom"
+        >The width of the bar. Adaptive when not specified</v-tooltip
+      >
+    </v-text-field>
+    <v-text-field
+      v-model="settings.barMaxWidth"
+      type="number"
+      label="Bar maximum width"
+      min="0"
+      max="100"
+      @input="updated"
+    >
+      <v-tooltip activator="parent" location="bottom"
+        >The maximum width of the bar. Has higer priority than
+        barWidth</v-tooltip
+      >
+    </v-text-field>
+    <v-text-field
+      v-model="settings.barMinWidth"
+      type="number"
+      label="Bar minimum width"
+      min="0"
+      max="100"
+      @input="updated"
+    >
+      <v-tooltip activator="parent" location="bottom"
+        >The minimum width of the bar. Has higer priority than
+        barWidth</v-tooltip
+      >
+    </v-text-field>
     <v-text-field
       v-model="barGap"
       type="number"
@@ -230,124 +203,146 @@
   </v-container>
 </template>
 <script>
-import LineStyle from '../LineStyle.vue'
-import ChartLabel from '../ChartLabel.vue'
-import ItemStyle from '../ItemStyle.vue'
+import LineStyle from "../LineStyle.vue";
+import ChartLabel from "../ChartLabel.vue";
+import ItemStyle from "../ItemStyle.vue";
 export default {
-  props: { type: String, options: Object },
-  data () {
+  emits: ["chartSettings"],
+  props: { options: Object },
+  data() {
     return {
       settings: {
-        type: 'bar',
-        barWidth: '',
-        barMaxWidth: '',
-        barMinWidth: '',
-        barGap: '30%',
-        colorBy: 'data',
+        type: "bar",
+        barWidth: "",
+        barMaxWidth: "",
+        barMinWidth: "",
+        barGap: "30%",
+        colorBy: "data",
         showBackground: false,
         backgroundStyle: {
-          color: 'rgba(180, 180, 180, 0.2)',
-          borderColor: '#000',
+          color: "rgba(180, 180, 180, 0.2)",
+          borderColor: "#000",
           borderWidth: 0,
-          borderType: 'solid'
+          borderType: "solid",
         },
         label: {
           show: false,
           rotate: 0,
-          offset: [0, 0]
+          offset: [0, 0],
         },
         labelLine: {
           show: false,
-          lineStyle: {}
+          lineStyle: {},
         },
         itemStyle: {
-          color: 'auto',
-          borderColor: '#000',
+          color: "auto",
+          borderColor: "#000",
           borderWidth: 0,
-          borderType: 'solid',
+          borderType: "solid",
           shadowBlur: 0,
-          shadowColor: '',
+          shadowColor: "",
           shadowOffsetX: 0,
-          shadowOffsetY: 0
+          shadowOffsetY: 0,
         },
         labelLayout: {
-          draggable: true
+          draggable: true,
         },
         tooltip: {},
-        markPoint: {}
+        markPoint: {},
       },
       displayBColor: false,
       displayBBorderColor: false,
       displayISBorderColor: false,
       displayISShadowColor: false,
-      colorBy: ['data', 'series'],
-      borderTypes: ['solid', 'dashed', 'dotted'],
-      position: ['top', 'left', 'right', 'bottom', 'inside', 'insideLeft', 'insideRight', 'insideTop', 'insideBottom', 'insideTopLeft', 'insideBottomLeft', 'insideTopRight', 'insideBottomRight', 'start', 'middle', 'end', 'insideStart', 'insideEnd'],
-      barGap: '',
-      markPoint: false
-    }
+      colorBy: ["data", "series"],
+      borderTypes: ["solid", "dashed", "dotted"],
+      position: [
+        "top",
+        "left",
+        "right",
+        "bottom",
+        "inside",
+        "insideLeft",
+        "insideRight",
+        "insideTop",
+        "insideBottom",
+        "insideTopLeft",
+        "insideBottomLeft",
+        "insideTopRight",
+        "insideBottomRight",
+        "start",
+        "middle",
+        "end",
+        "insideStart",
+        "insideEnd",
+      ],
+      barGap: "",
+      markPoint: false,
+    };
   },
-  created () {
+  created() {
     if (this.options.series && this.options.series.length > 0) {
       const barOpts = this.options.series.find((ser) => {
-        return ser.type === 'bar'
-      })
+        return ser.type === "bar";
+      });
       for (const index in barOpts) {
         if (this.settings[index]) {
-          this.settings[index] = barOpts[index]
+          this.settings[index] = barOpts[index];
         }
       }
     }
 
-    this.updated()
+    this.updated();
     if (this.settings.barGap) {
-      this.barGap = this.settings.barGap.replace('%', '')
+      this.barGap = this.settings.barGap.replace("%", "");
     }
     if (this.settings.markPoint && this.settings.markPoint.data) {
-      this.markPoint = true
+      this.markPoint = true;
     }
   },
   methods: {
-    markPointSwitch () {
+    markPointSwitch() {
       if (this.markPoint) {
         this.settings.markPoint = {
-          data: [{
-            type: 'max'
-          }],
-          symbol: 'pin'
-        }
+          data: [
+            {
+              type: "max",
+            },
+          ],
+          symbol: "pin",
+        };
       } else {
-        this.settings.markPoint = {}
+        this.settings.markPoint = {};
       }
-      this.updated()
+      this.updated();
     },
-    barGapUpdated () {
-      this.settings.barGap = this.barGap + '%'
+    barGapUpdated() {
+      this.settings.barGap = this.barGap + "%";
     },
-    barLabelSettings (setting) {
-      this.settings.label = setting
-      this.updated()
+    barLabelSettings(setting) {
+      this.settings.label = setting;
+      this.updated();
     },
-    labelLineStyle (setting) {
+    labelLineStyle(setting) {
       for (const style in setting.value) {
-        this.settings.labelLine.lineStyle[style] = setting.value[style]
+        this.settings.labelLine.lineStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    barStyle (setting) {
+    barStyle(setting) {
       for (const style in setting.value) {
-        this.settings.itemStyle[style] = setting.value[style]
+        this.settings.itemStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    updated () {
-      this.$emit('chartSettings', this.settings)
-    }
+    updated() {
+      this.$emit("chartSettings", this.settings);
+    },
   },
   components: {
     LineStyle,
     ChartLabel,
-    ItemStyle
-  }
-}
+    ItemStyle,
+  },
+};
 </script>

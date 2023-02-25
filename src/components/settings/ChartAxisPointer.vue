@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="displayColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
@@ -12,14 +9,24 @@
     </v-dialog>
     <v-row>
       <v-col cols="12">
-        <v-switch label="Show/Hide" v-model="axisPointer.show" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Show/Hide"
+          v-model="axisPointer.show"
+          @change="updated"
+        ></v-switch>
         <v-select
           :items="types"
           v-model="axisPointer.type"
           label="Indicator type"
           @change="updated"
         ></v-select>
-        <v-switch label="Trigger tooltip" v-model="axisPointer.triggerTooltip" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Trigger tooltip"
+          v-model="axisPointer.triggerTooltip"
+          @change="updated"
+        ></v-switch>
         <v-text-field
           v-model="axisPointer.value"
           label="Current value"
@@ -28,10 +35,17 @@
         ></v-text-field>
         <v-expansion-panels multiple focusable v-model="expandSettings">
           <v-expansion-panel>
-            <v-expansion-panel-header>Label of axis pointer</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title
+              >Label of axis pointer</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
               <div>
-                <v-switch label="Show/Hide" v-model="axisPointer.label.show" @change="updated"></v-switch>
+                <v-switch
+                  color="blue"
+                  label="Show/Hide"
+                  v-model="axisPointer.label.show"
+                  @change="updated"
+                ></v-switch>
               </div>
               <div>
                 <v-text-field
@@ -44,15 +58,25 @@
                 ></v-text-field>
               </div>
               <div>
-                <TextStyle @textStyle='labelStyle' :values="axisPointer.label"/>
+                <TextStyle
+                  @textStyle="labelStyle"
+                  :values="axisPointer.label"
+                />
               </div>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
           <v-expansion-panel>
-            <v-expansion-panel-header>Handle (Button to drag axisPointer)</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title
+              >Handle (Button to drag axisPointer)</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
               <div>
-                <v-switch label="Show/Hide" v-model="axisPointer.handle.show" @change="updated"></v-switch>
+                <v-switch
+                  color="blue"
+                  label="Show/Hide"
+                  v-model="axisPointer.handle.show"
+                  @change="updated"
+                ></v-switch>
               </div>
               <div>
                 <v-text-field
@@ -66,19 +90,20 @@
               </div>
               <div>
                 <v-row>
+                  <v-col cols="6"> Color: </v-col>
                   <v-col cols="6">
-                    Color:
-                  </v-col>
-                  <v-col cols="6">
-                    <v-card :color="axisPointer.handle.color" width="30px" height="20" @click="displayColor = true">
-                      <v-card-text @click="displayColor = true">
-
-                      </v-card-text>
+                    <v-card
+                      :color="axisPointer.handle.color"
+                      width="30px"
+                      height="20"
+                      @click="displayColor = true"
+                    >
+                      <v-card-text @click="displayColor = true"> </v-card-text>
                     </v-card>
                   </v-col>
                 </v-row>
               </div>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
@@ -86,69 +111,72 @@
   </div>
 </template>
 <script>
-import TextStyle from './TextStyle.vue'
+import TextStyle from "./TextStyle.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
       displayColor: false,
       axisPointer: {
         show: false,
-        type: 'line',
+        type: "line",
         label: {
           show: false,
           margin: 3,
-          color: '#fff',
-          fontStyle: 'normal',
-          fontWeight: 'normal',
-          fontFamily: 'sans-serif',
-          lineHeight: 12
+          color: "#fff",
+          fontStyle: "normal",
+          fontWeight: "normal",
+          fontFamily: "sans-serif",
+          lineHeight: 12,
         },
         triggerTooltip: true,
-        value: '',
+        value: "",
         handle: {
           show: true,
           size: 45,
-          color: '#333'
-        }
+          color: "#333",
+        },
       },
-      types: ['line', 'shadow', 'none'],
-      expandSettings: []
-    }
+      types: ["line", "shadow", "none"],
+      expandSettings: [],
+    };
   },
   watch: {
-    'axisPointer.handle.color': function (val, oldVal) {
+    "axisPointer.handle.color": function (val, oldVal) {
       if (val !== oldVal) {
-        this.updated()
+        this.updated();
       }
-    }
+    },
   },
   methods: {
-    externalSettings (setting) {
-      this.axisPointer[setting.name] = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.axisPointer[setting.name] = setting.value;
+      this.updated();
     },
-    labelStyle (setting) {
+    labelStyle(setting) {
       for (const style in setting.value) {
-        this.axisPointer.label[style] = setting.value[style]
+        this.axisPointer.label[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    updated () {
-      this.$emit('chartAxisPointer', { name: 'axisPointer', value: this.axisPointer })
-    }
+    updated() {
+      this.$emit("chartAxisPointer", {
+        name: "axisPointer",
+        value: this.axisPointer,
+      });
+    },
   },
-  created () {
+  created() {
     for (const index in this.values) {
-      this.axisPointer[index] = this.values[index]
+      this.axisPointer[index] = this.values[index];
     }
-    this.expandSettings = [0, 1]
+    this.expandSettings = [0, 1];
     setTimeout(() => {
-      this.expandSettings = []
-    }, 500)
+      this.expandSettings = [];
+    }, 500);
   },
   components: {
-    TextStyle
-  }
-}
+    TextStyle,
+  },
+};
 </script>

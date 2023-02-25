@@ -2,7 +2,12 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <v-switch label="Show/Hide" v-model="title.show" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Show/Hide"
+          v-model="title.show"
+          @change="updated"
+        ></v-switch>
         <v-text-field
           v-model="title.text"
           label="Text"
@@ -16,10 +21,13 @@
         ></v-select>
         <v-expansion-panels multiple focusable v-model="expandTextStyle">
           <v-expansion-panel>
-            <v-expansion-panel-header>Text Style</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <TextStyle @textStyle='externalSettings' :values="title.textStyle" />
-            </v-expansion-panel-content>
+            <v-expansion-panel-title>Text Style</v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <TextStyle
+                @textStyle="externalSettings"
+                :values="title.textStyle"
+              />
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
@@ -27,42 +35,42 @@
   </div>
 </template>
 <script>
-import TextStyle from './TextStyle.vue'
+import TextStyle from "./TextStyle.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
       title: {
         show: true,
-        text: 'My Chart',
-        textAlign: 'auto',
-        left: 'center',
-        textStyle: {}
+        text: "My Chart",
+        textAlign: "auto",
+        left: "center",
+        textStyle: {},
       },
-      textAligns: ['auto', 'left', 'right', 'center'],
-      expandTextStyle: []
-    }
+      textAligns: ["auto", "left", "right", "center"],
+      expandTextStyle: [],
+    };
   },
   methods: {
-    externalSettings (setting) {
-      this.title[setting.name] = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.title[setting.name] = setting.value;
+      this.updated();
     },
-    updated () {
-      this.$emit('chartTitle', { name: 'title', value: this.title })
-    }
+    updated() {
+      this.$emit("chartTitle", { name: "title", value: this.title });
+    },
   },
   components: {
-    TextStyle
+    TextStyle,
   },
-  created () {
+  created() {
     for (const index in this.values) {
-      this.title[index] = this.values[index]
+      this.title[index] = this.values[index];
     }
-    this.expandTextStyle = [0]
+    this.expandTextStyle = [0];
     setTimeout(() => {
-      this.expandTextStyle = []
-    }, 500)
-  }
-}
+      this.expandTextStyle = [];
+    }, 500);
+  },
+};
 </script>

@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="displayColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
@@ -13,14 +10,15 @@
     <v-row>
       <v-col cols="6">
         <v-row>
+          <v-col cols="6"> Color: </v-col>
           <v-col cols="6">
-            Color:
-          </v-col>
-          <v-col cols="6">
-            <v-card :color="style.color" width="30px" height="20" @click="displayColor = true">
-              <v-card-text @click="displayColor = true">
-
-              </v-card-text>
+            <v-card
+              :color="style.color"
+              width="30px"
+              height="20"
+              @click="displayColor = true"
+            >
+              <v-card-text @click="displayColor = true"> </v-card-text>
             </v-card>
           </v-col>
           <v-col cols="12">
@@ -77,41 +75,41 @@
 </template>
 <script>
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
       displayColor: false,
       style: {
-        color: '#020203FF',
-        fontStyle: 'normal',
-        fontWeight: 'normal',
-        fontFamily: 'sans-serif',
+        color: "#020203FF",
+        fontStyle: "normal",
+        fontWeight: "normal",
+        fontFamily: "sans-serif",
         fontSize: 12,
-        lineHeight: 12
+        lineHeight: 12,
       },
-      fontStyles: ['normal', 'italic', 'oblique'],
-      fontWeight: ['normal', 'bold', 'bolder', 'lighter']
-    }
+      fontStyles: ["normal", "italic", "oblique"],
+      fontWeight: ["normal", "bold", "bolder", "lighter"],
+    };
   },
   watch: {
-    'style.color': function (val, oldVal) {
+    "style.color": function (val, oldVal) {
       if (val !== oldVal) {
-        this.updated()
+        this.updated();
       }
-    }
+    },
   },
   methods: {
-    updated () {
-      this.$emit('textStyle', { name: 'textStyle', value: this.style })
-    }
+    updated() {
+      this.$emit("textStyle", { name: "textStyle", value: this.style });
+    },
   },
-  created () {
+  created() {
     for (const index in this.values) {
       if (Object.keys(this.style).indexOf(index) !== -1) {
-        this.style[index] = this.values[index]
+        this.style[index] = this.values[index];
       }
     }
-    this.updated()
-  }
-}
+    this.updated();
+  },
+};
 </script>

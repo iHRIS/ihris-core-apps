@@ -1,19 +1,13 @@
 <template>
   <div>
-    <v-dialog
-      v-model="displayLineStyleColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayLineStyleColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
         v-model="axis.axisLine.lineStyle.color"
       ></v-color-picker>
     </v-dialog>
-    <v-dialog
-      v-model="displayAxisTickColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayAxisTickColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
@@ -22,7 +16,12 @@
     </v-dialog>
     <v-row>
       <v-col cols="12">
-        <v-switch label="Show/Hide" v-model="axis.show" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Show/Hide"
+          v-model="axis.show"
+          @change="updated"
+        ></v-switch>
         <v-select
           :items="position"
           v-model="axis.position"
@@ -41,7 +40,7 @@
           :items="types"
           v-model="axis.type"
           label="Type of axis"
-          item-text="name"
+          item-title="name"
           item-value="value"
           @change="updated"
         ></v-select>
@@ -74,13 +73,20 @@
         ></v-text-field>
         <v-expansion-panels multiple focusable>
           <v-expansion-panel>
-            <v-expansion-panel-header>Text Style of axis name</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <TextStyle @textStyle='textStyle' :values="axis.nameTextStyle" />
-            </v-expansion-panel-content>
+            <v-expansion-panel-title
+              >Text Style of axis name</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
+              <TextStyle @textStyle="textStyle" :values="axis.nameTextStyle" />
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-        <v-switch label="Invert the axis" v-model="axis.inverse" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Invert the axis"
+          v-model="axis.inverse"
+          @change="updated"
+        ></v-switch>
         <v-text-field
           v-model="axis.min"
           type="number"
@@ -95,14 +101,24 @@
         ></v-text-field>
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-header>Axis Label</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title>Axis Label</v-expansion-panel-title>
+            <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
-                  <v-switch label="Show/Hide" v-model="axis.axisLabel.show" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show/Hide"
+                    v-model="axis.axisLabel.show"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Axis labels face the inside direction" v-model="axis.axisLabel.inside" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Axis labels face the inside direction"
+                    v-model="axis.axisLabel.inside"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
@@ -135,50 +151,86 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Show the label of the min tick" v-model="axis.axisLabel.showMinLabel" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show the label of the min tick"
+                    v-model="axis.axisLabel.showMinLabel"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Show the label of the max tick" v-model="axis.axisLabel.showMaxLabel" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show the label of the max tick"
+                    v-model="axis.axisLabel.showMaxLabel"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Hide overlapped labels" v-model="axis.axisLabel.hideOverlap" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Hide overlapped labels"
+                    v-model="axis.axisLabel.hideOverlap"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <TextStyle @textStyle="axisLabelStyle" :values="axis.axisLabel" />
+                  <TextStyle
+                    @textStyle="axisLabelStyle"
+                    :values="axis.axisLabel"
+                  />
                 </v-col>
               </v-row>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-header>Axis Line</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title>Axis Line</v-expansion-panel-title>
+            <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
-                  <v-switch label="Show/Hide" v-model="axis.axisLine.show" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show/Hide"
+                    v-model="axis.axisLine.show"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
                   <v-expansion-panels>
                     <v-expansion-panel>
-                      <v-expansion-panel-header>Line Style</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <LineStyle subscriber="axisLineStyle" @axisLineStyle="axisLineStyle" :values="axis.axisLine" />
-                      </v-expansion-panel-content>
+                      <v-expansion-panel-title
+                        >Line Style</v-expansion-panel-title
+                      >
+                      <v-expansion-panel-text>
+                        <LineStyle
+                          subscriber="axisLineStyle"
+                          @axisLineStyle="axisLineStyle"
+                          :values="axis.axisLine"
+                        />
+                      </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-col>
               </v-row>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-header>Split line of axis in grid area</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title
+              >Split line of axis in grid area</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
-                  <v-switch label="Show/Hide" v-model="axis.splitLine.show" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show/Hide"
+                    v-model="axis.splitLine.show"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
@@ -193,30 +245,51 @@
                 <v-col cols="12">
                   <v-expansion-panels>
                     <v-expansion-panel>
-                      <v-expansion-panel-header>Line Style</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <LineStyle subscriber="splitLineStyle" @splitLineStyle="splitLineStyle" :values="axis.splitLine" />
-                      </v-expansion-panel-content>
+                      <v-expansion-panel-title
+                        >Line Style</v-expansion-panel-title
+                      >
+                      <v-expansion-panel-text>
+                        <LineStyle
+                          subscriber="splitLineStyle"
+                          @splitLineStyle="splitLineStyle"
+                          :values="axis.splitLine"
+                        />
+                      </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-col>
               </v-row>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-header>Axis Tick</v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-title>Axis Tick</v-expansion-panel-title>
+            <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
-                  <v-switch label="Show/Hide" v-model="axis.axisTick.show" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Show/Hide"
+                    v-model="axis.axisTick.show"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Align axis tick with label" v-model="axis.axisTick.alignWithLabel" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Align axis tick with label"
+                    v-model="axis.axisTick.alignWithLabel"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
-                  <v-switch label="Axis labels face the inside direction" v-model="axis.axisTick.inside" @change="updated"></v-switch>
+                  <v-switch
+                    color="blue"
+                    label="Axis labels face the inside direction"
+                    v-model="axis.axisTick.inside"
+                    @change="updated"
+                  ></v-switch>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
@@ -231,23 +304,34 @@
                 <v-col cols="12">
                   <v-expansion-panels>
                     <v-expansion-panel>
-                      <v-expansion-panel-header>Line Style</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <LineStyle subscriber="axisTickStyle" @axisTickStyle="axisTickStyle" :values="axis.axisTick" />
-                      </v-expansion-panel-content>
+                      <v-expansion-panel-title
+                        >Line Style</v-expansion-panel-title
+                      >
+                      <v-expansion-panel-text>
+                        <LineStyle
+                          subscriber="axisTickStyle"
+                          @axisTickStyle="axisTickStyle"
+                          :values="axis.axisTick"
+                        />
+                      </v-expansion-panel-text>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-col>
               </v-row>
-            </v-expansion-panel-content>
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
         <v-expansion-panels multiple focusable>
           <v-expansion-panel>
-            <v-expansion-panel-header>Chart Axis Pointer</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ChartAxisPointer @chartAxisPointer='externalSettings' :values="axis.axisPointer" />
-            </v-expansion-panel-content>
+            <v-expansion-panel-title
+              >Chart Axis Pointer</v-expansion-panel-title
+            >
+            <v-expansion-panel-text>
+              <ChartAxisPointer
+                @chartAxisPointer="externalSettings"
+                :values="axis.axisPointer"
+              />
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
@@ -255,38 +339,38 @@
   </div>
 </template>
 <script>
-import TextStyle from './TextStyle.vue'
-import LineStyle from './LineStyle.vue'
-import ChartAxisPointer from './ChartAxisPointer.vue'
+import TextStyle from "./TextStyle.vue";
+import LineStyle from "./LineStyle.vue";
+import ChartAxisPointer from "./ChartAxisPointer.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
       displayLineStyleColor: false,
       displayAxisTickColor: false,
       axis: {
         show: true,
-        position: 'bottom',
+        position: "bottom",
         offset: 0,
-        type: 'category',
-        name: '',
-        nameLocation: 'end',
+        type: "category",
+        name: "",
+        nameLocation: "end",
         nameGap: 15,
         nameRotate: 0,
         nameTextStyle: {},
         inverse: false,
-        min: 'dataMin',
-        max: 'dataMax',
+        min: "dataMin",
+        max: "dataMax",
         axisLine: {
           show: true,
           onZero: true,
           lineStyle: {
-            color: '#333',
+            color: "#333",
             width: 1,
-            type: 'solid',
-            cap: 'butt',
-            opacity: 1
-          }
+            type: "solid",
+            cap: "butt",
+            opacity: 1,
+          },
         },
         axisTick: {
           show: true,
@@ -294,12 +378,12 @@ export default {
           inside: false,
           length: 5,
           lineStyle: {
-            color: '#333',
+            color: "#333",
             width: 1,
-            type: 'solid',
-            cap: 'butt',
-            opacity: 1
-          }
+            type: "solid",
+            cap: "butt",
+            opacity: 1,
+          },
         },
         axisLabel: {
           show: true,
@@ -311,115 +395,120 @@ export default {
           showMaxLabel: true,
           hideOverlap: false,
           lineStyle: {
-            color: '#333',
+            color: "#333",
             width: 1,
-            type: 'solid',
-            cap: 'butt',
-            opacity: 1
-          }
+            type: "solid",
+            cap: "butt",
+            opacity: 1,
+          },
         },
         splitLine: {
           show: false,
           interval: 0,
           lineStyle: {
-            color: '#333',
+            color: "#333",
             width: 1,
-            type: 'solid',
-            cap: 'butt',
-            opacity: 1
-          }
+            type: "solid",
+            cap: "butt",
+            opacity: 1,
+          },
         },
         axisPointer: {
           show: false,
-          type: 'line',
+          type: "line",
           label: {
             show: false,
             margin: 3,
-            color: '#fff',
-            fontStyle: 'normal',
-            fontWeight: 'normal',
-            fontFamily: 'sans-serif',
-            lineHeight: 12
+            color: "#fff",
+            fontStyle: "normal",
+            fontWeight: "normal",
+            fontFamily: "sans-serif",
+            lineHeight: 12,
           },
           triggerTooltip: true,
-          value: '',
+          value: "",
           handle: {
             show: true,
             size: 45,
-            color: '#333'
-          }
-        }
+            color: "#333",
+          },
+        },
       },
-      position: ['bottom', 'top'],
-      types: [{
-        name: 'Numerical axis, suitable for continuous data',
-        value: 'value'
-      }, {
-        name: 'Category axis, suitable for discrete category data',
-        value: 'category'
-      }, {
-        name: 'Time axis, suitable for continuous time series data',
-        value: 'time'
-      }, {
-        name: 'Log axis, suitable for log data',
-        value: 'log'
-      }],
-      nameLocation: ['start', 'middle', 'end']
-    }
+      position: ["bottom", "top"],
+      types: [
+        {
+          name: "Numerical axis, suitable for continuous data",
+          value: "value",
+        },
+        {
+          name: "Category axis, suitable for discrete category data",
+          value: "category",
+        },
+        {
+          name: "Time axis, suitable for continuous time series data",
+          value: "time",
+        },
+        {
+          name: "Log axis, suitable for log data",
+          value: "log",
+        },
+      ],
+      nameLocation: ["start", "middle", "end"],
+    };
   },
   methods: {
-    externalSettings (setting) {
-      this.axis[setting.name] = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.axis[setting.name] = setting.value;
+      this.updated();
     },
-    textStyle (setting) {
+    textStyle(setting) {
       for (const style in setting.value) {
-        this.axis.nameTextStyle[style] = setting.value[style]
+        this.axis.nameTextStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    axisLineStyle (setting) {
+    axisLineStyle(setting) {
       for (const style in setting.value) {
-        this.axis.axisLine.lineStyle[style] = setting.value[style]
+        this.axis.axisLine.lineStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    axisTickStyle (setting) {
+    axisTickStyle(setting) {
       for (const style in setting.value) {
-        this.axis.axisTick.lineStyle[style] = setting.value[style]
+        this.axis.axisTick.lineStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    splitLineStyle (setting) {
+    splitLineStyle(setting) {
       for (const style in setting.value) {
-        this.axis.splitLine.lineStyle[style] = setting.value[style]
+        this.axis.splitLine.lineStyle[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    axisLabelStyle (setting) {
+    axisLabelStyle(setting) {
       for (const style in setting.value) {
-        this.axis.axisLabel[style] = setting.value[style]
+        this.axis.axisLabel[style] = setting.value[style];
       }
-      this.updated()
+      this.updated();
     },
-    updated () {
-      this.$emit('chartAxis', { name: 'axis', value: this.axis })
-    }
+    updated() {
+      this.$emit("chartAxis", { name: "axis", value: this.axis });
+    },
   },
-  created () {
+  created() {
     for (const index in this.values) {
       if (Object.keys(this.axis).indexOf(index) !== -1) {
-        this.axis[index] = this.values[index]
+        this.axis[index] = this.values[index];
       }
     }
     if (!this.values || this.values.length === 0) {
-      this.updated()
+      this.updated();
     }
   },
   components: {
     TextStyle,
     LineStyle,
-    ChartAxisPointer
-  }
-}
+    ChartAxisPointer,
+  },
+};
 </script>

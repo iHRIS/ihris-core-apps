@@ -4,25 +4,25 @@
   </div>
 </template>
 <script>
-import ChartAxis from './ChartAxis.vue'
+import ChartAxis from "./ChartAxis.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
-      xAxis: {}
-    }
+      xAxis: {},
+    };
   },
   methods: {
-    externalSettings (setting) {
-      this.xAxis = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.xAxis = setting.value;
+      this.updated();
     },
-    updated () {
-      this.$emit('chartXaxis', { name: 'xAxis', value: this.xAxis })
-    }
+    updated() {
+      this.$emit("chartXaxis", { name: "xAxis", value: this.xAxis });
+    },
   },
   components: {
-    ChartAxis
-  }
-}
+    ChartAxis,
+  },
+};
 </script>

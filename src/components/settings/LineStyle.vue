@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-dialog
-      v-model="displayColor"
-      width="313px"
-    >
+    <v-dialog v-model="displayColor" width="313px">
       <v-color-picker
         class="ma-2"
         canvas-height="300"
@@ -11,14 +8,15 @@
       ></v-color-picker>
     </v-dialog>
     <v-row>
+      <v-col cols="6"> Color: </v-col>
       <v-col cols="6">
-        Color:
-      </v-col>
-      <v-col cols="6">
-        <v-card :color="lineStyle.color" width="30px" height="20" @click="displayColor = true">
-          <v-card-text @click="displayColor = true">
-
-          </v-card-text>
+        <v-card
+          :color="lineStyle.color"
+          width="30px"
+          height="20"
+          @click="displayColor = true"
+        >
+          <v-card-text @click="displayColor = true"> </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12">
@@ -52,8 +50,8 @@
           v-model="lineStyle.opacity"
           type="number"
           label="Line Opacity"
-          min=0.0
-          max=1
+          min="0.0"
+          max="1"
           @input="updated"
         ></v-text-field>
       </v-col>
@@ -62,39 +60,39 @@
 </template>
 <script>
 export default {
-  props: ['subscriber', 'values'],
-  data () {
+  props: ["subscriber", "values"],
+  data() {
     return {
       displayColor: false,
       lineStyle: {
-        color: '#333',
+        color: "#333",
         width: 1,
-        type: 'solid',
-        cap: 'butt',
-        opacity: 1
+        type: "solid",
+        cap: "butt",
+        opacity: 1,
       },
-      axisLineTypes: ['solid', 'dashed', 'dotted'],
-      caps: ['butt', 'round', 'square']
-    }
+      axisLineTypes: ["solid", "dashed", "dotted"],
+      caps: ["butt", "round", "square"],
+    };
   },
   watch: {
-    'lineStyle.color': function (val, oldVal) {
+    "lineStyle.color": function (val, oldVal) {
       if (val !== oldVal) {
-        this.updated()
+        this.updated();
       }
-    }
+    },
   },
   methods: {
-    updated () {
-      this.$emit(this.subscriber, { name: 'lineStyle', value: this.lineStyle })
-    }
+    updated() {
+      this.$emit(this.subscriber, { name: "lineStyle", value: this.lineStyle });
+    },
   },
-  created () {
+  created() {
     for (const index in this.values) {
       if (Object.keys(this.lineStyle).indexOf(index) !== -1) {
-        this.lineStyle[index] = this.values[index]
+        this.lineStyle[index] = this.values[index];
       }
     }
-  }
-}
+  },
+};
 </script>

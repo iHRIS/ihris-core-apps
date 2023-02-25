@@ -2,7 +2,12 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <v-switch label="Show/Hide" v-model="legend.show" @change="updated"></v-switch>
+        <v-switch
+          color="blue"
+          label="Show/Hide"
+          v-model="legend.show"
+          @change="updated"
+        ></v-switch>
         <v-select
           :items="types"
           v-model="legend.type"
@@ -43,10 +48,13 @@
         ></v-select>
         <v-expansion-panels multiple focusable v-model="expandTextStyle">
           <v-expansion-panel>
-            <v-expansion-panel-header>Text Style</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <TextStyle @textStyle='externalSettings' :values="legend.textStyle" />
-            </v-expansion-panel-content>
+            <v-expansion-panel-title>Text Style</v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <TextStyle
+                @textStyle="externalSettings"
+                :values="legend.textStyle"
+              />
+            </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
       </v-col>
@@ -54,49 +62,49 @@
   </div>
 </template>
 <script>
-import TextStyle from './TextStyle.vue'
+import TextStyle from "./TextStyle.vue";
 export default {
-  props: ['values'],
-  data () {
+  props: ["values"],
+  data() {
     return {
       legend: {
         show: true,
-        type: 'scroll',
-        orient: 'horizontal',
-        align: 'auto',
-        top: 'bottom',
+        type: "scroll",
+        orient: "horizontal",
+        align: "auto",
+        top: "bottom",
         itemGap: 10,
         selectedMode: true,
-        textStyle: {}
+        textStyle: {},
       },
-      types: ['plain', 'scroll'],
-      aligns: ['auto', 'left', 'right'],
-      top: ['bottom', 'middle', 'top'],
-      selections: [true, false, 'single', 'multiple'],
-      orientation: ['vertical', 'horizontal'],
-      expandTextStyle: []
-    }
+      types: ["plain", "scroll"],
+      aligns: ["auto", "left", "right"],
+      top: ["bottom", "middle", "top"],
+      selections: [true, false, "single", "multiple"],
+      orientation: ["vertical", "horizontal"],
+      expandTextStyle: [],
+    };
   },
   methods: {
-    externalSettings (setting) {
-      this.legend[setting.name] = setting.value
-      this.updated()
+    externalSettings(setting) {
+      this.legend[setting.name] = setting.value;
+      this.updated();
     },
-    updated () {
-      this.$emit('chartLegend', { name: 'legend', value: this.legend })
-    }
+    updated() {
+      this.$emit("chartLegend", { name: "legend", value: this.legend });
+    },
   },
-  created () {
+  created() {
     for (const index in this.values) {
-      this.legend[index] = this.values[index]
+      this.legend[index] = this.values[index];
     }
-    this.expandTextStyle = [0]
+    this.expandTextStyle = [0];
     setTimeout(() => {
-      this.expandTextStyle = []
-    }, 500)
+      this.expandTextStyle = [];
+    }, 500);
   },
   components: {
-    TextStyle
-  }
-}
+    TextStyle,
+  },
+};
 </script>

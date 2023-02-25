@@ -1,76 +1,91 @@
 <template>
   <div>
     <v-expansion-panels multiple focusable v-model="expandSettings">
-      <template v-for='(set, index) in settings'>
-        <v-expansion-panel :key='index' v-if="set.charts.indexOf(chartType) != -1">
-          <v-expansion-panel-header>{{set.header}}</v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <component :is='set.component' @[set.updateEvent]='externalSettings' v-bind="{values: option[set.optionObject]}" />
-          </v-expansion-panel-content>
+      <template v-for="(set, index) in settings">
+        <v-expansion-panel
+          :key="index"
+          v-if="set.charts.indexOf(chartType) != -1"
+        >
+          <v-expansion-panel-title>{{ set.header }}</v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <component
+              :is="set.component"
+              @[set.updateEvent]="externalSettings"
+              v-bind="{ values: option[set.optionObject] }"
+            />
+          </v-expansion-panel-text>
         </v-expansion-panel>
       </template>
     </v-expansion-panels>
   </div>
 </template>
 <script>
-import ChartTitle from './ChartTitle.vue'
-import ChartLegend from './ChartLegend.vue'
-import ChartToolTip from './ChartToolTip.vue'
-import ChartAxisPointer from './ChartAxisPointer.vue'
-import ChartXaxis from './ChartXaxis.vue'
-import ChartYaxis from './ChartYaxis.vue'
-import ChartMetric from './ChartMetric.vue'
+import ChartTitle from "./ChartTitle.vue";
+import ChartLegend from "./ChartLegend.vue";
+import ChartToolTip from "./ChartToolTip.vue";
+import ChartAxisPointer from "./ChartAxisPointer.vue";
+import ChartXaxis from "./ChartXaxis.vue";
+import ChartYaxis from "./ChartYaxis.vue";
+import ChartMetric from "./Charts/MetricChart.vue";
 
 export default {
-  props: ['chartType', 'chartSubType', 'option'],
-  data () {
+  props: ["chartType", "chartSubType", "option"],
+  data() {
     return {
       expandSettings: [],
-      settings: [{
-        header: 'Chart Title',
-        component: 'ChartTitle',
-        updateEvent: 'chartTitle',
-        optionObject: 'title',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Chart Legend',
-        component: 'ChartLegend',
-        updateEvent: 'chartLegend',
-        optionObject: 'legend',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Chart Tooltip',
-        component: 'ChartToolTip',
-        updateEvent: 'chartTooltip',
-        optionObject: 'tooltip',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Chart Axis Pointer',
-        component: 'ChartAxisPointer',
-        updateEvent: 'chartAxisPointer',
-        optionObject: 'axisPointer',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Chart X Axis',
-        component: 'ChartXaxis',
-        updateEvent: 'chartXaxis',
-        optionObject: 'xAxis',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Chart Y Axis',
-        component: 'ChartYaxis',
-        updateEvent: 'chartYaxis',
-        optionObject: 'yAxis',
-        charts: ['bar', 'pie', 'line', 'gauge', 'scatter']
-      }, {
-        header: 'Metric',
-        component: 'ChartMetric',
-        updateEvent: 'chartMetric',
-        optionObject: 'graphic',
-        charts: ['metric']
-      }],
-      options: {}
-    }
+      settings: [
+        {
+          header: "Chart Title",
+          component: "ChartTitle",
+          updateEvent: "chartTitle",
+          optionObject: "title",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Chart Legend",
+          component: "ChartLegend",
+          updateEvent: "chartLegend",
+          optionObject: "legend",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Chart Tooltip",
+          component: "ChartToolTip",
+          updateEvent: "chartTooltip",
+          optionObject: "tooltip",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Chart Axis Pointer",
+          component: "ChartAxisPointer",
+          updateEvent: "chartAxisPointer",
+          optionObject: "axisPointer",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Chart X Axis",
+          component: "ChartXaxis",
+          updateEvent: "chartXaxis",
+          optionObject: "xAxis",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Chart Y Axis",
+          component: "ChartYaxis",
+          updateEvent: "chartYaxis",
+          optionObject: "yAxis",
+          charts: ["bar", "pie", "line", "gauge", "scatter"],
+        },
+        {
+          header: "Metric",
+          component: "ChartMetric",
+          updateEvent: "chartMetric",
+          optionObject: "graphic",
+          charts: ["metric"],
+        },
+      ],
+      options: {},
+    };
   },
   components: {
     ChartTitle,
@@ -79,19 +94,21 @@ export default {
     ChartAxisPointer,
     ChartXaxis,
     ChartYaxis,
-    ChartMetric
+    ChartMetric,
   },
   methods: {
-    externalSettings (setting) {
-      this.options[setting.name] = setting.value
-      this.$emit('generalSettings', this.options)
-    }
+    externalSettings(setting) {
+      this.options[setting.name] = setting.value;
+      this.$emit("generalSettings", this.options);
+    },
   },
-  created () {
-    this.expandSettings = [...Array(this.settings.length).keys()].map((k, i) => i)
+  created() {
+    this.expandSettings = [...Array(this.settings.length).keys()].map(
+      (k, i) => i
+    );
     setTimeout(() => {
-      this.expandSettings = []
-    }, 500)
-  }
-}
+      this.expandSettings = [];
+    }, 500);
+  },
+};
 </script>
