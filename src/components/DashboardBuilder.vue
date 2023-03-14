@@ -170,6 +170,7 @@
               return-object
               clearable
               label="Filter By"
+              density="compact"
               @update:modelValue="activateDimension"
             ></v-autocomplete>
           </v-col>
@@ -204,6 +205,7 @@
                   item-title="name"
                   item-value="id"
                   filled
+                  density="compact"
                   label="Other Dashboards"
                   @update:modelValue="
                     $router.push({

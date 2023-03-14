@@ -31,7 +31,7 @@
             })
           "
         >
-          <v-icon start size="x-large">mdi-view-dashboard-edit </v-icon>
+          <v-icon start size="x-large">mdi-view-dashboard-edit-outline </v-icon>
           Dashboards
         </v-btn>
       </v-col>

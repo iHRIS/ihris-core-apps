@@ -1,5 +1,5 @@
 import { ref } from "vue";
-export default function MetricChart(series, option, dataset) {
+export default function IhrisMetricChart(series, option, dataset) {
   let data = ref("");
   const query = ref({
     size: 0,

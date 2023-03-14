@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import("../views/VizHome.vue"),
     },
     {
+      path: "/",
+      name: "home",
+      component: () => import("../views/VizHome.vue"),
+    },
+    {
       path: "/static/:id",
       name: "static",
       component: () => import("../views/static-page.vue"),

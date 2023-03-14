@@ -20,14 +20,7 @@
   </div>
 </template>
 <script>
-import ChartTitle from "./ChartTitle.vue";
-import ChartLegend from "./ChartLegend.vue";
-import ChartToolTip from "./ChartToolTip.vue";
-import ChartAxisPointer from "./ChartAxisPointer.vue";
-import ChartXaxis from "./ChartXaxis.vue";
-import ChartYaxis from "./ChartYaxis.vue";
-import ChartMetric from "./Charts/MetricChart.vue";
-
+import { defineAsyncComponent } from "vue";
 export default {
   props: ["chartType", "chartSubType", "option"],
   data() {
@@ -67,34 +60,28 @@ export default {
           component: "ChartXaxis",
           updateEvent: "chartXaxis",
           optionObject: "xAxis",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
+          charts: ["bar", "line", "scatter"],
         },
         {
           header: "Chart Y Axis",
           component: "ChartYaxis",
           updateEvent: "chartYaxis",
           optionObject: "yAxis",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
-        },
-        {
-          header: "Metric",
-          component: "ChartMetric",
-          updateEvent: "chartMetric",
-          optionObject: "graphic",
-          charts: ["metric"],
+          charts: ["bar", "line", "scatter"],
         },
       ],
       options: {},
     };
   },
   components: {
-    ChartTitle,
-    ChartLegend,
-    ChartToolTip,
-    ChartAxisPointer,
-    ChartXaxis,
-    ChartYaxis,
-    ChartMetric,
+    ChartTitle: defineAsyncComponent(() => import("./ChartTitle.vue")),
+    ChartLegend: defineAsyncComponent(() => import("./ChartLegend.vue")),
+    ChartToolTip: defineAsyncComponent(() => import("./ChartToolTip.vue")),
+    ChartAxisPointer: defineAsyncComponent(() =>
+      import("./ChartAxisPointer.vue")
+    ),
+    ChartXaxis: defineAsyncComponent(() => import("./ChartXaxis.vue")),
+    ChartYaxis: defineAsyncComponent(() => import("./ChartYaxis.vue")),
   },
   methods: {
     externalSettings(setting) {

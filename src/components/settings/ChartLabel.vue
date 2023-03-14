@@ -13,6 +13,14 @@
       </v-switch>
     </v-col>
     <v-col cols="12">
+      <v-select
+        :items="positions"
+        v-model="label.position"
+        label="Position"
+        @change="updated"
+      ></v-select>
+    </v-col>
+    <v-col cols="12">
       <v-text-field
         v-model="label.rotate"
         type="number"
@@ -70,7 +78,23 @@ export default {
         show: false,
         rotate: 0,
         offset: [0, 0],
+        position: "top",
       },
+      positions: [
+        "top",
+        "left",
+        "right",
+        "bottom",
+        "inside",
+        "insideLeft",
+        "insideRight",
+        "insideTop",
+        "insideBottom",
+        "insideTopLeft",
+        "insideBottomLeft",
+        "insideTopRight",
+        "insideBottomRight",
+      ],
     };
   },
   created() {

@@ -1,13 +1,8 @@
 <template>
   <div>
     <v-app-bar color="white" app clipped-left clipped-right>
-      <a :href="$store.state.coreURL">
-        <v-img
-          :src="'/ihrisapp/translator/images/' + header.logo"
-          contain
-          max-height="36"
-          max-width="106"
-        />
+      <a :href="coreURL">
+        <img :src="header.logo" style="vertical-align: bottom" />
       </a>
       <v-app-bar-title class="headline ml-2" bottom="true">
         <span v-if="header.title" class="text-blue font-weight-bold">
@@ -39,7 +34,7 @@
         v-if="!header.title"
         color="primary"
       ></v-progress-circular>
-      <v-btn icon="mdi-home" title="Home" />
+      <v-btn icon="mdi-home" title="Home" :href="coreURL" />
       <v-btn icon title="Help">
         <v-icon>mdi-help</v-icon>
       </v-btn>
@@ -87,6 +82,7 @@ export default {
       loading: false,
       idle_countdown: false,
       idle_logout: 30,
+      coreURL: "",
     };
   },
   components: {
@@ -120,7 +116,7 @@ export default {
         this.loading = true;
         fetch("/auth/logout").then(() => {
           this.loading = false;
-          // this.$store.commit('logout')
+          this.$store.commit("logout");
           this.$emit("loggedout");
           if (force) {
             this.$store.commit("setMessage", {
@@ -134,10 +130,13 @@ export default {
               text: "You have logged out.",
             });
           }
-          window.location = this.$store.state.coreURL;
+          window.location = location.href.split("/ihrisapp")[0];
         });
       }
     },
+  },
+  created() {
+    this.coreURL = location.href.split("/ihrisapp/")[0];
   },
 };
 </script>

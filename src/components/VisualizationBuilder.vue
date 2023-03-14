@@ -481,6 +481,7 @@
               :chartSubType="chart.subType"
               @chartSettings="chartSettings"
               :options="option"
+              :key="'chart' + chart.type + chart.subType"
             />
             <GeneralSettings
               v-if="renderSettings"
@@ -488,7 +489,7 @@
               :chartSubType="chart.subType"
               @generalSettings="generalSettings"
               :option="option"
-              :key="chart.type + chart.subType"
+              :key="'general' + chart.type + chart.subType"
             />
           </v-col>
         </v-row>
@@ -802,8 +803,9 @@ import {
   GraphicComponent,
 } from "echarts/components";
 import VChart from "vue-echarts";
-import MetricChart from "./charts/MetricChart.js";
-import AxisChart from "./charts/AxisChart.js";
+import MetricChart from "./charts/IhrisMetricChart.js";
+import IhrisAxisChart from "./charts/IhrisAxisChart.js";
+import IhrisPieChart from "./charts/IhrisPieChart.js";
 import ChartsList from "./ChartsList.vue";
 import ChartSettings from "./settings/ChartSettings.vue";
 import GeneralSettings from "./settings/GeneralSettings.vue";
@@ -949,8 +951,19 @@ export default {
     );
 
     function reloadIhrisChart() {
-      if (chart.value.renderComponent === "AxisChart") {
-        const IhrisChart = AxisChart(
+      if (chart.value.renderComponent === "IhrisAxisChart") {
+        const IhrisChart = IhrisAxisChart(
+          series,
+          categories,
+          chart,
+          option,
+          chartOptions,
+          dataset
+        );
+        addFilters.value = IhrisChart.addFilters;
+        getChartData.value = IhrisChart.getChartData;
+      } else if (chart.value.renderComponent === "IhrisPieChart") {
+        const IhrisChart = IhrisPieChart(
           series,
           categories,
           chart,
@@ -1193,6 +1206,7 @@ export default {
     }
 
     function chartSelected(value) {
+      option.value = {};
       chart.value = value;
       reloadIhrisChart();
     }
@@ -1698,6 +1712,7 @@ export default {
         chart.value = store.state.charts.find((chart) => {
           return chart.type === "bar";
         });
+        reloadIhrisChart();
       }
       fetch("/es/indices")
         .then((response) => {
@@ -1902,8 +1917,6 @@ export default {
     VChart,
     GeneralSettings,
     ChartSettings,
-    // AxisChart: defineAsyncComponent(() => import("./charts/AxisChart.vue")),
-    // MetricChart: defineAsyncComponent(() => import("./charts/MetricChart.js")),
   },
 };
 </script>

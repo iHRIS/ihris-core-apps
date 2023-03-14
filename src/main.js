@@ -9,28 +9,9 @@ import fetchDefaults from "fetch-defaults";
 import * as Keycloak from "keycloak-js";
 import VueCookies from "vue-cookies";
 
-// import "vuetify/styles";
-// import { createVuetify } from "vuetify";
-// import * as components from "vuetify/components";
-// import * as directives from "vuetify/directives";
-// import { aliases, mdi } from "vuetify/iconsets/mdi";
-
-// const vuetify = createVuetify({
-//   icons: {
-//     defaultSet: "mdi",
-//     aliases,
-//     sets: {
-//       mdi,
-//     },
-//   },
-//   components,
-//   directives,
-// });
-
 const app = createApp(App);
 app.use(router);
 app.use(store);
-// app.use(vuetify);
 app.use(VueGridLayout);
 app.use(i18n);
 registerPlugins(app);
