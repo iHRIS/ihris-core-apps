@@ -156,7 +156,7 @@
 import LineStyle from "../LineStyle.vue";
 import ChartLabel from "../ChartLabel.vue";
 export default {
-  props: { chartSubType: String, options: Object },
+  props: { chartSubType: String, option: Object },
   data() {
     return {
       settings: {
@@ -237,8 +237,8 @@ export default {
     if (this.chartSubType === "area") {
       this.settings.areaStyle = {};
     }
-    if (this.options.series && this.options.series.length > 0) {
-      const lineOpts = this.options.series.find((ser) => {
+    if (this.option.series && this.option.series.length > 0) {
+      const lineOpts = this.option.series.find((ser) => {
         return ser.type === "line";
       });
       for (const index in lineOpts) {

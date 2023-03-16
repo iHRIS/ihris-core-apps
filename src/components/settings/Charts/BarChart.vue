@@ -208,7 +208,7 @@ import ChartLabel from "../ChartLabel.vue";
 import ItemStyle from "../ItemStyle.vue";
 export default {
   emits: ["chartSettings"],
-  props: { options: Object },
+  props: { option: Object },
   data() {
     return {
       settings: {
@@ -281,8 +281,8 @@ export default {
     };
   },
   created() {
-    if (this.options.series && this.options.series.length > 0) {
-      const barOpts = this.options.series.find((ser) => {
+    if (this.option.series && this.option.series.length > 0) {
+      const barOpts = this.option.series.find((ser) => {
         return ser.type === "bar";
       });
       for (const index in barOpts) {

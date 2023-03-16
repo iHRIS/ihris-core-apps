@@ -480,7 +480,7 @@
               :chartType="chart.type"
               :chartSubType="chart.subType"
               @chartSettings="chartSettings"
-              :options="option"
+              v-model:option="option"
               :key="'chart' + chart.type + chart.subType"
             />
             <GeneralSettings

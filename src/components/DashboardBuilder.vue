@@ -150,6 +150,7 @@
             <v-text-field
               label="Dashboard Title*"
               outlined
+              density="compact"
               v-model="title"
               v-if="editingDash"
             />
@@ -643,17 +644,21 @@ export default {
     },
     addVizualization(id) {
       let maxY = 0;
+      let maxX = 0;
       for (const viz of this.visualizations) {
         if (viz.y > maxY) {
           maxY = viz.y;
         }
+        if (viz.x > maxX) {
+          maxX = viz.x;
+        }
       }
-      if (maxY) {
-        maxY += 2;
+      if (this.visualizations.length > 0) {
+        maxY += 11.2;
       }
       this.visualizations.push({
         id: id,
-        x: 0,
+        x: maxX,
         y: maxY,
         w: 6,
         h: 11.2,

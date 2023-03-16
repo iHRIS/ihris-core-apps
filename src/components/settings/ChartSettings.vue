@@ -1,10 +1,9 @@
 <template>
   <div>
-    {{ options }}
     <v-expansion-panels multiple focusable v-model="expandSettings">
       <v-expansion-panel title="Bar Chart" v-if="chartType === 'bar'">
         <v-expansion-panel-text>
-          <BarChart @chartSettings="chartSettings" :options="options" />
+          <BarChart @chartSettings="chartSettings" :option="options" />
         </v-expansion-panel-text>
       </v-expansion-panel>
       <v-expansion-panel title="Pie Chart" v-else-if="chartType === 'pie'">
@@ -12,7 +11,7 @@
           <PieChart
             @chartSettings="chartSettings"
             :chartSubType="chartSubType"
-            :options="options"
+            :option="options"
           />
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -21,13 +20,13 @@
           <LineChart
             @chartSettings="chartSettings"
             :chartSubType="chartSubType"
-            :options="options"
+            :option="options"
           />
         </v-expansion-panel-text>
       </v-expansion-panel>
       <v-expansion-panel title="Gauge Chart" v-else-if="chartType === 'gauge'">
         <v-expansion-panel-text>
-          <GaugeChart @chartSettings="chartSettings" :options="options" />
+          <GaugeChart @chartSettings="chartSettings" :option="options" />
         </v-expansion-panel-text>
       </v-expansion-panel>
       <v-expansion-panel
@@ -37,7 +36,7 @@
         <v-expansion-panel-text>
           <MetricChart
             @chartSettings="chartSettings"
-            v-model:options="option"
+            v-model:option="options"
           />
         </v-expansion-panel-text>
       </v-expansion-panel>
@@ -47,15 +46,15 @@
 <script>
 import { defineAsyncComponent, ref, computed, onMounted } from "vue";
 export default {
-  props: ["chartType", "chartSubType", "options"],
+  props: ["chartType", "chartSubType", "option"],
   setup(props, context) {
     const expandSettings = ref([]);
-    const option = computed({
+    const options = computed({
       get() {
-        return props.options;
+        return props.option;
       },
       set(value) {
-        context.emit("update:options", value);
+        context.emit("update:option", value);
       },
     });
     function chartSettings(setting) {
@@ -69,7 +68,7 @@ export default {
     });
 
     return {
-      option,
+      options,
       expandSettings,
       chartSettings,
     };

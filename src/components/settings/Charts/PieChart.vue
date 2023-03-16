@@ -307,7 +307,7 @@
 <script>
 import TextStyle from "../TextStyle.vue";
 export default {
-  props: { chartSubType: String, options: Object },
+  props: { chartSubType: String, option: Object },
   data() {
     return {
       settings: {
@@ -414,8 +414,8 @@ export default {
         borderWidth: 2,
       };
     }
-    if (this.options.series && this.options.series.length > 0) {
-      const pieOpts = this.options.series.find((ser) => {
+    if (this.option.series && this.option.series.length > 0) {
+      const pieOpts = this.option.series.find((ser) => {
         return ser.type === "pie";
       });
       for (const index in pieOpts) {

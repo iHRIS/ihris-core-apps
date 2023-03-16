@@ -7,20 +7,18 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="settings.graphic.elements[0].style.fontSize"
+                v-model="options.graphic.elements[0].style.fontSize"
                 type="number"
                 label="Font Size"
                 min="5"
                 max="100"
-                @input="updated"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-select
                 :items="fontWeight"
-                v-model="settings.graphic.elements[0].style.fontWeight"
+                v-model="options.graphic.elements[0].style.fontWeight"
                 label="Font Weight"
-                @change="updated"
               ></v-select>
             </v-col>
             <v-col cols="12">
@@ -37,8 +35,7 @@
                 v-if="animation"
                 color="blue"
                 label="Loop Animation"
-                v-model="settings.graphic.elements[0].keyframeAnimation.loop"
-                @change="updated"
+                v-model="options.graphic.elements[0].keyframeAnimation.loop"
               >
               </v-switch>
             </v-col>
@@ -56,28 +53,25 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
-                v-model="settings.graphic.elements[1].style.text"
+                v-model="options.graphic.elements[1].style.text"
                 label="Title"
-                @input="updated"
               >
               </v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field
-                v-model="settings.graphic.elements[1].style.fontSize"
+                v-model="options.graphic.elements[1].style.fontSize"
                 type="number"
                 label="Font Size"
                 min="5"
                 max="100"
-                @input="updated"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-select
                 :items="fontWeight"
-                v-model="settings.graphic.elements[1].style.fontWeight"
+                v-model="options.graphic.elements[1].style.fontWeight"
                 label="Font Weight"
-                @change="updated"
               ></v-select>
             </v-col>
             <v-col cols="12">
@@ -94,8 +88,7 @@
                 v-if="animation"
                 color="blue"
                 label="Loop Animation"
-                v-model="settings.graphic.elements[1].keyframeAnimation.loop"
-                @change="updated"
+                v-model="options.graphic.elements[1].keyframeAnimation.loop"
               >
               </v-switch>
             </v-col>
@@ -111,7 +104,7 @@
 <script>
 import { ref, computed, onMounted } from "vue";
 export default {
-  props: { options: Object },
+  props: { option: Object },
   setup(props, context) {
     const fontWeight = ref(["normal", "bold", "bolder", "lighter"]);
     const animation = ref(false);
@@ -203,39 +196,32 @@ export default {
         ],
       },
     });
-    let option = computed({
+    let options = computed({
       get() {
-        return props.options;
+        return props.option;
       },
       set(value) {
-        context.emit("update:options", value);
+        context.emit("update:option", value);
       },
     });
     onMounted(() => {
-      option.value = settings.value;
-      updated();
+      if (!props.option.graphic) {
+        options.value = settings.value;
+      }
     });
     function animate(index) {
       if (animation.value) {
-        settings.value.graphic.elements[
-          index
-        ].keyframeAnimation.duration = 3000;
+        options.value.graphic.elements[index].keyframeAnimation.duration = 3000;
       } else {
-        settings.value.graphic.elements[index].keyframeAnimation.duration = 1;
+        options.value.graphic.elements[index].keyframeAnimation.duration = 1;
       }
-      updated();
-    }
-    function updated() {
-      console.error(JSON.stringify(option.value, 0, 2));
-      console.log("update");
     }
 
     return {
       fontWeight,
       animation,
-      settings,
+      options,
       animate,
-      updated,
     };
   },
 };

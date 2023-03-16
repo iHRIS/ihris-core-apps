@@ -192,7 +192,7 @@
 import ItemStyle from "../ItemStyle.vue";
 import ChartLabel from "../ChartLabel.vue";
 export default {
-  props: { options: Object },
+  props: { option: Object },
   data() {
     return {
       settings: {
@@ -247,8 +247,8 @@ export default {
     };
   },
   created() {
-    if (this.options.series && this.options.series.length > 0) {
-      const gaugeOpts = this.options.series.find((ser) => {
+    if (this.option.series && this.option.series.length > 0) {
+      const gaugeOpts = this.option.series.find((ser) => {
         return ser.type === "gauge";
       });
       for (const index in gaugeOpts) {
