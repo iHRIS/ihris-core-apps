@@ -1417,22 +1417,28 @@ export default {
       })
         .then((response) => {
           if (response.status !== 200 && response.status !== 201) {
-            store.state.snackbar.enabled = true;
-            store.state.snackbar.text = "Failed to save Visualization!";
-            store.state.snackbar.color = "error";
+            this.$store.commit("setMessage", {
+              type: "error",
+              text: "Failed to save Visualization!",
+              timeout: 2000,
+            });
             return;
           }
           response.json().then((data) => {
-            store.state.snackbar.enabled = true;
-            store.state.snackbar.text = "Visualization saved successfully!";
-            store.state.snackbar.color = "primary";
+            this.$store.commit("setMessage", {
+              type: "primary",
+              text: "Visualization saved successfully!",
+              timeout: 2000,
+            });
             vizId.value = data.id;
           });
         })
         .catch((error) => {
-          store.state.snackbar.enabled = true;
-          store.state.snackbar.text = "Failed to save Visualization!";
-          store.state.snackbar.color = "error";
+          this.$store.commit("setMessage", {
+            type: "error",
+            text: "Failed to save Visualization!",
+            timeout: 2000,
+          });
           console.error("Error:", error);
         });
     }

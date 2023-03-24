@@ -747,22 +747,28 @@ export default {
       })
         .then((response) => {
           if (response.status !== 200 && response.status !== 201) {
-            this.$store.state.snackbar.enabled = true;
-            this.$store.state.snackbar.text = "Failed to save Dashboard!";
-            this.$store.state.snackbar.color = "error";
+            this.$store.commit("setMessage", {
+              type: "error",
+              text: "Failed to save Dashboard!",
+              timeout: 2000,
+            });
             return;
           }
           response.json().then((data) => {
-            this.$store.state.snackbar.enabled = true;
-            this.$store.state.snackbar.text = "Dashboard saved successfully!";
-            this.$store.state.snackbar.color = "primary";
+            this.$store.commit("setMessage", {
+              type: "primary",
+              text: "Dashboard saved successfully!",
+              timeout: 4000,
+            });
             this.dashboardId = data.id;
           });
         })
         .catch((error) => {
-          this.$store.state.snackbar.enabled = true;
-          this.$store.state.snackbar.text = "Failed to save Dashboard!";
-          this.$store.state.snackbar.color = "error";
+          this.$store.commit("setMessage", {
+            type: "error",
+            text: "Failed to save Dashboard!",
+            timeout: 2000,
+          });
           console.error("Error:", error);
         });
     },

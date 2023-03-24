@@ -4,31 +4,36 @@
     <IhrisNavigation app :nav="nav" v-on:loggedin="updateConfig" />
     <v-main>
       <v-snackbar
-        v-model="$store.state.snackbar.enabled"
-        timeout="2000"
-        :color="$store.state.snackbar.color"
-        dark
+        v-model="$store.state.message.active"
+        :timeout="$store.state.message.timeout"
+        :color="$store.state.message.type"
+        top
+        multi-line
       >
-        {{ $store.state.snackbar.text }}
-
-        <template v-slot:action="{ attrs }">
-          <v-btn
-            dark
-            color="blue"
-            text
-            v-bind="attrs"
-            @click="$store.state.snackbar.enabled = false"
-          >
-            Close
-          </v-btn>
-        </template>
+        {{ $store.state.message.text }}
+        <v-btn
+          dark
+          color="blue"
+          icon="mdi-close"
+          size="small"
+          @click="$store.commit('closeMessage')"
+        />
       </v-snackbar>
+      <v-alert
+        v-if="connectionStatus"
+        variant="outlined"
+        type="warning"
+        border="top"
+      >
+        {{ connectionStatus }}
+      </v-alert>
       <router-view :key="$route.fullPath" />
     </v-main>
     <IhrisFooter :footer="footer" />
   </v-app>
 </template>
 <script>
+const { fetch: originalFetch } = window;
 import IhrisHeader from "./components/IhrisHeader.vue";
 import IhrisFooter from "./components/IhrisFooter.vue";
 import IhrisNavigation from "./components/IhrisNavigation.vue";
@@ -36,6 +41,7 @@ import IhrisNavigation from "./components/IhrisNavigation.vue";
 export default {
   data: function () {
     return {
+      connectionStatus: "",
       loading: false,
       idle_countdown: false,
       idle_logout: 30,
@@ -123,6 +129,7 @@ export default {
                     if (
                       Object.prototype.hasOwnProperty.call(data.footer, "links")
                     ) {
+                      this.footer.links = [];
                       for (const id of Object.keys(data.footer.links)) {
                         data.footer.links[id].id = id;
                         this.footer.links.push(data.footer.links[id]);
@@ -143,6 +150,18 @@ export default {
     },
   },
   async created() {
+    window.fetch = async (...args) => {
+      let [resource, config] = args;
+      let response = await originalFetch(resource, config);
+      if (response.status === 401) {
+        console.error("Not loggedin");
+        this.connectionStatus = "offline";
+        window.location = location.href.split("/ihrisapp")[0];
+      } else {
+        this.connectionStatus = "";
+      }
+      return response;
+    };
     document.title = "Data Visualizer";
     let query = location.search;
     query = query.substring(1);

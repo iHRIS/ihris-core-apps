@@ -56,11 +56,11 @@
         </v-btn>
       </template>
     </v-app-bar>
-    <v-overlay :value="idle_countdown">
-      <v-card class="secondary lighten-1">
-        <v-card-title class="headline warning white--text" primary-title
-          >Idle - Auto Logout</v-card-title
-        >
+    <v-overlay v-model="idle_countdown" class="align-center justify-center">
+      <v-card>
+        <v-toolbar color="warning" class="text-h6 pa-3" height="24">
+          Idle - Auto Logout
+        </v-toolbar>
         <v-card-text class="black--text"
           >You have been idle too long and will be logged out in
           {{ idle_logout }} seconds.</v-card-text
@@ -72,6 +72,7 @@
 
 <script>
 import VueCookies from "vue-cookies";
+import IdleJs from "idle-js";
 import LanguageSwitcher from "@/components/language-switcher.vue";
 
 export default {
@@ -88,19 +89,11 @@ export default {
   components: {
     LanguageSwitcher,
   },
-  onIdle() {
-    // if (store.state.user.loggedin) this.logout(null, true)
-    if (this.$store.state.user.loggedin) this.idleDialog();
-  },
-  onActive() {
-    this.idle_countdown = false;
-  },
   methods: {
     idleDialog() {
       this.idle_logout = 30;
       this.idle_countdown = true;
       const timerId = setInterval(() => {
-        if (!this.isAppIdle) return clearInterval(timerId);
         this.idle_logout -= 1;
         if (this.idle_logout < 1) {
           clearInterval(timerId);
@@ -136,6 +129,21 @@ export default {
     },
   },
   created() {
+    const me = this;
+    const idle = new IdleJs({
+      idle: 900000,
+      events: ["mousemove", "keydown", "mousedown", "touchstart"],
+      keepTracking: true,
+      startAtIdle: false,
+
+      onIdle() {
+        if (me.$store.state.user.loggedin) me.idleDialog();
+      },
+      onActive() {
+        me.idle_countdown = false;
+      },
+    });
+    idle.start();
     this.coreURL = location.href.split("/ihrisapp/")[0];
   },
 };
