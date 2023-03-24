@@ -1,13 +1,12 @@
+import { createRouter, createWebHashHistory } from "vue-router";
 
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [{
+      path: "/static/:id",
+      name: "static",
+      component: () => import("../views/static-page.vue"),
+    }]
+});
 
-Vue.use(VueRouter)
-
-const routes = []
-
-const router = new VueRouter({
-  routes
-})
-
-export default router
+export default router;
