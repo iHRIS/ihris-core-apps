@@ -1,24 +1,25 @@
 
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHashHistory } from "vue-router";
 
-Vue.use(VueRouter)
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import(/* webpackChunkName: "about" */ '../components/TranslatedLanguages.vue'),
+    },
+    {
+      path: '/review/:locale',
+      name: 'review',
+      component: () => import(/* webpackChunkName: "about" */ '../components/ReviewTranslations.vue'),
+    },
+    {
+      path: "/static/:id",
+      name: "static",
+      component: () => import("../views/static-page.vue"),
+    },
+  ],
+});
 
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: () => import(/* webpackChunkName: "about" */ '../components/TranslatedLanguages.vue')
-  },
-  {
-    path: '/review/:locale',
-    name: 'review',
-    component: () => import(/* webpackChunkName: "about" */ '../components/ReviewTranslations.vue')
-  }
-]
-
-const router = new VueRouter({
-  routes
-})
-
-export default router
+export default router;

@@ -6,10 +6,9 @@
       v-model="displayDialog"
     >
       <v-card>
-        <v-toolbar
-          color="primary"
-          dark
-        >Import {{language}} Translations</v-toolbar>
+        <v-toolbar color="primary" dark
+          >Import {{ language }} Translations</v-toolbar
+        >
         <v-card-text>
           <v-file-input
             :disabled="importStatus.running"
@@ -19,7 +18,11 @@
             v-model="importedTranslation"
             ref="trans"
           ></v-file-input>
-          <v-progress-linear :indeterminate="true" height="20" v-if="importStatus.running">
+          <v-progress-linear
+            :indeterminate="true"
+            height="20"
+            v-if="importStatus.running"
+          >
             Importing Translations
           </v-progress-linear>
           <div v-if="importStatus.successful" style="color: green">
@@ -30,15 +33,16 @@
             <b>Import failed because of below error(s)</b>
           </div>
           <div v-if="importStatus.duplicated.length > 0">
-            &nbsp;&nbsp;&nbsp;Below Keys are Dupplicated <br>
+            &nbsp;&nbsp;&nbsp;Below Keys are Dupplicated <br />
             <template v-for="(dup, index) in importStatus.duplicated">
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{++index}}. {{dup}}
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ ++index }}. {{ dup }}
             </template>
           </div>
           <div v-if="importStatus.invalid.length > 0">
-            &nbsp;&nbsp;&nbsp;Below Keys were not expected and must be removed before importing <br>
+            &nbsp;&nbsp;&nbsp;Below Keys were not expected and must be removed
+            before importing <br />
             <template v-for="(inv, index) in importStatus.invalid">
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{++index}}. {{inv}}
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ ++index }}. {{ inv }}
             </template>
           </div>
         </v-card-text>
@@ -66,57 +70,56 @@
   </v-container>
 </template>
 <script>
-import { eventBus } from '../main'
 export default {
-  props: ['importDialog', 'locale', 'language'],
-  data () {
+  props: ["importDialog", "locale", "language"],
+  data() {
     return {
-      importedTranslation: '',
+      importedTranslation: "",
       importStatus: {
         running: false,
         failed: false,
         successful: false,
         duplicated: [],
-        invalid: []
-      }
-    }
+        invalid: [],
+      },
+    };
   },
   computed: {
-    displayDialog () {
-      return this.importDialog
-    }
+    displayDialog() {
+      return this.importDialog;
+    },
   },
   methods: {
-    closeImportDialog () {
-      this.importStatus.running = false
-      this.importStatus.failed = false
-      this.importStatus.successful = false
-      this.importStatus.duplicated = []
-      this.importStatus.invalid = []
-      this.importedTranslation = ''
-      eventBus.$emit('closeImportDialog')
+    closeImportDialog() {
+      this.importStatus.running = false;
+      this.importStatus.failed = false;
+      this.importStatus.successful = false;
+      this.importStatus.duplicated = [];
+      this.importStatus.invalid = [];
+      this.importedTranslation = "";
+      this.emitter.emit("closeImportDialog");
     },
-    importTranslation () {
-      const data = new FormData()
-      data.append('translation', this.importedTranslation)
-      this.importStatus.running = true
-      fetch('/translator/import/' + this.locale, {
-        method: 'POST',
-        body: data
+    importTranslation() {
+      const data = new FormData();
+      data.append("translation", this.importedTranslation);
+      this.importStatus.running = true;
+      fetch("/translator/import/" + this.locale, {
+        method: "POST",
+        body: data,
       }).then((response) => {
         if (response.status === 200) {
-          this.importStatus.running = false
-          this.importStatus.successful = true
+          this.importStatus.running = false;
+          this.importStatus.successful = true;
         } else if (response.status === 400) {
           response.json().then((data) => {
-            this.importStatus.running = false
-            this.importStatus.failed = true
-            this.importStatus.duplicated = data.duplicated
-            this.importStatus.invalid = data.invalid
-          })
+            this.importStatus.running = false;
+            this.importStatus.failed = true;
+            this.importStatus.duplicated = data.duplicated;
+            this.importStatus.invalid = data.invalid;
+          });
         }
-      })
-    }
-  }
-}
+      });
+    },
+  },
+};
 </script>

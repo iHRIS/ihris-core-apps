@@ -1,9 +1,6 @@
 <template>
   <div class="home">
-    <v-snackbar
-      v-model="snackbar"
-      timeout="2000"
-    >
+    <v-snackbar v-model="snackbar" timeout="2000">
       {{ snackbarText }}
 
       <template v-slot:action="{ attrs }">
@@ -24,10 +21,7 @@
     >
       <template v-slot:default="dialog">
         <v-card>
-          <v-toolbar
-            color="primary"
-            dark
-          >Select Language</v-toolbar>
+          <v-toolbar color="primary" dark>Select Language</v-toolbar>
           <v-card-text>
             <div class="text-h6">
               <v-autocomplete
@@ -42,19 +36,12 @@
             </div>
           </v-card-text>
           <v-card-actions class="justify-end">
-            <v-btn
-              text
-              @click="dialog.value = false"
-            >
+            <v-btn text @click="dialog.value = false">
               <v-icon>mdi-close</v-icon>
               Close
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn
-              :disabled="!language"
-              text
-              @click="add"
-            >
+            <v-btn :disabled="!language" text @click="add">
               <v-icon>mdi-plus</v-icon>
               Add
             </v-btn>
@@ -63,15 +50,8 @@
       </template>
     </v-dialog>
     <center>
-      <v-card
-        class="mx-auto"
-        max-width="300"
-        tile
-      >
-        <v-app-bar
-          dark
-          color="primary"
-        >
+      <v-card class="mx-auto" max-width="300" tile>
+        <v-app-bar dark color="primary">
           <v-icon>mdi-google-translate</v-icon>
           <v-spacer></v-spacer>
           <v-toolbar-title>Enabled Languages</v-toolbar-title>
@@ -79,9 +59,7 @@
         <v-card-title primary-title>
           <v-row>
             <v-col cols="7">
-              <div class="text-subtitle-2">
-                Select to view
-              </div>
+              <div class="text-subtitle-2">Select to view</div>
             </v-col>
             <v-col cols="2">
               <v-tooltip top>
@@ -124,18 +102,15 @@
           </v-row>
         </v-card-title>
         <v-list shaped>
-          <v-list-item-group
-            v-model="selectedLocale"
-            color="primary"
-          >
-            <v-list-item
-              v-for="(lang, i) in translatedLanguages"
-              :key="i"
-            >
+          <v-list-item-group v-model="selectedLocale" color="primary">
+            <v-list-item v-for="(lang, i) in translatedLanguages" :key="i">
               <v-list-item-content>
                 <v-row>
                   <v-col>
-                    <v-list-item-title v-text="lang.language" @click="selected(lang)"></v-list-item-title>
+                    <v-list-item-title
+                      v-text="lang.language"
+                      @click="selected(lang)"
+                    ></v-list-item-title>
                   </v-col>
                   <v-col v-if="textExtractionStatus[lang.locale].active">
                     <v-progress-linear
@@ -162,109 +137,128 @@
 </template>
 
 <script>
-import { eventBus } from '../main'
 export default {
-  data () {
+  data() {
     return {
-      snackbarColor: 'green',
-      snackbarText: '',
+      snackbarColor: "green",
+      snackbarText: "",
       snackbar: false,
       addDialog: false,
       translatedLanguages: [],
-      selectedLocale: '',
+      selectedLocale: "",
       languages: [],
-      language: '',
-      textExtractionStatus: {}
-    }
+      language: "",
+      textExtractionStatus: {},
+    };
   },
   methods: {
-    getTranslatedLanguages () {
-      fetch('/translator/getTranslatedLanguages').then((response) => {
-        response.json().then(lang => {
-          this.translatedLanguages = lang
-          for (const lang of this.translatedLanguages) {
-            this.$set(this.textExtractionStatus, lang.locale, {})
-            this.$set(this.textExtractionStatus[lang.locale], 'active', false)
-            this.$set(this.textExtractionStatus[lang.locale], 'running', false)
-            this.$set(this.textExtractionStatus[lang.locale], 'displayStatus', false)
-          }
+    getTranslatedLanguages() {
+      fetch("/translator/getTranslatedLanguages")
+        .then((response) => {
+          response.json().then((lang) => {
+            this.translatedLanguages = lang;
+            for (const lang of this.translatedLanguages) {
+              this.$set(this.textExtractionStatus, lang.locale, {});
+              this.$set(
+                this.textExtractionStatus[lang.locale],
+                "active",
+                false
+              );
+              this.$set(
+                this.textExtractionStatus[lang.locale],
+                "running",
+                false
+              );
+              this.$set(
+                this.textExtractionStatus[lang.locale],
+                "displayStatus",
+                false
+              );
+            }
+          });
         })
-      }).catch(err => {
-        console.log(err)
-      })
+        .catch((err) => {
+          console.log(err);
+        });
     },
-    selected (lang) {
+    selected(lang) {
       this.$router.push({
-        path: '/review/' + lang.locale
-      })
+        path: "/review/" + lang.locale,
+      });
     },
-    populateTexts () {
+    populateTexts() {
       for (const lang of this.translatedLanguages) {
-        this.textExtractionStatus[lang.locale].active = true
+        this.textExtractionStatus[lang.locale].active = true;
         // this.textExtractionStatus[lang.locale].running = true
       }
-      this.textExtractionStatus.en.running = true
-      fetch('/translator/extractTexts/en').then((response) => {
-        this.textExtractionStatus.en.running = false
-        this.textExtractionStatus.en.displayStatus = true
-        if (response.status === 200) {
-          for (const lang of this.translatedLanguages) {
-            if (lang.locale === 'en') {
-              continue
-            }
-            this.textExtractionStatus[lang.locale].active = true
-            this.textExtractionStatus[lang.locale].running = true
-            fetch('/translator/extractTexts/' + lang.locale).then((response) => {
-              if (response.status === 200) {
-                this.textExtractionStatus[lang.locale].running = false
-                this.textExtractionStatus[lang.locale].displayStatus = true
+      this.textExtractionStatus.en.running = true;
+      fetch("/translator/extractTexts/en")
+        .then((response) => {
+          this.textExtractionStatus.en.running = false;
+          this.textExtractionStatus.en.displayStatus = true;
+          if (response.status === 200) {
+            for (const lang of this.translatedLanguages) {
+              if (lang.locale === "en") {
+                continue;
               }
-            }).catch(() => {
-              this.textExtractionStatus[lang.locale].running = false
-              this.snackbar = true
-              this.snackbarColor = 'red'
-              this.snackbarText = 'Error Occured for English'
-            })
+              this.textExtractionStatus[lang.locale].active = true;
+              this.textExtractionStatus[lang.locale].running = true;
+              fetch("/translator/extractTexts/" + lang.locale)
+                .then((response) => {
+                  if (response.status === 200) {
+                    this.textExtractionStatus[lang.locale].running = false;
+                    this.textExtractionStatus[lang.locale].displayStatus = true;
+                  }
+                })
+                .catch(() => {
+                  this.textExtractionStatus[lang.locale].running = false;
+                  this.snackbar = true;
+                  this.snackbarColor = "red";
+                  this.snackbarText = "Error Occured for English";
+                });
+            }
           }
-        }
-      }).catch(() => {
-        this.textExtractionStatus.en.running = false
-        this.snackbar = true
-        this.snackbarColor = 'red'
-        this.snackbarText = 'Error Occured for English'
-      })
-    },
-    getLanguages () {
-      this.addDialog = true
-      fetch('/translator/languages').then((response) => {
-        response.json().then((languages) => {
-          this.languages = languages
         })
-      })
+        .catch(() => {
+          this.textExtractionStatus.en.running = false;
+          this.snackbar = true;
+          this.snackbarColor = "red";
+          this.snackbarText = "Error Occured for English";
+        });
     },
-    add () {
-      fetch('/translator/addLanguage/' + this.language, { method: 'POST' }).then((response) => {
-        if (response.status === 201) {
-          this.addDialog = false
-          this.getTranslatedLanguages()
-          this.snackbar = true
-          this.snackbarColor = 'green'
-          this.snackbarText = 'Language Added'
-          eventBus.$emit('getLanguageList')
-        } else {
-          this.snackbar = true
-          this.snackbarColor = 'red'
-          this.snackbarText = 'Error Occured'
-        }
-      }).catch(() => {
-        this.snackbar = true
-        this.snackbarColor = 'red'
-        this.snackbarText = 'Error Occured'
-      })
-    }
+    getLanguages() {
+      this.addDialog = true;
+      fetch("/translator/languages").then((response) => {
+        response.json().then((languages) => {
+          this.languages = languages;
+        });
+      });
+    },
+    add() {
+      fetch("/translator/addLanguage/" + this.language, { method: "POST" })
+        .then((response) => {
+          if (response.status === 201) {
+            this.addDialog = false;
+            this.getTranslatedLanguages();
+            this.snackbar = true;
+            this.snackbarColor = "green";
+            this.snackbarText = "Language Added";
+            this.emitter.emit("getLanguageList");
+          } else {
+            this.snackbar = true;
+            this.snackbarColor = "red";
+            this.snackbarText = "Error Occured";
+          }
+        })
+        .catch(() => {
+          this.snackbar = true;
+          this.snackbarColor = "red";
+          this.snackbarText = "Error Occured";
+        });
+    },
   },
-  created () {
-    this.getTranslatedLanguages()
-  }
-}
+  created() {
+    this.getTranslatedLanguages();
+  },
+};
 </script>

@@ -1,44 +1,74 @@
 <template>
   <v-app id="top">
     <IhrisHeader app :header="header" @loggedout="updateConfig" />
+    <IhrisNavigation app :nav="nav" v-on:loggedin="updateConfig" />
     <v-main>
+      <v-snackbar
+        v-model="$store.state.message.active"
+        :timeout="$store.state.message.timeout"
+        :color="$store.state.message.type"
+        top
+        multi-line
+      >
+        {{ $store.state.message.text }}
+        <v-btn
+          dark
+          color="blue"
+          icon="mdi-close"
+          size="small"
+          @click="$store.commit('closeMessage')"
+        />
+      </v-snackbar>
+      <v-alert
+        v-if="connectionStatus"
+        variant="outlined"
+        type="warning"
+        border="top"
+      >
+        {{ connectionStatus }}
+      </v-alert>
       <center>
         <p></p>
         <b>iHRIS Translation APP</b>
       </center>
-      <router-view />
+      <router-view :key="$route.fullPath" />
     </v-main>
     <IhrisFooter :footer="footer" />
   </v-app>
 </template>
 <script>
-import IhrisHeader from './components/IhrisHeader'
-import IhrisFooter from './components/IhrisFooter'
+const { fetch: originalFetch } = window;
+import IhrisHeader from "./components/IhrisHeader.vue";
+import IhrisFooter from "./components/IhrisFooter.vue";
+import IhrisNavigation from "./components/IhrisNavigation.vue";
+
 export default {
   data: function () {
     return {
+      connectionStatus: "",
       loading: false,
       idle_countdown: false,
       idle_logout: 30,
       header: {
         title: false,
         site: null,
-        logo: 'iHRIS5Logo.png',
-        auths: []
+        logo: "iHRIS5Logo.png",
+        auths: [],
       },
       footer: {
-        links: []
+        links: [],
       },
       nav: {
         active: null,
         menu: {},
-        auths: []
-      }
-    }
+        auths: [],
+      },
+    };
   },
   components: {
     IhrisHeader,
-    IhrisFooter
+    IhrisFooter,
+    IhrisNavigation,
   },
   methods: {
     updateConfig: function () {
@@ -84,6 +114,7 @@ export default {
               }
               if (Object.prototype.hasOwnProperty.call(data, 'footer')) {
                 if (Object.prototype.hasOwnProperty.call(data.footer, 'links')) {
+                  this.footer.links = [];
                   for (const id of Object.keys(data.footer.links)) {
                     data.footer.links[id].id = id
                     this.footer.links.push(data.footer.links[id])
@@ -97,19 +128,31 @@ export default {
       })
     }
   },
-  created () {
-    this.updateConfig().then(() => {
-      let query = location.search
-      query = query.substring(1)
-      query = query.split('=')
-      const index = query.findIndex((qr) => qr === 'baseURL')
-      if (index !== -1) {
-        this.$store.state.coreURL = query[index + 1]
+  async created() {
+    window.fetch = async (...args) => {
+      let [resource, config] = args;
+      let response = await originalFetch(resource, config);
+      if (response.status === 401) {
+        console.error("Not loggedin");
+        this.connectionStatus = "offline";
+        window.location = location.href.split("/ihrisapp")[0];
+      } else {
+        this.connectionStatus = "";
       }
-      if (!this.$store.state.user.loggedin && this.$store.state.coreURL) {
-        window.location = this.$store.state.coreURL
-      }
-    })
-  }
-}
+      return response;
+    };
+    document.title = "Translation App";
+    let query = location.search;
+    query = query.substring(1);
+    query = query.split("=");
+    const index = query.findIndex((qr) => qr === "baseURL");
+    if (index !== -1) {
+      this.$store.state.coreURL = query[index + 1];
+    }
+    await this.updateConfig();
+    if (!this.$store.state.user.loggedin && this.$store.state.coreURL) {
+      window.location = this.$store.state.coreURL;
+    }
+  },
+};
 </script>
