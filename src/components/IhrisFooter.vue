@@ -1,14 +1,14 @@
 <template>
-  <v-footer color='white' app>
-    <v-row justify='end'>
+  <v-footer color="white" app>
+    <v-row justify="end">
       <v-btn
-        v-for='link in footer.links'
-        :key='link.id'
-        text
-        class='text-none'
+        v-for="link in footer.links"
+        :key="link.id"
+        variant="text"
+        class="text-none"
         :to="link.to"
         :href="link.href"
-        :target="link.href ? '_blank': ''"
+        :target="link.href ? '_blank' : ''"
       >
         {{ $t(`App.footer.${link.text}`) }}
       </v-btn>
@@ -17,13 +17,11 @@
 </template>
 
 <script>
-
 export default {
-  name: 'the-footer',
-  props: ['footer'],
+  name: "the-footer",
+  props: ["footer"],
   data: function () {
-    return {
-    }
-  }
-}
+    return {};
+  },
+};
 </script>

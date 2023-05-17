@@ -189,12 +189,11 @@
               class="elevation-1"
               style="cursor: pointer"
             >
-              <template v-slot:item="{ item, index }">
-                <tr @click="edit(item)">
-                  <td>{{ ++index }}</td>
-                  <td>{{ item.en | limitTexts }}</td>
-                  <td>{{ item.text | limitTexts }}</td>
-                </tr>
+              <template v-slot:item.value.en="{ item }">
+                {{ item.value.en | limitTexts }}
+              </template>
+              <template v-slot:item.value.text="{ item }">
+                {{ item.value.text | limitTexts }}
               </template>
             </v-data-table>
           </v-card-text>
@@ -299,6 +298,7 @@ export default {
   },
   filters: {
     limitTexts(val) {
+      console.log(val);
       if (val.length < 100) {
         return val;
       }

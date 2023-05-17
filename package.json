@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/ihrisapp/translator/",
+    "build": "vite build --base=/ihrisapp/ihris-app/",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
@@ -15,18 +15,15 @@
     "fhirpath": "^3.3.1",
     "idle-js": "^1.2.0",
     "keycloak-js": "^20.0.3",
+    "mitt": "^3.0.0",
     "url": "^0.11.0",
     "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.45",
     "vue-cookies": "^1.8.2",
-    "vue-echarts": "^6.5.4",
-    "vue-grid-layout": "^3.0.0-beta1",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.1.6",
-    "vuedraggable": "^4.1.0",
     "vuetify": "^3.1.6",
     "vuex": "^4.1.0",
-    "mitt" : "^3.0.0",
     "webfontloader": "^1.6.28"
   },
   "devDependencies": {

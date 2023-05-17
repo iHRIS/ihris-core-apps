@@ -1,5 +1,14 @@
 <template>
-  <div class="home">
+  <div class="home" style="text-align: center">
+    The iHRIS Translation App lets you translate the iHRIS interface into
+    different languages that are supported by Google Translate. <br />
+    You may start by clicking on the plus sign below, selecting the language to
+    translate to and clicking the add button.<br />
+    Once done with the translating, click come back to this page and click the
+    upload option below.
+    <!--</div>-->
+    <br /><br />
+    <!--div class="home"-->
     <v-snackbar v-model="snackbar" timeout="2000">
       {{ snackbarText }}
 
@@ -21,14 +30,14 @@
     >
       <template v-slot:default="dialog">
         <v-card>
-          <v-toolbar color="primary" dark>Select Language</v-toolbar>
+          <v-toolbar color="primary" dark> Select Language</v-toolbar>
           <v-card-text>
             <div class="text-h6">
               <v-autocomplete
                 v-model="language"
                 :items="languages"
                 item-value="locale"
-                item-text="name"
+                item-title="name"
                 dense
                 filled
                 label="Languages"
@@ -50,13 +59,14 @@
       </template>
     </v-dialog>
     <center>
-      <v-card class="mx-auto" max-width="300" tile>
-        <v-app-bar dark color="primary">
-          <v-icon>mdi-google-translate</v-icon>
-          <v-spacer></v-spacer>
-          <v-toolbar-title>Enabled Languages</v-toolbar-title>
-        </v-app-bar>
+      <v-card class="mx-auto" max-width="400" tile>
         <v-card-title primary-title>
+          <v-row>
+            <v-toolbar-title dark color="primary">
+              <v-icon>mdi-google-translate</v-icon> Enabled
+              Languages</v-toolbar-title
+            >
+          </v-row>
           <v-row>
             <v-col cols="7">
               <div class="text-subtitle-2">Select to view</div>
@@ -66,6 +76,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                     class="mx-2"
+                    rounded
                     fab
                     dark
                     color="indigo"
@@ -85,6 +96,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
                     class="mx-2"
+                    rounded
                     fab
                     dark
                     color="indigo"
@@ -135,7 +147,6 @@
     </center>
   </div>
 </template>
-
 <script>
 export default {
   data() {
@@ -158,22 +169,10 @@ export default {
           response.json().then((lang) => {
             this.translatedLanguages = lang;
             for (const lang of this.translatedLanguages) {
-              this.$set(this.textExtractionStatus, lang.locale, {});
-              this.$set(
-                this.textExtractionStatus[lang.locale],
-                "active",
-                false
-              );
-              this.$set(
-                this.textExtractionStatus[lang.locale],
-                "running",
-                false
-              );
-              this.$set(
-                this.textExtractionStatus[lang.locale],
-                "displayStatus",
-                false
-              );
+              this.textExtractionStatus[lang.locale] = {};
+              this.textExtractionStatus[lang.locale].active = false;
+              this.textExtractionStatus[lang.locale].running = false;
+              this.textExtractionStatus[lang.locale].displayStatus = false;
             }
           });
         })

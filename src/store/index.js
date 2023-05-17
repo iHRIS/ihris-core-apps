@@ -4,7 +4,7 @@ const store = createStore({
   state: {
     user: {
       loggedin: false,
-      name: ''
+      name: "",
     },
     idp: "ihris",
     security_off: false,
@@ -14,33 +14,32 @@ const store = createStore({
       timeout: 5000,
       active: false,
     },
-    coreURL: ''
+    coreURL: "",
   },
-  getters: {
-  },
+  getters: {},
   mutations: {
-    login (state, user) {
-      state.user.loggedin = true
-      state.user.name = user.name
-      state.user.location = user.location
-      state.user.role = user.role
-      state.user.userId = user.userId
-      state.user.reference = user.reference
-      state.user.facilityId = user.facilityId
-      state.user.physicalLocation = user.physicalLocation
+    login(state, user) {
+      state.user.loggedin = true;
+      state.user.name = user.name;
+      state.user.location = user.location;
+      state.user.role = user.role;
+      state.user.userId = user.userId;
+      state.user.reference = user.reference;
+      state.user.facilityId = user.facilityId;
+      state.user.physicalLocation = user.physicalLocation;
     },
-    logout (state) {
-      state.user.loggedin = false
-      state.user.name = ''
-      state.user.name = ''
-      state.user.location = ''
-      state.user.role = ''
-      state.user.reference = ''
-      state.user.facilityId = ''
-      state.user.physicalLocation = ''
+    logout(state) {
+      state.user.loggedin = false;
+      state.user.name = "";
+      state.user.name = "";
+      state.user.location = "";
+      state.user.role = "";
+      state.user.reference = "";
+      state.user.facilityId = "";
+      state.user.physicalLocation = "";
     },
-    securityOff (state, data) {
-      state.security_off = data
+    securityOff(state, data) {
+      state.security_off = data;
     },
     closeMessage(state) {
       state.message.active = false;
@@ -59,9 +58,7 @@ const store = createStore({
       }
     },
   },
-  actions: {
-  },
-  modules: {
-  }
-})
+  actions: {},
+  modules: {},
+});
 export default store;

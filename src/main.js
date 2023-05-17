@@ -1,33 +1,25 @@
 import { createApp } from "vue";
-import mitt from "mitt";
-import VueGridLayout from "vue-grid-layout";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import IdleJs from "idle-js";
-import * as Keycloak from "keycloak-js";
-import VueCookies from "vue-cookies";
 import { registerPlugins } from "@/plugins";
 import { i18n, loadLanguage } from "./i18n";
+import fetchDefaults from "fetch-defaults";
+import * as Keycloak from "keycloak-js";
+import VueCookies from "vue-cookies";
+import mitt from 'mitt';
 
 const emitter = mitt();
 const app = createApp(App);
 app.use(router);
 app.use(store);
-app.use(VueGridLayout);
 app.use(i18n);
 registerPlugins(app);
+app.config.globalProperties.emitter = emitter;
 
 app.config.globalProperties.$loadLanguage = function (locale) {
   loadLanguage(locale, app);
 };
-
-app.use(IdleJs, {
-  event: emitter,
-  store,
-  idle: 900000,
-  startAtIdle: false,
-});
 
 fetch("/config/app").then((response) => {
   response.json().then((data) => {
