@@ -58,8 +58,51 @@
         </v-card>
       </template>
     </v-dialog>
+    <v-dialog
+      transition="dialog-top-transition"
+      max-width="600"
+      v-model="addOtherDialog"
+    >
+      <template v-slot:default="dialog2">
+        <v-card>
+          <v-toolbar color="primary" dark
+            >Type Non-Google Translate Language</v-toolbar
+          >
+          <v-card-text>
+            <div class="text-h6">
+              <v-text-field
+                v-model="language"
+                hint="Enter Language Not supported by google translate"
+                clearable
+                required
+                label="Language"
+              >
+              </v-text-field>
+              <!--<v-text-field 
+              v-model="language"
+              hint="Enter three later short code for the above language"
+              clearable
+              required 
+              label="Language Code">
+            </v-text-field>-->
+            </div>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn text @click="dialog2.value = false">
+              <v-icon>mdi-close</v-icon>
+              Close
+            </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn text @click="add">
+              <v-icon>mdi-plus</v-icon>
+              Add
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </template>
+    </v-dialog>
     <center>
-      <v-card class="mx-auto" max-width="400" tile>
+      <v-card class="mx-auto" max-width="500" tile>
         <v-card-title primary-title>
           <v-row>
             <v-toolbar-title dark color="primary">
@@ -68,7 +111,7 @@
             >
           </v-row>
           <v-row>
-            <v-col cols="7">
+            <v-col cols="5">
               <div class="text-subtitle-2">Select to view</div>
             </v-col>
             <v-col cols="2">
@@ -85,10 +128,30 @@
                     v-bind="attrs"
                     v-on="on"
                   >
+                    <v-icon>mdi-google-translate</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add New Google Language</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="2">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    class="mx-2"
+                    rounded
+                    fab
+                    dark
+                    color="indigo"
+                    small
+                    @click="addOtherDialog = true"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
                     <v-icon>mdi-plus</v-icon>
                   </v-btn>
                 </template>
-                <span>Add New Language</span>
+                <span>Add New Non-Google Language</span>
               </v-tooltip>
             </v-col>
             <v-col cols="2">
@@ -155,6 +218,7 @@ export default {
       snackbarText: "",
       snackbar: false,
       addDialog: false,
+      addOtherDialog: false,
       translatedLanguages: [],
       selectedLocale: "",
       languages: [],
