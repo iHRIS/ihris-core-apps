@@ -41,7 +41,11 @@
         background style</v-tooltip
       >
     </v-switch>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels
+      multiple
+      focusable
+      v-model="expandBackgroundStyleSettings"
+    >
       <v-expansion-panel>
         <v-expansion-panel-title>Bar Background Style</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -95,7 +99,7 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels multiple focusable v-model="expandLabelSettings">
       <v-expansion-panel>
         <v-expansion-panel-title>Labels</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -110,7 +114,7 @@
         >Settings about labels of a bar</v-tooltip
       >
     </v-expansion-panels>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels multiple focusable v-model="expandLabelLineSettings">
       <v-expansion-panel>
         <v-expansion-panel-title>Label Line</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -141,7 +145,7 @@
         >Configuration of label guide line</v-tooltip
       >
     </v-expansion-panels>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels multiple focusable v-model="expandBarsSettings">
       <v-expansion-panel>
         <v-expansion-panel-title>Bars Settings</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -211,6 +215,10 @@ export default {
   props: { option: Object },
   data() {
     return {
+      expandLabelSettings: [],
+      expandBackgroundStyleSettings: [],
+      expandLabelLineSettings: [],
+      expandBarsSettings: [],
       settings: {
         type: "bar",
         barWidth: "",
@@ -279,6 +287,18 @@ export default {
       barGap: "",
       markPoint: false,
     };
+  },
+  mounted() {
+    this.expandLabelSettings.push(0);
+    this.expandBackgroundStyleSettings.push(0);
+    this.expandLabelLineSettings.push(0);
+    this.expandBarsSettings.push(0);
+    setTimeout(() => {
+      this.expandLabelSettings = [];
+      this.expandBackgroundStyleSettings = [];
+      this.expandLabelLineSettings = [];
+      this.expandBarsSettings = [];
+    }, 500);
   },
   created() {
     if (this.option.series && this.option.series.length > 0) {

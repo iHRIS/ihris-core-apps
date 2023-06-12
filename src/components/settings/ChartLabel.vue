@@ -75,7 +75,7 @@ export default {
   data() {
     return {
       label: {
-        show: false,
+        show: true,
         rotate: 0,
         offset: [0, 0],
         position: "top",

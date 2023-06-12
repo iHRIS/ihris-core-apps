@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="6">
         <v-text-field
+          :disabled="option.series && option.series.length > 0"
           type="number"
           min="0"
           max="100"
@@ -18,6 +19,7 @@
       </v-col>
       <v-col cols="6">
         <v-text-field
+          :disabled="option.series && option.series.length > 0"
           type="number"
           min="0"
           max="100"
@@ -201,7 +203,7 @@
         >Height of pie chart component. Adaptive by default.e</v-tooltip
       >
     </v-text-field>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels multiple focusable v-model="expandLabelSettings">
       <v-expansion-panel>
         <v-expansion-panel-title>Labels</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -215,6 +217,28 @@
               >
                 <v-tooltip activator="parent" location="bottom"
                   >Show or Hide labels</v-tooltip
+                >
+              </v-switch>
+            </v-col>
+            <v-col cols="12">
+              <v-switch
+                color="blue"
+                label="Show Percent"
+                v-model="other.label.percent"
+                @change="labelPercent"
+              >
+                <v-tooltip activator="parent" location="bottom"
+                  >Show Percent</v-tooltip
+                >
+              </v-switch>
+              <v-switch
+                color="blue"
+                label="Show Number"
+                v-model="other.label.number"
+                @change="labelNumber"
+              >
+                <v-tooltip activator="parent" location="bottom"
+                  >Show Number</v-tooltip
                 >
               </v-switch>
             </v-col>
@@ -250,7 +274,7 @@
         >Settings about labels of a pie sectors</v-tooltip
       >
     </v-expansion-panels>
-    <v-expansion-panels multiple focusable>
+    <v-expansion-panels multiple focusable v-model="expandLabelLineSettings">
       <v-expansion-panel>
         <v-expansion-panel-title>Labels Lines</v-expansion-panel-title>
         <v-expansion-panel-text>
@@ -310,6 +334,8 @@ export default {
   props: { chartSubType: String, option: Object },
   data() {
     return {
+      expandLabelSettings: [],
+      expandLabelLineSettings: [],
       settings: {
         type: "pie",
         colorBy: "data",
@@ -331,6 +357,15 @@ export default {
           show: true,
           position: "outside",
           distanceToLabelLine: 5,
+          formatter: "{b}：{c}  {per|{d}%}",
+          rich: {
+            per: {
+              color: "#fff",
+              backgroundColor: "#4C5058",
+              padding: [3, 4],
+              borderRadius: 4,
+            },
+          },
         },
         labelLine: {
           show: true,
@@ -344,6 +379,12 @@ export default {
         radius: ["0%", "75%"],
         tooltip: {
           trigger: "item",
+        },
+      },
+      other: {
+        label: {
+          percent: true,
+          number: true,
         },
       },
       colorBy: ["data", "series"],
@@ -390,6 +431,14 @@ export default {
       }
     },
   },
+  mounted() {
+    this.expandLabelSettings.push(0);
+    this.expandLabelLineSettings.push(0);
+    setTimeout(() => {
+      this.expandLabelSettings = [];
+      this.expandLabelLineSettings = [];
+    }, 500);
+  },
   created() {
     if (this.chartSubType === "donut") {
       this.settings.radius = ["40%", "70%"];
@@ -424,11 +473,43 @@ export default {
         }
       }
     }
-    this.innerRadius = this.settings.radius[0].replace("%", "");
-    this.outerRadius = this.settings.radius[1].replace("%", "");
+    this.innerRadius = this.settings.radius[0].toString().replace("%", "");
+    this.outerRadius = this.settings.radius[1].toString().replace("%", "");
     this.updated();
   },
   methods: {
+    labelPercent() {
+      if (this.other.label.percent) {
+        if (this.other.label.number) {
+          this.settings.label.formatter = "{b}：{c}  {per|{d}%}";
+        } else {
+          this.settings.label.formatter = "{b}：{d}%";
+        }
+      } else {
+        if (this.other.label.number) {
+          this.settings.label.formatter = "{b}:{c}";
+        } else {
+          this.settings.label.formatter = "{b}";
+        }
+      }
+      this.updated();
+    },
+    labelNumber() {
+      if (this.other.label.number) {
+        if (this.other.label.percent) {
+          this.settings.label.formatter = "{b}：{c}  {per|{d}%}";
+        } else {
+          this.settings.label.formatter = "{b}：{c}";
+        }
+      } else {
+        if (this.other.label.percent) {
+          this.settings.label.formatter = "{b}:{per|{d}%}";
+        } else {
+          this.settings.label.formatter = "{b}";
+        }
+      }
+      this.updated();
+    },
     LabelTextStyle(setting) {
       for (const style in setting.value) {
         this.settings.label[style] = setting.value[style];

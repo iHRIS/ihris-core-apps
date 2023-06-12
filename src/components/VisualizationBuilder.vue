@@ -1237,6 +1237,9 @@ export default {
           }
         }
       }
+      if (displayChart.value) {
+        loadChartData();
+      }
     }
 
     function save() {
