@@ -106,6 +106,7 @@
           <ChartLabel
             subscriber="barLabel"
             @barLabel="barLabelSettings"
+            :default="settings.label"
             :values="settings.label"
           />
         </v-expansion-panel-text>
@@ -234,9 +235,10 @@ export default {
           borderType: "solid",
         },
         label: {
-          show: false,
+          show: true,
           rotate: 0,
           offset: [0, 0],
+          position: "inside",
         },
         labelLine: {
           show: false,
@@ -264,26 +266,6 @@ export default {
       displayISShadowColor: false,
       colorBy: ["data", "series"],
       borderTypes: ["solid", "dashed", "dotted"],
-      position: [
-        "top",
-        "left",
-        "right",
-        "bottom",
-        "inside",
-        "insideLeft",
-        "insideRight",
-        "insideTop",
-        "insideBottom",
-        "insideTopLeft",
-        "insideBottomLeft",
-        "insideTopRight",
-        "insideBottomRight",
-        "start",
-        "middle",
-        "end",
-        "insideStart",
-        "insideEnd",
-      ],
       barGap: "",
       markPoint: false,
     };

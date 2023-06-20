@@ -24,7 +24,7 @@ const store = createStore({
         hasAxis: true,
         maxCategories: 2,
         maxSeries: 1,
-        minCategories: 1,
+        minCategories: 0,
         minSeries: 1,
         title: "Bar Chart",
         description:

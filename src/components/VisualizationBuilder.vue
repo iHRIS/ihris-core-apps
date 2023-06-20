@@ -746,6 +746,50 @@
               >Loading Data</v-progress-linear
             >
           </v-col>
+          <v-col cols="12">
+            <center><h3>Basic Settings</h3></center>
+            <v-row>
+              <v-col cols="6">
+                <v-switch
+                  color="blue"
+                  label="Show top values only"
+                  v-model="otherOptions.horizontalValues.displayTopValues"
+                >
+                  <v-tooltip activator="parent" location="bottom"
+                    >Only display top values and group the rest into
+                    others</v-tooltip
+                  >
+                </v-switch>
+              </v-col>
+              <v-col
+                cols="6"
+                v-if="otherOptions.horizontalValues.displayTopValues"
+              >
+                <v-text-field
+                  v-model="otherOptions.horizontalValues.totalValues"
+                  type="number"
+                  label="Total Top Values"
+                  min="0"
+                >
+                  <v-tooltip activator="parent" location="bottom"
+                    >Whether to move text slightly vertically</v-tooltip
+                  >
+                </v-text-field>
+              </v-col>
+              <v-col cols="6">
+                Bars Direction
+                <v-radio-group
+                  @change="loadChartData"
+                  inline
+                  v-model="otherOptions.barsDirection"
+                  color="blue"
+                >
+                  <v-radio label="Vertical" value="vertical"></v-radio>
+                  <v-radio label="Horizontal" value="horizontal"></v-radio>
+                </v-radio-group>
+              </v-col>
+            </v-row>
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -892,6 +936,13 @@ export default {
     const showValuesSelector = ref(false);
     const chart = ref({});
     const option = ref({});
+    const otherOptions = ref({
+      horizontalValues: {
+        displayTopValues: true,
+        totalValues: 20,
+      },
+      barsDirection: "vertical",
+    });
     const chartOptions = ref([]);
     const dragArea = ref(false);
     let addFilters = ref(function () {});
@@ -958,7 +1009,8 @@ export default {
           chart,
           option,
           chartOptions,
-          dataset
+          dataset,
+          otherOptions
         );
         addFilters.value = IhrisChart.addFilters;
         getChartData.value = IhrisChart.getChartData;
@@ -1759,6 +1811,7 @@ export default {
       showValuesSelector,
       chart,
       option,
+      otherOptions,
       chartOptions,
       dragArea,
       vizWidth,

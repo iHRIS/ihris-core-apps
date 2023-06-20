@@ -5,7 +5,8 @@ export default function IhrisAxisChart(
   chart,
   option,
   chartOptions,
-  dataset
+  dataset,
+  otherOptions
 ) {
   let data = ref("");
   const query = ref({
@@ -135,9 +136,9 @@ export default function IhrisAxisChart(
 
   function getData() {
     return new Promise((resolve, reject) => {
-      let category = "categories";
-      if (chart.value.maxCategories === 0) {
-        category = "series";
+      let aggKey = "categories";
+      if (chart.value.maxCategories === 0 || categories.value.length === 0) {
+        aggKey = "series";
       }
       const url = `/es/${dataset.value.name}/_search?filter_path=aggregations`;
       fetch(url, {
@@ -154,20 +155,20 @@ export default function IhrisAxisChart(
               if (!data.value) {
                 data.value = results;
               } else if (
-                results.aggregations[category].buckets &&
-                results.aggregations[category].buckets.length > 0
+                results.aggregations[aggKey].buckets &&
+                results.aggregations[aggKey].buckets.length > 0
               ) {
-                data.value.aggregations[category].buckets =
-                  data.value.aggregations[category].buckets.concat(
-                    results.aggregations[category].buckets
+                data.value.aggregations[aggKey].buckets =
+                  data.value.aggregations[aggKey].buckets.concat(
+                    results.aggregations[aggKey].buckets
                   );
               }
               if (
                 results.aggregations &&
-                results.aggregations[category].after_key
+                results.aggregations[aggKey].after_key
               ) {
-                query.value.aggs[category].composite.after =
-                  results.aggregations[category].after_key;
+                query.value.aggs[aggKey].composite.after =
+                  results.aggregations[aggKey].after_key;
                 getData().then(() => {
                   return resolve();
                 });
@@ -315,14 +316,30 @@ export default function IhrisAxisChart(
     }
   }
   async function parseResults() {
+    let displayTopValues = otherOptions.value.horizontalValues.displayTopValues;
+    let displayTotalValues = otherOptions.value.horizontalValues.totalValues;
+    let aggKey = "categories";
+    if (chart.value.maxCategories === 0 || categories.value.length === 0) {
+      aggKey = "series";
+    }
     const level1Cat = [];
     const seriesData = {};
-    for (const bucket of data.value.aggregations.categories.buckets) {
+    if (displayTopValues) {
+      data.value.aggregations[aggKey].buckets.sort((a, b) => {
+        return b.doc_count - a.doc_count;
+      });
+    }
+
+    for (const bucket of data.value.aggregations[aggKey].buckets) {
       const keys = Object.keys(bucket.key);
       for (const key of keys) {
-        level1Cat.push(bucket.key[key]);
+        if (!displayTopValues || displayTotalValues > level1Cat.length) {
+          level1Cat.push(bucket.key[key]);
+        } else if (!level1Cat[displayTotalValues]) {
+          level1Cat[displayTotalValues] = "Others";
+        }
       }
-      if (bucket.series.buckets) {
+      if (bucket.series && bucket.series.buckets) {
         for (const value of bucket.series.buckets) {
           let name = value.key;
           if (value.key_as_string) {
@@ -335,9 +352,26 @@ export default function IhrisAxisChart(
           if (val === 0) {
             val = "-";
           }
-          seriesData[name].push(val);
+          if (
+            displayTopValues &&
+            seriesData[name].length >= displayTotalValues
+          ) {
+            if (!seriesData[name][displayTotalValues]) {
+              seriesData[name][displayTotalValues] = val;
+            } else {
+              if (val !== "-" && seriesData[name][displayTotalValues] == "-") {
+                seriesData[name][displayTotalValues] = 0;
+              }
+              if (seriesData[name][displayTotalValues] !== "-" && val == "-") {
+                continue;
+              }
+              seriesData[name][displayTotalValues] += val;
+            }
+          } else {
+            seriesData[name].push(val);
+          }
         }
-      } else if (bucket.series.value) {
+      } else if (bucket.series && bucket.series.value) {
         let value = bucket.series.value;
         if (value === 0) {
           value = "-";
@@ -346,31 +380,89 @@ export default function IhrisAxisChart(
           seriesData[series.value[0].display] = [];
         }
         seriesData[series.value[0].display].push(value);
+      } else if (categories.value.length === 0) {
+        let name = series.value[0].display;
+        let value = bucket.doc_count;
+        if (value === 0) {
+          value = "-";
+        }
+        if (!seriesData[series.value[0].display]) {
+          seriesData[series.value[0].display] = [];
+        }
+
+        if (
+          displayTopValues &&
+          seriesData[series.value[0].display].length >= displayTotalValues
+        ) {
+          if (!seriesData[name][displayTotalValues]) {
+            seriesData[name][displayTotalValues] = value;
+          } else {
+            if (value !== "-" && seriesData[name][displayTotalValues] == "-") {
+              seriesData[name][displayTotalValues] = 0;
+            }
+            if (seriesData[name][displayTotalValues] !== "-" && value == "-") {
+              continue;
+            }
+            seriesData[name][displayTotalValues] += value;
+          }
+        } else {
+          seriesData[name].push(value);
+        }
       }
     }
     let xAxisSettings = {};
-    if (option.value.xAxis && option.value.xAxis.length > 0) {
+    if (
+      option.value.xAxis &&
+      Array.isArray(option.value.xAxis) &&
+      option.value.xAxis.length > 0
+    ) {
       xAxisSettings = JSON.parse(JSON.stringify(option.value.xAxis[0]));
+      delete xAxisSettings.data;
+    } else if (option.value.xAxis) {
+      xAxisSettings = JSON.parse(JSON.stringify(option.value.xAxis));
       delete xAxisSettings.data;
     }
     let yAxisSettings = {};
-    if (option.value.yAxis) {
+    if (
+      option.value.yAxis &&
+      Array.isArray(option.value.yAxis) &&
+      option.value.yAxis.length > 0
+    ) {
+      yAxisSettings = JSON.parse(JSON.stringify(option.value.yAxis[0]));
+      delete yAxisSettings.data;
+    } else if (option.value.yAxis) {
       yAxisSettings = JSON.parse(JSON.stringify(option.value.yAxis));
+      delete yAxisSettings.data;
     }
     option.value.xAxis = [];
-    option.value.yAxis = {};
+    option.value.yAxis = [];
     option.value.series = [];
     if (level1Cat && level1Cat.length > 0) {
+      if (otherOptions.value.barsDirection === "vertical") {
+        option.value.xAxis.push({
+          ...xAxisSettings,
+          type: "category",
+          data: level1Cat,
+        });
+      } else {
+        option.value.yAxis.push({
+          ...yAxisSettings,
+          type: "category",
+          data: level1Cat,
+        });
+      }
+    }
+    if (otherOptions.value.barsDirection === "vertical") {
+      option.value.yAxis.push({
+        ...yAxisSettings,
+        type: "value",
+      });
+    } else {
       option.value.xAxis.push({
         ...xAxisSettings,
-        type: "category",
-        data: level1Cat,
+        type: "value",
       });
     }
-    option.value.yAxis = {
-      type: "value",
-      ...yAxisSettings,
-    };
     const chartOpt = chartOptions.value.find((opt) => {
       return opt.type === chart.value.type;
     });
@@ -385,6 +477,7 @@ export default function IhrisAxisChart(
       option.value.series.push({
         name: seriesName,
         type: chart.value.type,
+        stack: "ser",
         ...chartOpt,
         data: seriesData[seriesName],
       });

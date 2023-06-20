@@ -134,7 +134,7 @@
                   <v-text-field
                     v-model="axis.axisLabel.rotate"
                     type="number"
-                    label="Interval of Axis label"
+                    label="Rotate Axis label"
                     min="-90"
                     max="90"
                     @input="updated"
@@ -388,7 +388,7 @@ export default {
         axisLabel: {
           show: true,
           inside: false,
-          interval: 0,
+          interval: "auto",
           rotate: 0,
           margin: 8,
           showMinLabel: true,
