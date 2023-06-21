@@ -245,7 +245,7 @@ export default {
 </script>
 <style scoped>
 .v-application .primary {
-  background-color: #569fd36e !important;
+  background-color: #0d3552 !important;
   border-color: var(--v-primary-base) !important;
 }
 .v-application .primary.darken-2 {
