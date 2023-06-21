@@ -746,7 +746,10 @@
               >Loading Data</v-progress-linear
             >
           </v-col>
-          <v-col cols="12">
+          <v-col
+            cols="12"
+            v-if="renderSettings && chart.renderComponent === 'IhrisAxisChart'"
+          >
             <center><h3>Basic Settings</h3></center>
             <v-row>
               <v-col cols="6">
@@ -1297,6 +1300,7 @@ export default {
     function save() {
       // deep copy
       const options = JSON.parse(JSON.stringify(option.value));
+      const otherOpts = JSON.parse(JSON.stringify(otherOptions.value));
       if (options.series) {
         for (const opt of options.series) {
           delete opt.data;
@@ -1352,6 +1356,10 @@ export default {
           {
             url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings",
             valueBase64Binary: window.btoa(JSON.stringify(options)),
+          },
+          {
+            url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-other-settings",
+            valueBase64Binary: window.btoa(JSON.stringify(otherOpts)),
           },
           {
             url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-permissions",
@@ -1472,7 +1480,7 @@ export default {
       })
         .then((response) => {
           if (response.status !== 200 && response.status !== 201) {
-            this.$store.commit("setMessage", {
+            store.commit("setMessage", {
               type: "error",
               text: "Failed to save Visualization!",
               timeout: 2000,
@@ -1480,7 +1488,7 @@ export default {
             return;
           }
           response.json().then((data) => {
-            this.$store.commit("setMessage", {
+            store.commit("setMessage", {
               type: "primary",
               text: "Visualization saved successfully!",
               timeout: 2000,
@@ -1489,7 +1497,7 @@ export default {
           });
         })
         .catch((error) => {
-          this.$store.commit("setMessage", {
+          store.commit("setMessage", {
             type: "error",
             text: "Failed to save Visualization!",
             timeout: 2000,
@@ -1549,7 +1557,7 @@ export default {
           chart.value = store.state.charts.find((ct) => {
             return ct.type === type && ct.subType === subtype;
           });
-          reloadIhrisChart();
+          // reloadIhrisChart();
 
           for (const vizData of data.extension) {
             if (
@@ -1704,9 +1712,23 @@ export default {
                 console.log(error);
               }
             }
+
+            if (
+              vizData.url ===
+              "http://ihris.org/fhir/StructureDefinition/ihris-visualization-other-settings"
+            ) {
+              let othersettings = vizData.valueBase64Binary;
+              try {
+                othersettings = JSON.parse(window.atob(othersettings));
+                otherOptions.value = othersettings;
+              } catch (error) {
+                console.log(error);
+              }
+            }
           }
-          renderSettings.value = true;
           await nextTick();
+          renderSettings.value = true;
+          reloadIhrisChart();
           loadChartData();
         });
       });

@@ -11,7 +11,9 @@
             <component
               :is="set.component"
               @[set.updateEvent]="externalSettings"
-              v-bind="{ values: option[set.optionObject] }"
+              v-bind="{
+                values: options[set.optionObject],
+              }"
             />
           </v-expansion-panel-text>
         </v-expansion-panel>
@@ -20,57 +22,77 @@
   </div>
 </template>
 <script>
-import { defineAsyncComponent } from "vue";
+import { defineAsyncComponent, ref, onMounted } from "vue";
 export default {
   props: ["chartType", "chartSubType", "option"],
-  data() {
+  setup(props, context) {
+    const expandSettings = ref([]);
+    const settings = ref([
+      {
+        header: "Chart Title",
+        component: "ChartTitle",
+        updateEvent: "chartTitle",
+        optionObject: "title",
+        charts: ["bar", "pie", "line", "gauge", "scatter"],
+      },
+      {
+        header: "Chart Legend",
+        component: "ChartLegend",
+        updateEvent: "chartLegend",
+        optionObject: "legend",
+        charts: ["bar", "pie", "line", "gauge", "scatter"],
+      },
+      {
+        header: "Chart Tooltip",
+        component: "ChartToolTip",
+        updateEvent: "chartTooltip",
+        optionObject: "tooltip",
+        charts: ["bar", "pie", "line", "gauge", "scatter"],
+      },
+      {
+        header: "Chart Axis Pointer",
+        component: "ChartAxisPointer",
+        updateEvent: "chartAxisPointer",
+        optionObject: "axisPointer",
+        charts: ["bar", "pie", "line", "gauge", "scatter"],
+      },
+      {
+        header: "Chart X Axis",
+        component: "ChartXaxis",
+        updateEvent: "chartXaxis",
+        optionObject: "xAxis",
+        charts: ["bar", "line", "scatter"],
+      },
+      {
+        header: "Chart Y Axis",
+        component: "ChartYaxis",
+        updateEvent: "chartYaxis",
+        optionObject: "yAxis",
+        charts: ["bar", "line", "scatter"],
+      },
+    ]);
+    const options = ref({});
+
+    function externalSettings(setting) {
+      options.value[setting.name] = setting.value;
+      context.emit("generalSettings", options.value);
+    }
+
+    onMounted(() => {
+      options.value = JSON.parse(JSON.stringify(props.option));
+      expandSettings.value = [...Array(settings.value.length).keys()].map(
+        (k, i) => i
+      );
+      setTimeout(() => {
+        expandSettings.value = [];
+      }, 500);
+    });
+
     return {
-      expandSettings: [],
-      settings: [
-        {
-          header: "Chart Title",
-          component: "ChartTitle",
-          updateEvent: "chartTitle",
-          optionObject: "title",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
-        },
-        {
-          header: "Chart Legend",
-          component: "ChartLegend",
-          updateEvent: "chartLegend",
-          optionObject: "legend",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
-        },
-        {
-          header: "Chart Tooltip",
-          component: "ChartToolTip",
-          updateEvent: "chartTooltip",
-          optionObject: "tooltip",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
-        },
-        {
-          header: "Chart Axis Pointer",
-          component: "ChartAxisPointer",
-          updateEvent: "chartAxisPointer",
-          optionObject: "axisPointer",
-          charts: ["bar", "pie", "line", "gauge", "scatter"],
-        },
-        {
-          header: "Chart X Axis",
-          component: "ChartXaxis",
-          updateEvent: "chartXaxis",
-          optionObject: "xAxis",
-          charts: ["bar", "line", "scatter"],
-        },
-        {
-          header: "Chart Y Axis",
-          component: "ChartYaxis",
-          updateEvent: "chartYaxis",
-          optionObject: "yAxis",
-          charts: ["bar", "line", "scatter"],
-        },
-      ],
-      options: {},
+      expandSettings,
+      settings,
+      options,
+      externalSettings,
     };
   },
   components: {
@@ -82,20 +104,6 @@ export default {
     ),
     ChartXaxis: defineAsyncComponent(() => import("./ChartXaxis.vue")),
     ChartYaxis: defineAsyncComponent(() => import("./ChartYaxis.vue")),
-  },
-  methods: {
-    externalSettings(setting) {
-      this.options[setting.name] = setting.value;
-      this.$emit("generalSettings", this.options);
-    },
-  },
-  created() {
-    this.expandSettings = [...Array(this.settings.length).keys()].map(
-      (k, i) => i
-    );
-    setTimeout(() => {
-      this.expandSettings = [];
-    }, 500);
   },
 };
 </script>

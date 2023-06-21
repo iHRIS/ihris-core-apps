@@ -35,42 +35,50 @@
   </div>
 </template>
 <script>
+import { ref, onMounted } from "vue";
 import TextStyle from "./TextStyle.vue";
 export default {
-  props: ["values"],
-  data() {
+  props: ["values", "optValues"],
+  setup(props, context) {
+    const title = ref({
+      show: true,
+      text: "My Chart",
+      textAlign: "auto",
+      left: "center",
+      textStyle: {},
+    });
+    const textAligns = ref(["auto", "left", "right", "center"]);
+    const expandTextStyle = ref([]);
+
+    function externalSettings(setting) {
+      title.value[setting.name] = setting.value;
+      updated();
+    }
+
+    function updated() {
+      context.emit("chartTitle", { name: "title", value: title.value });
+    }
+
+    onMounted(() => {
+      for (const index in props.values) {
+        title.value[index] = props.values[index];
+      }
+      expandTextStyle.value = [0];
+      setTimeout(() => {
+        expandTextStyle.value = [];
+      }, 500);
+    });
+
     return {
-      title: {
-        show: true,
-        text: "My Chart",
-        textAlign: "auto",
-        left: "center",
-        textStyle: {},
-      },
-      textAligns: ["auto", "left", "right", "center"],
-      expandTextStyle: [],
+      title,
+      textAligns,
+      expandTextStyle,
+      externalSettings,
+      updated,
     };
-  },
-  methods: {
-    externalSettings(setting) {
-      this.title[setting.name] = setting.value;
-      this.updated();
-    },
-    updated() {
-      this.$emit("chartTitle", { name: "title", value: this.title });
-    },
   },
   components: {
     TextStyle,
-  },
-  created() {
-    for (const index in this.values) {
-      this.title[index] = this.values[index];
-    }
-    this.expandTextStyle = [0];
-    setTimeout(() => {
-      this.expandTextStyle = [];
-    }, 500);
   },
 };
 </script>
