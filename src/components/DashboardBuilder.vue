@@ -512,7 +512,7 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
-        }).then((response) => {
+        }).then(() => {
           //console.log(JSON.stringify(response), null, 2);
           this.$router.push({ name: "home" });
         });
