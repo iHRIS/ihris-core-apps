@@ -188,6 +188,19 @@
               </v-tooltip>
             </v-btn>
           </v-col>
+          <v-col v-if="!editingDash" cols="auto">
+            <v-btn
+              icon
+              color="tertiary"
+              size="small"
+              @click="deleteDash = true"
+            >
+              <v-icon color="primary">mdi-delete-circle</v-icon>
+              <v-tooltip activator="parent" location="top">
+                Delete this dashboard
+              </v-tooltip>
+            </v-btn>
+          </v-col>
           <v-col v-else cols="auto">
             <v-btn icon color="white" size="small" @click="cancelEditing">
               <v-icon color="error">mdi-close-thick</v-icon>
@@ -196,6 +209,28 @@
               </v-tooltip>
             </v-btn>
           </v-col>
+          <v-dialog v-model="deleteDash" persistent width="auto">
+            <!--<v-system-bar window color="primary" dark height="60px">
+              <v-spacer></v-spacer>
+              <v-icon @click="deleteDash = false" style="cursor: pointer">
+                mdi-close
+              </v-icon>
+            </v-system-bar>-->
+            <v-card>
+              <v-card-title class="text-h5">
+                Are you sure you want to delete this Dashboard?
+              </v-card-title>
+              <v-card-actions class="justify-end">
+                <v-btn color="green darken-1" text @click="deleteDash = false">
+                  No
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn color="red darken-1" text @click="deleteDashboard"
+                  >Yes
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
           <v-spacer></v-spacer>
           <v-col cols="3">
             <v-row>
@@ -344,6 +379,7 @@ export default {
       dashboards: [],
       loadingDashData: false,
       editingDash: false,
+      deleteDash: false,
       visualizations: [],
       dimensions: [],
       displayVizList: false,
@@ -465,6 +501,21 @@ export default {
     cancelEditing() {
       if (this.dashboardId) {
         this.editingDash = false;
+      } else {
+        this.$router.push({ name: "home" });
+      }
+    },
+    deleteDashboard() {
+      if (this.dashboardId) {
+        fetch("/fhir/Basic/" + this.dashboardId, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((response) => {
+          //console.log(JSON.stringify(response), null, 2);
+          this.$router.push({ name: "home" });
+        });
       } else {
         this.$router.push({ name: "home" });
       }
