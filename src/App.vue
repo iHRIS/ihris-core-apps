@@ -20,12 +20,12 @@
         />
       </v-snackbar>
       <v-alert
-        v-if="connectionStatus"
+        v-if="!$store.state.user.loggedin"
         variant="outlined"
         type="warning"
         border="top"
       >
-        {{ connectionStatus }}
+        offline
       </v-alert>
       <center>
         <p></p>
@@ -45,7 +45,6 @@ import IhrisNavigation from "./components/IhrisNavigation.vue";
 export default {
   data: function () {
     return {
-      connectionStatus: "",
       loading: false,
       idle_countdown: false,
       idle_logout: 30,
@@ -159,10 +158,7 @@ export default {
       let response = await originalFetch(resource, config);
       if (response.status === 401) {
         console.error("Not loggedin");
-        this.connectionStatus = "offline";
         window.location = location.href.split("/ihrisapp")[0];
-      } else {
-        this.connectionStatus = "";
       }
       return response;
     };
