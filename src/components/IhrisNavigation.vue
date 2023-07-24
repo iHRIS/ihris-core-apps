@@ -4,7 +4,7 @@
     :rail="mini"
     permanent
     color="#0d3552"
-    class="primary text-white font-weight-bold"
+    class="text-white font-weight-bold"
     style="z-index: 3"
     @click="minimizeDrawer"
     v-if="$store.state.user.loggedin"
