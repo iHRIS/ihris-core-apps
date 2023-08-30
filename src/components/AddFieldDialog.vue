@@ -16,17 +16,6 @@
       </v-toolbar>
       <v-card-text>
         <Tree @node-focus="nodeOpen" :nodes="treeData" :config="config"></Tree>
-        <v-autocomplete
-          label="Field"
-          :loading="loading"
-          :items="fields"
-          outlined
-          hide-details="auto"
-          item-text="display"
-          item-value="code"
-          dense
-          return-object
-        />
       </v-card-text>
     </v-card>
     </v-dialog>
@@ -41,35 +30,14 @@ const props = defineProps({
   id: "",
   showAddFieldDialog: Boolean
 })
-const treeData = ref({
-  id1: {
-    text: "text1",
-    children: ["id11", "id12"]
-  },
-  id11: {
-    text: "text11",
-    children: ["id21", "id22"],
-  },
-  id12: {
-    text: "text12",
-  },
-  id21: {
-    text: "text21",
-  },
-  id22: {
-    text: "text22",
-  },
-  id2: {
-    text: "text2",
-  },
-})
+const treeData = ref({})
 let config = ref({
-  roots: ["id1", "id2"]
+  checkboxes: true,
+  roots: []
 })
 const elements = ref([])
 const skipFileds = ref(["id", "meta", "implicitRules", "language", "text", "contained", "modifierExtension"])
 const loading = ref(false)
-const fields = ref([])
 const showDialog = ref(props.showAddFieldDialog)
 const updateValue = () => {
   emit('update:showAddFieldDialog', false)
@@ -83,22 +51,37 @@ onMounted(() => {
 });
 function nodeOpen(node) {
   console.error(JSON.stringify(node, 0, 2));
-  getTopField(node.id, node.parent)
 }
 function loadStructure() {
-  fields.value = []
-  config.value.roots = ["id1", "id2"]
+  config.value.roots = []
+  treeData.value = {}
   loading.value = true
   fetch("/fhir/StructureDefinition/" + props.id).then((response) => {
     response.json().then((structure) => {
       elements.value = structure.snapshot.element
-      getTopField(structure.type)
+      getFields(structure.type)
+      cleanTreeExtensions()
       loading.value = false
     })
   })
 }
 
-function getTopField(base) {
+function cleanTreeExtensions() {
+  for(let data in treeData.value) {
+    if(data.endsWith(".extension") && !treeData.value[data].children) {
+      let ids = data.split(".extension")
+      ids.pop()
+      parent = ids.join(".extension")
+      let childIndex = treeData.value[parent].children.findIndex((child) => {
+        return child === data
+      })
+      treeData.value[parent].children.splice(childIndex, 1)
+      delete treeData.value[data]
+    }
+  }
+}
+
+function getFields(base) {
   for(let element of elements.value) {
     if(!element.id.startsWith(base)) {
       continue
@@ -112,14 +95,10 @@ function getTopField(base) {
     let modId = element.id.replace(base, "")
     if(modId) {
       modId = modId.split(".")
-      if(modId.length === 2) {
-        let exist = fields.value.find((field) => {
-          return element.id.startsWith(base + '.' + field + '.') || element.id.startsWith(base + '.' + field + ':') || element.id === base + '.' + field
-        })
-        if(exist) {
+      if(modId.length === 2 && !element.id.includes(":")) {
+        if(treeData.value[element.id]) {
           continue
         }
-        fields.value.push(modId[1])
         let label = modId[1]
         if(element.label) {
           label = element.label
@@ -135,16 +114,18 @@ function getTopField(base) {
         treeData.value[element.id] = {
           text: label
         }
+        if(modId[1] === "extension") {
+          treeData.value[element.id].text = "Extensions"
+          getExtensionFields(element.id)
+        }
       } else if(modId.length === 3 && !element.id.includes(":")) {
         let id = element.id.split(".")
         id.pop()
         id = id.join(".")
-        getTopField(id)
+        getFields(id)
       }
     }
   }
-  // console.error(JSON.stringify(treeData, 0, 2));
-  // getExtensionFields("Basic.extension:document.extension")
 }
 
 function getExtensionFields(base) {
@@ -153,10 +134,38 @@ function getExtensionFields(base) {
       continue
     }
     let modId = element.id.replace(base + ":", "")
-    if(modId.includes(".") || modId.includes(".")) {
+    if(modId.includes(".") && (!element.id.endsWith(".extension") || modId.split('.').length !== 2)) {
       continue
     }
-    console.error(element.id);
+    if(!modId.includes(".")) {
+      let label = element.label
+      if(!label) {
+        label = modId
+      }
+      if(treeData.value[base]) {
+        if(!treeData.value[base].children) {
+          treeData.value[base].children = []
+        }
+        treeData.value[base].children.push(element.id)
+      } else {
+        config.value.roots.push(element.id)
+      }
+      treeData.value[element.id] = {
+        text: label
+      }
+    } else if(modId.includes(".")) {
+      let ids = element.id.split(".extension")
+      ids.pop()
+      parent = ids.join(".extension")
+      if(!treeData.value[parent].children) {
+        treeData.value[parent].children = []
+      }
+      treeData.value[parent].children.push(element.id)
+      treeData.value[element.id] = {
+        text: "Extensions"
+      }
+      getExtensionFields(element.id)
+    }
   }
 }
 </script>
