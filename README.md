@@ -1,6 +1,10 @@
-# iHRIS APPS Startup Template
 
-## Cloning
+# iHRIS navigation and role APPS
+
+# ihris-core-apps
+## Descriptions
+This repository contains all iHRIS apps that are shipped with iHRIS. It also contains a startup template that can help you to quickly create an iHRIS App using VUEJS.
+An iHRIS App can be cloned as below
 ```
 git clone --single-branch --branch startup-template https://github.com/iHRIS/ihris-core-apps.git startup-template
 ```
