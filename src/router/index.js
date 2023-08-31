@@ -6,7 +6,19 @@ const router = createRouter({
       path: "/static/:id",
       name: "static",
       component: () => import("../views/static-page.vue"),
-    }]
+    },
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("../views/home.vue"),
+    },
+    {
+      path: "/",
+      name: "home",
+      component: () => import("../views/home.vue"),
+    },
+
+  ]
 });
 
 export default router;

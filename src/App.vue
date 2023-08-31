@@ -27,10 +27,7 @@
       >
         {{ connectionStatus }}
       </v-alert>
-      <center>
-        <p></p>
-        <b>My New iHRIS App</b>
-      </center>
+
       <router-view :key="$route.fullPath" />
     </v-main>
     <IhrisFooter :footer="footer" />

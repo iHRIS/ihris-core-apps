@@ -7,11 +7,13 @@ import { i18n, loadLanguage } from "./i18n";
 import fetchDefaults from "fetch-defaults";
 import * as Keycloak from "keycloak-js";
 import VueCookies from "vue-cookies";
+import VueCodeHighlight from "vue-code-highlight";
 
 const app = createApp(App);
 app.use(router);
 app.use(store);
-app.use(i18n);
+app.use(i18n)
+app.use(VueCodeHighlight)
 registerPlugins(app);
 
 app.config.globalProperties.$loadLanguage = function (locale) {
