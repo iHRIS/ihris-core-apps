@@ -1,10 +1,10 @@
 {
-  "name": "data-visualizer",
-  "version": "0.0.0",
+  "name": "ihris-task-role-management",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/ihrisapp/ihris-app/",
+    "build": "vite build --base=/ihrisapp/ihris-taskAndRole/",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },

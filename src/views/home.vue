@@ -4,7 +4,7 @@
       <h1 class="font-weight-bold text-h5 text-basil">
         <p class="pt-4">
           <v-icon class="mr-2" color="primary">mdi-account-cog-outline</v-icon>
-          Navigation and Permission Manager App
+          Tasks, Permissions and Roles Manager App
         </p>
         <v-divider class="my-2"></v-divider>
       </h1>

@@ -163,7 +163,7 @@ export default {
       }
       return response;
     };
-    document.title = "iHRIS App";
+    document.title = "Task And Role Management App";
     let query = location.search;
     query = query.substring(1);
     query = query.split("=");
