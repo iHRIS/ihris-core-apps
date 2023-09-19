@@ -206,7 +206,6 @@ export default {
       }
     },
     onSave: function () {
-      console.log("to be saved",this.bundle)
       this.isSaving = true
       fetch("/taskAndRole/saveTask", {
         method: "POST",
@@ -345,7 +344,6 @@ Title:          "iHRIS Task To Read ${title} Page"
         if (page.sections.length > 1) {
           page.sections.map(x => {
             let id =x.toLowerCase().replaceAll(" ", "-")
-            console.log({x,id})
               this.FSHCode.push(`
 Instance:       ihris-task-view-${id}-section
 InstanceOf:     IhrisTask
@@ -368,8 +366,6 @@ Usage:          #example
         let id = instance.replaceAll("_", "-")
         let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
-
-        console.log("check navigation",instance)
         this.FSHCode.push(`
 Instance:       ihris-task-navigation-${instance}
 InstanceOf:     IhrisTask
@@ -573,7 +569,6 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
         let valueId = x
         let instance =  x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
         let id = instance.replaceAll("_", "-");
-        console.log({instance,id})
         let tittle = x.includes(".")
           ? x
             .replaceAll(".", " ")
@@ -686,7 +681,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
         }
       })
       let allReference = []
-      let profile = reference.map(x => x.type[0].targetProfile[0])
+      let profile = reference.map(x => x.type[0]?.targetProfile?.[0])
       allReference = [...allReference, ...profile]
       let valueSetAll = data.differential.element.filter(x => {
         if (x?.binding?.valueSet) {
@@ -699,16 +694,18 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       let referenceResource = []
       if (allReference.length > 0) {
         referenceResource = await Promise.all(allReference.map(async x => {
-          let [resType, id] = x.split('/').slice(-2)
-          let url = `/fhir/${resType}/${id}`;
-          let response = await fetch(url)
-          if (response.ok) {
-            let data = await response.json()
-            if (data.type) {
-              return data.type
-            }
-            if (resType === "ValueSet") {
-              return resType
+          if(x) {
+            let [resType, id] = x.split('/').slice(-2)
+            let url = `/fhir/${resType}/${id}`;
+            let response = await fetch(url)
+            if (response.ok) {
+              let data = await response.json()
+              if (data.type) {
+                return data.type
+              }
+              if (resType === "ValueSet") {
+                return resType
+              }
             }
           }
         }))
