@@ -52,23 +52,12 @@
             {{ language }} Translations
             <br />
             <br />
-            <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="indigo"
-                  dark
-                  to="/"
-                  small
-                  class="mx-2"
-                  fab
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>mdi-arrow-left-circle</v-icon>
-                </v-btn>
-              </template>
-              <span>Back to Enabled Languages List</span>
-            </v-tooltip>
+            <v-btn class="mx-2" dark color="indigo" small icon to="/">
+              <v-icon>mdi-arrow-left-circle</v-icon>
+              <v-tooltip activator="parent" location="top">
+                Back to Enabled Languages List
+              </v-tooltip>
+            </v-btn>
           </v-col>
           <v-col v-if="$store.state.user.loggedin">
             <v-card width="300">
@@ -82,41 +71,37 @@
                 </label>
                 <v-row>
                   <v-col>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          color="primary"
-                          :disabled="translationProgress.showTransProgress"
-                          small
-                          @click="displayTransConf('full')"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon left>mdi-google-translate</v-icon>
-                          Full
-                        </v-btn>
-                      </template>
-                      <span>Translate all texts</span>
-                    </v-tooltip>
+                    <v-btn
+                      color="primary"
+                      :disabled="translationProgress.showTransProgress"
+                      small
+                      @click="displayTransConf('full')"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon left>mdi-google-translate</v-icon>
+                      <v-tooltip activator="parent" location="bottom">
+                        Translate all texts
+                      </v-tooltip>
+                      Full
+                    </v-btn>
                   </v-col>
                   <v-col>
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          color="blue"
-                          dark
-                          :disabled="translationProgress.showTransProgress"
-                          small
-                          @click="displayTransConf('partial')"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon left>mdi-google-translate</v-icon>
-                          Partial
-                        </v-btn>
-                      </template>
-                      <span>Only missing translations</span>
-                    </v-tooltip>
+                    <v-btn
+                      color="blue"
+                      dark
+                      :disabled="translationProgress.showTransProgress"
+                      small
+                      @click="displayTransConf('partial')"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon left>mdi-google-translate</v-icon>
+                      <v-tooltip activator="parent" location="bottom">
+                        Only missing translations
+                      </v-tooltip>
+                      Partial
+                    </v-btn>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -174,11 +159,11 @@
               stream
               v-if="translationProgress.showTransProgress"
             >
-              <strong
-                >{{ translationProgress.translated }}/{{
+              <strong>
+                {{ translationProgress.translated }}/{{
                   translationProgress.required
-                }}</strong
-              >
+                }}
+              </strong>
             </v-progress-linear>
             <v-data-table
               :headers="headers"
@@ -186,14 +171,13 @@
               :search="search"
               :loading="loading"
               loading-text="Loading"
-              class="elevation-1"
-              style="cursor: pointer"
             >
-              <template v-slot:item.value.en="{ item }">
-                {{ item.value.en | limitTexts }}
-              </template>
-              <template v-slot:item.value.text="{ item }">
-                {{ item.value.text | limitTexts }}
+              <template v-slot:item="{ item, index }">
+                <tr @click="edit(item.value)" style="cursor: pointer">
+                  <td>{{ ++index }}</td>
+                  <td>{{ limitTexts(item.value.en) }}</td>
+                  <td>{{ limitTexts(item.value.text) }}</td>
+                </tr>
               </template>
             </v-data-table>
           </v-card-text>
@@ -261,6 +245,7 @@ import ImportTranslations from "./ImportTranslations.vue";
 export default {
   data() {
     return {
+      language: "",
       snackbarColor: "green",
       snackbarText: "",
       snackbar: false,
@@ -296,16 +281,13 @@ export default {
       },
     };
   },
-  filters: {
+  methods: {
     limitTexts(val) {
-      console.log(val);
       if (val.length < 100) {
         return val;
       }
       return val.substring(0, 100) + "...";
     },
-  },
-  methods: {
     displayTransConf(type) {
       this.transRunType = type;
       if (type === "full") {
@@ -457,7 +439,7 @@ export default {
       this.importDialog = false;
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.translationProgress.interval);
   },
 };

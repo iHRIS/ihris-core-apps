@@ -28,183 +28,163 @@
       max-width="600"
       v-model="addDialog"
     >
-      <template v-slot:default="dialog">
-        <v-card>
-          <v-toolbar color="primary" dark> Select Language</v-toolbar>
-          <v-card-text>
-            <div class="text-h6">
-              <v-autocomplete
-                v-model="language"
-                :items="languages"
-                item-value="locale"
-                item-title="name"
-                dense
-                filled
-                label="Languages"
-              ></v-autocomplete>
-            </div>
-          </v-card-text>
-          <v-card-actions class="justify-end">
-            <v-btn text @click="dialog.value = false">
-              <v-icon>mdi-close</v-icon>
-              Close
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn :disabled="!language" text @click="add">
-              <v-icon>mdi-plus</v-icon>
-              Add
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </template>
+      <v-card>
+        <v-toolbar color="primary" dark> Select Language</v-toolbar>
+        <v-card-text>
+          <div class="text-h6">
+            <v-autocomplete
+              v-model="language"
+              :items="languages"
+              item-value="locale"
+              item-title="name"
+              dense
+              filled
+              label="Languages"
+            ></v-autocomplete>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn text @click="addDialog = false">
+            <v-icon>mdi-close</v-icon>
+            Close
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn :disabled="!language" text @click="add">
+            <v-icon>mdi-plus</v-icon>
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
     <v-dialog
       transition="dialog-top-transition"
       max-width="600"
       v-model="addOtherDialog"
     >
-      <template v-slot:default="dialog2">
-        <v-card>
-          <v-toolbar color="primary" dark
-            >Type Non-Google Translate Language</v-toolbar
-          >
-          <v-card-text>
-            <div class="text-h6">
-              <v-text-field
-                v-model="language"
-                hint="Enter Language Not supported by google translate"
-                clearable
-                required
-                label="Language"
-              >
-              </v-text-field>
-              <!--<v-text-field 
+      <v-card>
+        <v-toolbar color="primary" dark
+          >Type Non-Google Translate Language</v-toolbar
+        >
+        <v-card-text>
+          <div class="text-h6">
+            <v-text-field
+              v-model="language"
+              hint="Enter Language Not supported by google translate"
+              clearable
+              required
+              label="Language"
+            >
+            </v-text-field>
+            <!--<v-text-field 
               v-model="language"
               hint="Enter three later short code for the above language"
               clearable
               required 
               label="Language Code">
             </v-text-field>-->
-            </div>
-          </v-card-text>
-          <v-card-actions class="justify-end">
-            <v-btn text @click="dialog2.value = false">
-              <v-icon>mdi-close</v-icon>
-              Close
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn text @click="add">
-              <v-icon>mdi-plus</v-icon>
-              Add
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </template>
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn text @click="addOtherDialog = false">
+            <v-icon>mdi-close</v-icon>
+            Close
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn text @click="add">
+            <v-icon>mdi-plus</v-icon>
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
     <center>
       <v-card class="mx-auto" max-width="500" tile>
+        <v-toolbar dark color="primary">
+          <v-icon>mdi-google-translate</v-icon>
+          <v-spacer></v-spacer>
+          <v-toolbar-title>Enabled Languages</v-toolbar-title>
+        </v-toolbar>
         <v-card-title primary-title>
-          <v-row>
-            <v-toolbar-title dark color="primary">
-              <v-icon>mdi-google-translate</v-icon> Enabled
-              Languages</v-toolbar-title
-            >
-          </v-row>
           <v-row>
             <v-col cols="5">
               <div class="text-subtitle-2">Select to view</div>
             </v-col>
             <v-col cols="2">
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    class="mx-2"
-                    rounded
-                    fab
-                    dark
-                    color="indigo"
-                    small
-                    @click="getLanguages"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>mdi-google-translate</v-icon>
-                  </v-btn>
-                </template>
-                <span>Add New Google Language</span>
-              </v-tooltip>
+              <v-btn
+                class="mx-2"
+                dark
+                color="indigo"
+                small
+                icon
+                @click="getLanguages"
+              >
+                <v-icon>mdi-google-translate</v-icon>
+                <v-tooltip activator="parent" location="top">
+                  Add New Google Language
+                </v-tooltip>
+              </v-btn>
             </v-col>
             <v-col cols="2">
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    class="mx-2"
-                    rounded
-                    fab
-                    dark
-                    color="indigo"
-                    small
-                    @click="addOtherDialog = true"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </template>
-                <span>Add New Non-Google Language</span>
-              </v-tooltip>
+              <v-btn
+                class="mx-2"
+                dark
+                color="indigo"
+                small
+                icon
+                @click="addOtherDialog = true"
+              >
+                <v-icon>mdi-plus</v-icon>
+                <v-tooltip activator="parent" location="top">
+                  Add New Non-Google Language
+                </v-tooltip>
+              </v-btn>
             </v-col>
             <v-col cols="2">
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    class="mx-2"
-                    rounded
-                    fab
-                    dark
-                    color="indigo"
-                    small
-                    @click="populateTexts"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>mdi-publish</v-icon>
-                  </v-btn>
-                </template>
-                <span>Populate languages with iHRIS Texts</span>
-              </v-tooltip>
+              <v-btn
+                class="mx-2"
+                dark
+                color="indigo"
+                small
+                icon
+                @click="populateTexts"
+              >
+                <v-icon>mdi-publish</v-icon>
+                <v-tooltip activator="parent" location="top">
+                  Populate languages with iHRIS Texts
+                </v-tooltip>
+              </v-btn>
             </v-col>
           </v-row>
         </v-card-title>
-        <v-list shaped>
-          <v-list-item-group v-model="selectedLocale" color="primary">
-            <v-list-item v-for="(lang, i) in translatedLanguages" :key="i">
-              <v-list-item-content>
-                <v-row>
-                  <v-col>
-                    <v-list-item-title
-                      v-text="lang.language"
-                      @click="selected(lang)"
-                    ></v-list-item-title>
-                  </v-col>
-                  <v-col v-if="textExtractionStatus[lang.locale].active">
-                    <v-progress-linear
-                      color="deep-purple accent-4"
-                      indeterminate
-                      rounded
-                      height="6"
-                      v-if="textExtractionStatus[lang.locale].running"
-                    ></v-progress-linear>
-                    <v-icon
-                      v-if="textExtractionStatus[lang.locale].displayStatus"
-                    >
-                      mdi-check
-                    </v-icon>
-                  </v-col>
-                </v-row>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-item-group>
+        <v-list>
+          <v-list-item
+            v-for="(lang, i) in translatedLanguages"
+            :key="i"
+            :value="lang"
+            color="primary"
+            rounded="xl"
+          >
+            <v-row>
+              <v-col>
+                <v-list-item-title
+                  v-text="lang.language"
+                  @click="selected(lang)"
+                ></v-list-item-title>
+              </v-col>
+              <v-col v-if="textExtractionStatus[lang.locale].active">
+                <v-progress-linear
+                  color="deep-purple accent-4"
+                  indeterminate
+                  rounded
+                  height="6"
+                  v-if="textExtractionStatus[lang.locale].running"
+                ></v-progress-linear>
+                <v-icon v-if="textExtractionStatus[lang.locale].displayStatus">
+                  mdi-check
+                </v-icon>
+              </v-col>
+            </v-row>
+          </v-list-item>
         </v-list>
       </v-card>
     </center>
