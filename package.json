@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/ihrisapp/ihris-dashboard/",
+    "build": "vite build --base=/ihrisapp/ihris-data-visualizer/",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
@@ -15,6 +15,7 @@
     "fetch-defaults": "^1.0.0",
     "fhirpath": "^3.3.1",
     "idle-js": "^1.2.0",
+    "js-base64": "^3.7.5",
     "keycloak-js": "^20.0.3",
     "url": "^0.11.0",
     "vite-plugin-vuetify": "^1.0.2",

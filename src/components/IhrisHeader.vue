@@ -9,8 +9,8 @@
           {{ header.title }}
         </span>
         <span class="secondary--text font-weight-bold" v-if="header.site">
-          | {{ header.site }}</span
-        >
+          | {{ header.site }}
+        </span>
       </v-app-bar-title>
       <v-spacer v-if="$store.state.security_off"></v-spacer>
       <div

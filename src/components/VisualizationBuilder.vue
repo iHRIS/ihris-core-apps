@@ -828,6 +828,7 @@
   </v-container>
 </template>
 <script>
+import { Base64 } from "js-base64";
 import { ref, computed, watch, onMounted, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
@@ -1355,11 +1356,11 @@ export default {
           },
           {
             url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-settings",
-            valueBase64Binary: window.btoa(JSON.stringify(options)),
+            valueBase64Binary: Base64.encode(JSON.stringify(options)),
           },
           {
             url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-other-settings",
-            valueBase64Binary: window.btoa(JSON.stringify(otherOpts)),
+            valueBase64Binary: Base64.encode(JSON.stringify(otherOpts)),
           },
           {
             url: "http://ihris.org/fhir/StructureDefinition/ihris-visualization-permissions",
@@ -1394,7 +1395,7 @@ export default {
         if (cat.selectedValues) {
           cats.push({
             url: "selectedValues",
-            valueString: window.btoa(JSON.stringify(cat.selectedValues)),
+            valueString: Base64.encode(JSON.stringify(cat.selectedValues)),
           });
         }
         visualization.extension.push({
@@ -1428,7 +1429,7 @@ export default {
         if (ser.selectedValues) {
           sers.push({
             url: "selectedValues",
-            valueString: window.btoa(JSON.stringify(ser.selectedValues)),
+            valueString: Base64.encode(JSON.stringify(ser.selectedValues)),
           });
         }
         visualization.extension.push({
@@ -1458,7 +1459,7 @@ export default {
         if (fil.selectedValues) {
           fils.push({
             url: "selectedValues",
-            valueString: window.btoa(JSON.stringify(fil.selectedValues)),
+            valueString: Base64.encode(JSON.stringify(fil.selectedValues)),
           });
         }
         visualization.extension.push({
@@ -1577,7 +1578,7 @@ export default {
                 if (selectedValues) {
                   try {
                     selectedValues = JSON.parse(
-                      window.atob(selectedValues.valueString)
+                      Base64.decode(selectedValues.valueString)
                     );
                   } catch (error) {
                     console.log(error);
@@ -1627,7 +1628,7 @@ export default {
                 if (selectedValues) {
                   try {
                     selectedValues = JSON.parse(
-                      window.atob(selectedValues.valueString)
+                      Base64.decode(selectedValues.valueString)
                     );
                   } catch (error) {
                     console.log(error);
@@ -1667,7 +1668,7 @@ export default {
                 if (selectedValues) {
                   try {
                     selectedValues = JSON.parse(
-                      window.atob(selectedValues.valueString)
+                      Base64.decode(selectedValues.valueString)
                     );
                   } catch (error) {
                     console.log(error);
@@ -1695,7 +1696,7 @@ export default {
             ) {
               let settings = vizData.valueBase64Binary;
               try {
-                settings = JSON.parse(window.atob(settings));
+                settings = JSON.parse(Base64.decode(settings));
                 option.value = settings;
                 if (option.value.series) {
                   for (const chartOpt of option.value.series) {
@@ -1719,7 +1720,7 @@ export default {
             ) {
               let othersettings = vizData.valueBase64Binary;
               try {
-                othersettings = JSON.parse(window.atob(othersettings));
+                othersettings = JSON.parse(Base64.decode(othersettings));
                 otherOptions.value = othersettings;
               } catch (error) {
                 console.log(error);
