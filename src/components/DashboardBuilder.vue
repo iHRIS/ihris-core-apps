@@ -50,13 +50,13 @@
           </template>
           <v-data-table
             hide-default-header
-            :items-per-page="27"
-            :headers="[{ value: 'name' }]"
+            :items-per-page="20"
+            :headers="[{ key: 'name', title: 'name' }]"
             :items="activeDimension.dimValues"
             :loading="activeDimension.loading"
             dense
-            item-key="name"
             show-select
+            return-object
             v-model="activeDimension.selectedValues"
           />
         </v-card-text>
@@ -523,7 +523,7 @@ export default {
     applyFilters() {
       this.showValuesSelector = false;
       this.reloadAllViz();
-      this.activeDimension.data = {};
+      this.activeDimension.data = "";
     },
     removeFilter(dimensionIndex, valueIndex) {
       this.filters[dimensionIndex].values.splice(valueIndex, 1);

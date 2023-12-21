@@ -77,14 +77,13 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="confirmDelete" persistent width="330">
-      <v-system-bar window color="primary" dark height="40px">
-        <v-spacer></v-spacer>
-        <v-icon @click="confirmDelete = false" style="cursor: pointer">
-          mdi-close
-        </v-icon>
-      </v-system-bar>
+    <v-dialog v-model="confirmDelete" persistent width="600">
       <v-card>
+        <v-layout style="height: 50px">
+          <v-system-bar color="primary">
+            <v-icon @click="confirmDelete = false"> mdi-close </v-icon>
+          </v-system-bar>
+        </v-layout>
         <v-card-title class="text-h5">
           Are you sure you want to delete this visualization?
         </v-card-title>
