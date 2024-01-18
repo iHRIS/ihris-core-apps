@@ -362,6 +362,7 @@ Usage:          #example
       })
       menus.map(x => {
         let valueId = x
+        x = x.split(':menu:').slice(-2).join("-")
         let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
         let id = instance.replaceAll("_", "-")
         let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
@@ -567,6 +568,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       })
       menus.map((x) => {
         let valueId = x
+        x = x.split(':menu:').slice(-2).join("-")
         let instance =  x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
         let id = instance.replaceAll("_", "-");
         let tittle = x.includes(".")
