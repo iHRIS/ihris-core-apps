@@ -230,6 +230,12 @@ export default {
     },
     reload: async function () {
       this.isLoading = true
+      this.bundle = {
+        resourceType: "Bundle",
+        type: "transaction",
+        entry: [],
+      }
+      this.FSHCode = []
       await this.updateConfig();
     },
     getMenuName: function (nav) {
@@ -343,7 +349,7 @@ Title:          "iHRIS Task To Read ${title} Page"
         }
         if (page.sections.length > 1) {
           page.sections.map(x => {
-            let id =x.toLowerCase().replaceAll(" ", "-")
+              let id = x.toLowerCase().replaceAll(" ", "-")
               this.FSHCode.push(`
 Instance:       ihris-task-view-${id}-section
 InstanceOf:     IhrisTask
@@ -363,7 +369,7 @@ Usage:          #example
       menus.map(x => {
         let valueId = x
         x = x.split(':menu:').slice(-2).join("-")
-        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
+        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
         let id = instance.replaceAll("_", "-")
         let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
@@ -569,7 +575,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       menus.map((x) => {
         let valueId = x
         x = x.split(':menu:').slice(-2).join("-")
-        let instance =  x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
+        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
         let id = instance.replaceAll("_", "-");
         let tittle = x.includes(".")
           ? x
@@ -664,7 +670,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
           }
           return {
             id: x.resource.id,
-            resource:[...new Set(resource)],
+            resource: [...new Set(resource)],
             sections
           }
         }))
@@ -696,7 +702,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       let referenceResource = []
       if (allReference.length > 0) {
         referenceResource = await Promise.all(allReference.map(async x => {
-          if(x) {
+          if (x) {
             let [resType, id] = x.split('/').slice(-2)
             let url = `/fhir/${resType}/${id}`;
             let response = await fetch(url)
