@@ -230,6 +230,12 @@ export default {
     },
     reload: async function () {
       this.isLoading = true
+      this.bundle = {
+        resourceType: "Bundle",
+        type: "transaction",
+        entry: [],
+      }
+      this.FSHCode = []
       await this.updateConfig();
     },
     getMenuName: function (nav) {
@@ -343,7 +349,7 @@ Title:          "iHRIS Task To Read ${title} Page"
         }
         if (page.sections.length > 1) {
           page.sections.map(x => {
-            let id =x.toLowerCase().replaceAll(" ", "-")
+              let id = x.toLowerCase().replaceAll(" ", "-")
               this.FSHCode.push(`
 Instance:       ihris-task-view-${id}-section
 InstanceOf:     IhrisTask
@@ -363,10 +369,11 @@ Usage:          #example
       menus.map(x => {
         let valueId = x
         x = x.split(':menu:').slice(-2).join("-")
-        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
+        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
         let id = instance.replaceAll("_", "-")
         let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
+        let valueInstance = valueId.replaceAll(":", ".")
         this.FSHCode.push(`
 Instance:       ihris-task-navigation-${instance}
 InstanceOf:     IhrisTask
@@ -376,7 +383,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
 * extension[name].valueString = "${name}"
 * extension[attributes][0].extension[permission].valueCode = IhrisTaskPermissionCodeSystem#special
 * extension[attributes][0].extension[resource].valueCode = IhrisTaskResourceCodeSystem#navigation
-* extension[attributes][0].extension[instance].valueId = "${valueId}"
+* extension[attributes][0].extension[instance].valueId = "${valueInstance}"
             `)
       })
     },
@@ -569,7 +576,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       menus.map((x) => {
         let valueId = x
         x = x.split(':menu:').slice(-2).join("-")
-        let instance =  x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":","-")
+        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
         let id = instance.replaceAll("_", "-");
         let tittle = x.includes(".")
           ? x
@@ -581,6 +588,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
             .join(" ")
           : x.charAt(0).toUpperCase() + x.slice(1);
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
+        let valueInstance = valueId.replaceAll(":", ".")
         let data = {
           resource: {
             resourceType: "Basic",
@@ -614,7 +622,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
                   },
                   {
                     url: "instance",
-                    valueId: valueId,
+                    valueId: valueInstance,
                   },
                 ],
                 url: "http://ihris.org/fhir/StructureDefinition/task-attributes",
@@ -664,7 +672,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
           }
           return {
             id: x.resource.id,
-            resource:[...new Set(resource)],
+            resource: [...new Set(resource)],
             sections
           }
         }))
@@ -696,7 +704,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       let referenceResource = []
       if (allReference.length > 0) {
         referenceResource = await Promise.all(allReference.map(async x => {
-          if(x) {
+          if (x) {
             let [resType, id] = x.split('/').slice(-2)
             let url = `/fhir/${resType}/${id}`;
             let response = await fetch(url)
