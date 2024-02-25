@@ -230,12 +230,6 @@ export default {
     },
     reload: async function () {
       this.isLoading = true
-      this.bundle = {
-        resourceType: "Bundle",
-        type: "transaction",
-        entry: [],
-      }
-      this.FSHCode = []
       await this.updateConfig();
     },
     getMenuName: function (nav) {
@@ -243,7 +237,9 @@ export default {
       return nav.map((x) => {
         const match = regex.exec(x.name);
         if (match) {
-          return match[1];
+          let val = {}
+          val[match[1]] = x.valueString
+          return val
         }
       });
     },
@@ -257,6 +253,7 @@ export default {
     filterMenu: function (menu) {
       let itemToBeRemoved = [];
       const instance = menu.map((x) => {
+        let menu_key = Object.keys(x)[0]
         // let returnData = {}
         //
         // let menuList = x.split(".");
@@ -277,8 +274,8 @@ export default {
         // }
         //
 
-        if (x.includes(":menu:")) {
-          let parent = x.split(":menu:")[0];
+        if (menu_key.includes(":menu:")) {
+          let parent = menu_key.split(":menu:")[0];
           if (!itemToBeRemoved.includes(parent)) {
             itemToBeRemoved.push(parent);
           }
@@ -344,14 +341,17 @@ Title:          "iHRIS Task To Read ${title} Page"
 * extension[attributes][0].extension[instance].valueId = "${page.id}"`
         if (page.resource) {
           page.resource.map((x, index) => {
+            if(!x) {
+              return
+            }
             fsh = fsh + "\n" + `* extension[compositeTask][${index}].valueReference = Reference(Basic/ihris-task-write-${x.toLowerCase()})`
           })
         }
         if (page.sections.length > 1) {
           page.sections.map(x => {
-              let id = x.toLowerCase().replaceAll(" ", "-")
+            let id =x.toLowerCase().replaceAll(" ", "-")
               this.FSHCode.push(`
-Instance:       ihris-task-view-${id}-section
+Instance:       ihris-task-section-${id}
 InstanceOf:     IhrisTask
 Title:          "iHRIS Task To view ${x} Section"
 Usage:          #example
@@ -367,23 +367,24 @@ Usage:          #example
         this.FSHCode.push(fsh)
       })
       menus.map(x => {
-        let valueId = x
-        x = x.split(':menu:').slice(-2).join("-")
-        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
-        let id = instance.replaceAll("_", "-")
-        let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
-        let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
-        let valueInstance = valueId.replaceAll(":", ".")
+        let menu_key = Object.keys(x)[0]
+        let menu_text = x[menu_key]
+        let valueId = menu_key
+        menu_key = menu_key.split(':menu:').slice(-2).join("-")
+        let instance = menu_key.split(":")
+        instance = instance.join("-")
+        valueId = valueId.split(":")
+        valueId = valueId.join(".")
         this.FSHCode.push(`
 Instance:       ihris-task-navigation-${instance}
 InstanceOf:     IhrisTask
 Usage:          #example
-Title:          "iHRIS Task To Navigate to ${tittle}"
+Title:          "See ${menu_text} Menu"
 * code = IhrisResourceCodeSystem#task
-* extension[name].valueString = "${name}"
+* extension[name].valueString = "See ${menu_text} Menu"
 * extension[attributes][0].extension[permission].valueCode = IhrisTaskPermissionCodeSystem#special
 * extension[attributes][0].extension[resource].valueCode = IhrisTaskResourceCodeSystem#navigation
-* extension[attributes][0].extension[instance].valueId = "${valueInstance}"
+* extension[attributes][0].extension[instance].valueId = "${valueId}"
             `)
       })
     },
@@ -512,6 +513,9 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
         };
         if (page.resource) {
           page.resource.map((x, index) => {
+            if(!x) {
+              return
+            }
             let compositeTask = {
               "url": "http://ihris.org/fhir/StructureDefinition/composite-task",
               "valueReference": {
@@ -574,21 +578,11 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
         }
       })
       menus.map((x) => {
-        let valueId = x
-        x = x.split(':menu:').slice(-2).join("-")
-        let instance = x.replaceAll(".", "-").replaceAll("_", "-").replaceAll(":", "-")
-        let id = instance.replaceAll("_", "-");
-        let tittle = x.includes(".")
-          ? x
-            .replaceAll(".", " ")
-            .replaceAll("-", " ")
-            .replaceAll("_", "-")
-            .split(" ")
-            .map((y) => (y = y.charAt(0).toUpperCase() + y.slice(1)))
-            .join(" ")
-          : x.charAt(0).toUpperCase() + x.slice(1);
-        let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
-        let valueInstance = valueId.replaceAll(":", ".")
+        let menu_key = Object.keys(x)[0]
+        let menu_text = x[menu_key]
+        let valueId = menu_key
+        menu_key = menu_key.split(':menu:').slice(-2).join("-")
+        let instance = menu_key.split(":")
         let data = {
           resource: {
             resourceType: "Basic",
@@ -608,7 +602,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
             extension: [
               {
                 url: "http://ihris.org/fhir/StructureDefinition/ihris-basic-name",
-                valueString: name,
+                valueString: menu_text,
               },
               {
                 extension: [
@@ -622,7 +616,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
                   },
                   {
                     url: "instance",
-                    valueId: valueInstance,
+                    valueId: valueId,
                   },
                 ],
                 url: "http://ihris.org/fhir/StructureDefinition/task-attributes",
@@ -672,7 +666,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
           }
           return {
             id: x.resource.id,
-            resource: [...new Set(resource)],
+            resource:[...new Set(resource)],
             sections
           }
         }))
@@ -685,26 +679,30 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
       let response = await fetch(url)
       let data = await response.json()
       returnData.type = data.type
-      let reference = data.differential.element.filter(x => {
+      let reference = data.differential && data.differential.element.filter(x => {
         if (x?.type?.[0].code === "Reference") {
           return true
         }
       })
       let allReference = []
-      let profile = reference.map(x => x.type[0]?.targetProfile?.[0])
-      allReference = [...allReference, ...profile]
-      let valueSetAll = data.differential.element.filter(x => {
+      if(reference) {
+        let profile = reference.map(x => x.type[0]?.targetProfile?.[0])
+        allReference = [...allReference, ...profile]
+      }
+      let valueSetAll = data.differential && data.differential.element.filter(x => {
         if (x?.binding?.valueSet) {
           return true
         }
       })
-      let valueSet = valueSetAll.map(x => x.binding.valueSet)
+      if(valueSetAll) {
+        let valueSet = valueSetAll.map(x => x.binding.valueSet)
 
-      allReference = [...allReference, ...valueSet]
+        allReference = [...allReference, ...valueSet]
+      }
       let referenceResource = []
       if (allReference.length > 0) {
         referenceResource = await Promise.all(allReference.map(async x => {
-          if (x) {
+          if(x) {
             let [resType, id] = x.split('/').slice(-2)
             let url = `/fhir/${resType}/${id}`;
             let response = await fetch(url)
@@ -721,19 +719,21 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
         }))
       }
       const filteredArray = referenceResource.filter((element) => element != null);
-      let allRelatedResource = data.snapshot.element.filter(x => x?.type?.[0].code === "Reference").map(x => x?.type?.[0].targetProfile?.[0].split("/").pop()).filter(x => (x !== undefined && x !== "Resource" && x !== "Endpoint"))
-      for (const res of allRelatedResource) {
-        if (this.allResource.includes(res)) {
-          filteredArray.push(res)
-        } else {
-          try {
-            let response = await fetch(`/fhir/StructureDefinition/${res}`)
-            let data = await response.json()
-            if (data.resourceType === "StructureDefinition") {
-              filteredArray.push(data.type)
+      let allRelatedResource = data.snapshot && data.snapshot.element.filter(x => x?.type?.[0].code === "Reference").map(x => x?.type?.[0].targetProfile?.[0].split("/").pop()).filter(x => (x !== undefined && x !== "Resource" && x !== "Endpoint"))
+      if(allRelatedResource) {
+        for (const res of allRelatedResource) {
+          if (this.allResource.includes(res)) {
+            filteredArray.push(res)
+          } else {
+            try {
+              let response = await fetch(`/fhir/StructureDefinition/${res}`)
+              let data = await response.json()
+              if (data.resourceType === "StructureDefinition") {
+                filteredArray.push(data.type)
+              }
+            } catch (e) {
+              console.log(e)
             }
-          } catch (e) {
-            console.log(e)
           }
         }
       }
