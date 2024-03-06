@@ -373,7 +373,7 @@ Usage:          #example
         let id = instance.replaceAll("_", "-")
         let tittle = x.includes(".") ? x.replaceAll(".", " ").replaceAll("-", " ").replaceAll("_", "-").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ") : x.charAt(0).toUpperCase() + x.slice(1)
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
-        let valueInstance = valueId.replaceAll(":", ".")
+        let valueInstance = valueId.replaceAll(":menu","").replaceAll(":", ".")
         this.FSHCode.push(`
 Instance:       ihris-task-navigation-${instance}
 InstanceOf:     IhrisTask
@@ -588,7 +588,7 @@ Title:          "iHRIS Task To Navigate to ${tittle}"
             .join(" ")
           : x.charAt(0).toUpperCase() + x.slice(1);
         let name = `View ${id.replaceAll("-", " ").split(" ").map(y => y = y.charAt(0).toUpperCase() + y.slice(1)).join(" ")} Menu`;
-        let valueInstance = valueId.replaceAll(":", ".")
+        let valueInstance = valueId.replaceAll(":menu","").replaceAll(":", ".")
         let data = {
           resource: {
             resourceType: "Basic",
