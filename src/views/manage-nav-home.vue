@@ -370,6 +370,7 @@ Usage:          #example
         let menu_key = Object.keys(x)[0]
         let menu_text = x[menu_key]
         let valueId = menu_key
+        valueId = valueId.replaceAll(":menu","").replaceAll(":", ".")
         menu_key = menu_key.split(':menu:').slice(-2).join("-")
         let instance = menu_key.split(":")
         instance = instance.join("-")
@@ -581,6 +582,7 @@ Title:          "See ${menu_text} Menu"
         let menu_key = Object.keys(x)[0]
         let menu_text = x[menu_key]
         let valueId = menu_key
+        valueId = valueId.replaceAll(":menu","").replaceAll(":", ".")
         menu_key = menu_key.split(':menu:').slice(-2).join("-")
         let instance = menu_key.split(":")
         let data = {
