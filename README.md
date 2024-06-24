@@ -1,12 +1,30 @@
-# ihris-core-apps
-## Descriptions
-This repository contains all iHRIS apps that are shipped with iHRIS. It also contains a startup template that can help you to quickly create an iHRIS App using VUEJS.
-An iHRIS App can be cloned as below
+# data-visualizer
+
+## Clone the repo
+```sh
+git clone --single-branch --branch data-visualizer https://github.com/iHRIS/ihris-core-apps.git data-visualizer
 ```
-git clone --single-branch --branch <app-name> https://github.com/iHRIS/ihris-core-apps.git <app-name>
+
+## Install dependencies
+```sh
+cd data-visualizer
+npm install
 ```
-Replace app-name with the name of the app you are cloning. ie ihris-translator app can be cloned as below
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
 ```
-git clone --single-branch --branch ihris-translator https://github.com/iHRIS/ihris-core-apps.git ihris-translator
+
+### Compile and Minify for Production
+
+```sh
+npm run build
 ```
-Do the same for cloning the startup template
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
+```
