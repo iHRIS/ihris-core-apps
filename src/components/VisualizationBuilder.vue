@@ -7,29 +7,29 @@
           size="large"
           @click="$router.push({ name: 'home' })"
         >
-          <v-icon start color="primary">mdi-home</v-icon> Home
+          <v-icon start color="primary">mdi-home</v-icon> {{ $t(`App.hardcoded-texts.Home`) }}
         </v-btn>
       </v-col>
       <v-col cols="auto">
         <v-btn color="tertiary" size="large" @click="save">
-          <v-icon start color="primary">mdi-content-save-check</v-icon> Save
+          <v-icon start color="primary">mdi-content-save-check</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
         </v-btn>
       </v-col>
       <v-col cols="auto">
         <v-btn color="tertiary" size="large" @click="confirmDelete = true">
-          <v-icon start color="primary">mdi-delete</v-icon>Delete
+          <v-icon start color="primary">mdi-delete</v-icon>{{ $t(`App.hardcoded-texts.Delete`) }}
         </v-btn>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="auto">
-        <h2 style="text-align: center">Data Vizualizer</h2>
+        <h2 style="text-align: center">{{ $t(`App.hardcoded-texts.Data Vizualizer`) }}</h2>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="auto">
         <v-btn color="tertiary" size="large" @click="listViz">
-          <v-icon start color="primary">mdi-open-in-app</v-icon>Open
+          <v-icon start color="primary">mdi-open-in-app</v-icon>{{ $t(`App.hardcoded-texts.Open`) }}
           <v-tooltip activator="parent" location="top">
-            Open Another Visualization
+            {{ $t(`App.hardcoded-texts.Open Another Visualization`) }}
           </v-tooltip>
         </v-btn>
       </v-col>
@@ -41,7 +41,7 @@
       width="960px"
     >
       <v-toolbar color="primary" density="compact" height="40px">
-        <v-toolbar-title> Available Vizualizations </v-toolbar-title>
+        <v-toolbar-title> {{ $t(`App.hardcoded-texts.Available Vizualizations`) }} </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-icon @click="displayVizList = false" style="cursor: pointer"
           >mdi-close</v-icon
@@ -85,14 +85,14 @@
           </v-system-bar>
         </v-layout>
         <v-card-title class="text-h5">
-          Are you sure you want to delete this visualization?
+          {{ $t(`App.hardcoded-texts.Delete Vizualization Confirmation`) }}
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" text @click="confirmDelete = false">
-            No
+            {{ $t(`App.hardcoded-texts.No`) }}
           </v-btn>
-          <v-btn color="green darken-1" text @click="deleteViz"> Yes </v-btn>
+          <v-btn color="green darken-1" text @click="deleteViz"> {{ $t(`App.hardcoded-texts.Yes`) }} </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -105,7 +105,7 @@
       <v-card>
         <v-toolbar color="primary" density="compact">
           <v-toolbar-title>
-            Values For {{ activeDimension.name }}
+            {{ $t(`App.hardcoded-texts.Values For`) }} {{ activeDimension.name }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
           <v-icon @click="closeValuesSelector" style="cursor: pointer"
@@ -126,7 +126,7 @@
           </v-radio-group>
           <v-spacer></v-spacer>
           <v-btn color="success" @click="closeValuesSelector" size="small"
-            >Save</v-btn
+            > {{ $t(`App.hardcoded-texts.Save`) }}</v-btn
           >
         </v-card-actions>
         <v-card-text
@@ -319,7 +319,7 @@
                 </v-row>
                 <v-row v-if="dimensions.length > 0"><h3>Dimensions</h3></v-row>
                 <v-row v-else-if="dataset.id && dimensions.length == 0"
-                  ><h3>No Dimensions Available</h3></v-row
+                  ><h3>{{ $t(`App.hardcoded-texts.No Dimensions Available`) }}</h3></v-row
                 >
                 <v-row>
                   <ul>
@@ -355,7 +355,7 @@
             <v-card style="height: 100%">
               <v-card-text>
                 <v-card shaped>
-                  <v-card-title> Filters </v-card-title>
+                  <v-card-title> {{ $t(`App.hardcoded-texts.Filters`) }} </v-card-title>
                   <v-card-text>
                     <draggable
                       :list="filters"
@@ -445,7 +445,7 @@
                 <v-divider></v-divider>
                 <v-card shaped>
                   <v-card-title>
-                    Charts
+                    {{ $t(`App.hardcoded-texts.Charts`) }}
                     <v-icon @click="showChartsList = true"
                       >mdi-dots-vertical</v-icon
                     >
@@ -469,7 +469,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <h2><v-icon>mdi-cog-outline</v-icon> Settings</h2>
+            <h2><v-icon>mdi-cog-outline</v-icon> {{ $t(`App.hardcoded-texts.Settings`) }}</h2>
           </v-col>
         </v-row>
         <v-row>
@@ -497,7 +497,7 @@
         <v-row>
           <v-col cols="4" v-if="editingViz && chart.maxCategories > 0">
             <v-card width="200" height="100" rounded>
-              <v-card-title style="font-size: 16px"> Categories </v-card-title>
+              <v-card-title style="font-size: 16px"> {{ $t(`App.hardcoded-texts.Categories`) }} </v-card-title>
               <v-card-text>
                 <draggable
                   id="categories"
@@ -583,7 +583,7 @@
           </v-col>
           <v-col cols="3" v-if="editingViz && chart.maxSeries > 0">
             <v-card width="200" height="100">
-              <v-card-title style="font-size: 16px">Series</v-card-title>
+              <v-card-title style="font-size: 16px">{{ $t(`App.hardcoded-texts.Series`) }}</v-card-title>
               <v-card-text>
                 <draggable
                   :list="series"
@@ -714,7 +714,7 @@
               v-if="editingViz"
             >
               <v-icon start>mdi-sitemap</v-icon>
-              Visualize
+              {{ $t(`App.hardcoded-texts.Visualize`) }}
             </v-btn>
           </v-col>
         </v-row>
@@ -775,7 +775,7 @@
                 chart.renderComponent === 'IhrisTabularChart')
             "
           >
-            <h3>Basic Settings</h3>
+            <h3>{{ $t(`App.hardcoded-texts.Basic Settings`) }}</h3>
             <v-row>
               <v-col cols="6">
                 <v-switch
@@ -805,7 +805,7 @@
                 </v-text-field>
               </v-col>
               <v-col cols="6">
-                Bars Direction
+                {{ $t(`App.hardcoded-texts.Bars Direction`) }}
                 <v-radio-group
                   @change="loadChartData"
                   inline

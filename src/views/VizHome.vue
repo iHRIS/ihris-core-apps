@@ -1,11 +1,8 @@
 <template>
   <v-container grid-list-xs>
     <div style="text-align: center">
-      iHRIS Data Visualizer lets you create different charts to easily visualize
-      your data for better decision making. <br />
-      You may start by creating a new visualization or open an existing
-      visualization to either edit it or creating a new visualization based on
-      the open data visualization.
+      {{ $t(`App.hardcoded-texts.Data visualizer welcome text1`) }} <br />
+      {{ $t(`App.hardcoded-texts.Data visualizer welcome text2`) }}{{ $t(`App.hardcoded-texts.Data visualizer welcome text3`) }}
     </div>
     <br />
     <v-row justify="center">
@@ -16,7 +13,7 @@
           size="x-large"
           @click="$router.push({ name: 'vizBuilder' })"
         >
-          <v-icon start size="x-large">mdi-eye</v-icon>Visualizations
+          <v-icon start size="x-large">mdi-eye</v-icon>{{ $t(`App.hardcoded-texts.Visualizations`) }}
         </v-btn>
       </v-col>
       <v-col cols="auto">
@@ -32,7 +29,7 @@
           "
         >
           <v-icon start size="x-large">mdi-view-dashboard-edit-outline </v-icon>
-          Dashboards
+          {{ $t(`App.hardcoded-texts.Dashboards`) }}
         </v-btn>
       </v-col>
     </v-row>

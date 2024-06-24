@@ -3,11 +3,11 @@
     <v-dialog v-model="deleteDash" persistent width="auto">
       <v-card>
         <v-card-title class="text-h5">
-          Are you sure you want to delete this Dashboard?
+          {{ $t(`App.hardcoded-texts.confirm_delete_dashboard`) }}
         </v-card-title>
         <v-card-actions class="justify-end">
           <v-btn color="green darken-1" text @click="deleteDash = false">
-            No
+            {{ $t(`App.hardcoded-texts.No`) }}
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn color="red darken-1" text @click="deleteDashboard">Yes </v-btn>
@@ -22,7 +22,8 @@
     >
       <v-toolbar color="primary" density="compact" height="40px">
         <v-toolbar-title>
-          Values For {{ activeDimension.data.display }}
+          {{ $t(`App.hardcoded-texts.Values For`) }}
+          {{ activeDimension.data.display }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-icon @click="showValuesSelector = false" style="cursor: pointer"
@@ -42,7 +43,7 @@
           <v-col cols="2">
             <br />
             <v-btn color="accent" size="small" @click="applyFilters">
-              Apply
+              {{ activeDimension.data.Apply1 }}
             </v-btn>
           </v-col>
         </v-row>
@@ -89,7 +90,7 @@
           <v-col cols="2">
             <br />
             <v-btn color="accent" size="small" @click="applyFilters">
-              Apply
+              {{ activeDimension.data.Apply1 }}
             </v-btn>
           </v-col>
         </v-row>
@@ -192,11 +193,11 @@
               size="small"
               @click="$router.push({ name: 'home' })"
             >
-              <v-icon start color="primary">mdi-home</v-icon> Home
+              <v-icon start color="primary">mdi-home</v-icon> {{ $t(`App.hardcoded-texts.Home`) }}
             </v-btn>
             &nbsp;
             <v-btn color="tertiary" size="small" @click="reload">
-              <v-icon start color="primary">mdi-reload</v-icon> Reload
+              <v-icon start color="primary">mdi-reload</v-icon> {{ $t(`App.hardcoded-texts.Reload`) }}
             </v-btn>
             &nbsp;
             <v-btn
@@ -205,12 +206,11 @@
               @click="save"
               :disabled="!canSave"
             >
-              <v-icon start color="primary">mdi-content-save-check</v-icon> Save
+              <v-icon start color="primary">mdi-content-save-check</v-icon> {{ $t(`App.hardcoded-texts.Save`) }}
             </v-btn>
             &nbsp;
             <v-btn color="tertiary" size="small" @click="listViz">
-              <v-icon start color="primary">mdi-plus</v-icon> Insert
-              Visualization
+              <v-icon start color="primary">mdi-plus</v-icon> {{ $t(`App.hardcoded-texts.Insert Visualization`) }}
             </v-btn>
             &nbsp;
             <v-btn
@@ -218,8 +218,7 @@
               size="small"
               @click="$router.push({ name: 'vizBuilder' })"
             >
-              <v-icon start color="primary">mdi-plus</v-icon> Create
-              Visualization
+              <v-icon start color="primary">mdi-plus</v-icon> {{ $t(`App.hardcoded-texts.Create Visualization`) }}
             </v-btn>
           </v-col>
         </v-row>
@@ -358,8 +357,8 @@
         </template>
         <template v-else-if="visualizations.length === 0">
           <div style="text-align: center">
-            Your dashboard is blank. Click Add Visualization button to add
-            dashboard items
+            {{ $t(`App.hardcoded-texts.Dashboard Instructions1`) }}
+          {{ $t(`App.hardcoded-texts.Dashboard Instructions2`) }}
           </div>
         </template>
         <grid-layout
